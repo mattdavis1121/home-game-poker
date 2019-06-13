@@ -1,0 +1,6 @@
+/.direnv
+.envrc
+.env
+.idea
+__pycache__/
+node_modules/
