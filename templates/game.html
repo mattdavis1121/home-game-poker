@@ -5,6 +5,25 @@
     <title>Poker App | DEV</title>
     <script src="{{ url_for('static', filename='phaser_2.6.2.min.js') }}"></script>
     <script src="{{ url_for('static', filename='build/output.js') }}"></script>
+{#    <script>#}
+{#        (function see() {#}
+{#            var source = new EventSource("{{ url_for('sse.stream') }}");#}
+{#            source.addEventListener('greeting', function(event) {#}
+{#                var data = JSON.parse(event.data);#}
+{#                console.log("The server says " + data.message);#}
+{#            }, false);#}
+{#        })()#}
+{##}
+{#    </script>#}
+
+    <script>
+        var SSE_URL = "{{ url_for('sse.stream') }}";
+        var source = new EventSource(SSE_URL);
+        source.addEventListener('greeting', function (event) {
+            var data = JSON.parse(event.data);
+            console.log(data);
+        }, false);
+    </script>
     <style>html, body {
         background-color: #000000;
         margin: 0;

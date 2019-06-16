@@ -1,6 +1,8 @@
+import SSE from "../SSE"
+
 class Main extends Phaser.State {
     init() {
-
+        this.sse = source;
     }
 
     create() {
@@ -9,6 +11,19 @@ class Main extends Phaser.State {
 
         this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
         this.card.anchor.setTo(0.5);
+
+        this.sse.addEventListener("event", (event) => {
+            this.handleEvent(event);
+        });
+
+        this.sse.addEventListener("event", () => {
+            this.updateBtn();
+        })
+    }
+
+    handleEvent(event) {
+        console.log(event);
+        console.log(this);
     }
 
     update() {
@@ -27,8 +42,14 @@ class Main extends Phaser.State {
         return btn;
     }
 
-    btnClicked() {
-        console.log("clicked")
+    btnClicked(btn) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', '/button_clicked');
+        xhr.send();
+    }
+
+    updateBtn() {
+        this.dealBtn.tint = this.dealBtn.tint === 0xffffff ? 0xff0000 : 0xffffff;
     }
 }
 

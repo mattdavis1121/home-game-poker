@@ -1,6 +1,6 @@
 from flask import Flask
 
-from extensions import db, migrate
+from extensions import db, migrate, sse
 
 
 def create_app(config_object="settings"):
@@ -10,6 +10,7 @@ def create_app(config_object="settings"):
     app = Flask(__name__.split(".")[0])
     app.config.from_object(config_object)
     register_extensions(app)
+    app.register_blueprint(sse, url_prefix="/stream")
     return app
 
 

@@ -11,6 +11,7 @@ env.read_env()
 ENV = env.str("FLASK_ENV", default="production")
 DEBUG = ENV == "development"
 SQLALCHEMY_DATABASE_URI = env.str("DATABASE_URL")
+REDIS_URL = env.str("REDIS_URL")
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG_TB_ENABLED = DEBUG
 DEBUG_TB_INTERCEPT_REDIRECTS = False

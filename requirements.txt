@@ -11,6 +11,10 @@ psycopg2==2.8.2
 # Migrations
 Flask-Migrate==2.2.1
 
+# SSE
+Flask-SSE==0.2.1
+redis==3.2.1
+
 # Environment variable parsing
 environs==4.0.0
 
