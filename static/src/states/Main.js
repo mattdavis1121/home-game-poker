@@ -2,7 +2,8 @@ import SSE from "../SSE"
 
 class Main extends Phaser.State {
     init() {
-        this.sse = new SSE(this.game, SSE_URL);
+        this.gameData = initialData;
+        this.sse = new SSE(this.game, this.gameData.sseUrl);
     }
 
     create() {
@@ -33,8 +34,11 @@ class Main extends Phaser.State {
 
     btnClicked(btn) {
         let xhr = new XMLHttpRequest();
-        xhr.open('GET', '/button_clicked');
-        xhr.send();
+        xhr.open('POST', '/button_clicked');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({
+            tableName: initialData.tableName,
+        }));
     }
 
     updateBtn(btn) {

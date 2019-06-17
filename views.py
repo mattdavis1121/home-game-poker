@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, Response, jsonify
+from flask import render_template, redirect, url_for, request
 from app import app, sse
 from models import Table
 
@@ -21,7 +21,9 @@ def show_table(table_name):
     return render_template("game.html")
 
 
-@app.route("/button_clicked", methods=["GET"])
+@app.route("/button_clicked", methods=["POST"])
 def button_clicked():
-    sse.publish({"clicked": True}, type="event")
+    data = request.get_json()
+    table = Table.query.filter_by(name=data["tableName"]).first()
+    sse.publish({"clicked": True}, type="event", channel=table.name)
     return "Message sent!"
