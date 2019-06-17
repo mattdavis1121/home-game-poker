@@ -21,3 +21,4 @@ environs==4.0.0
 # Other
 eventlet==0.24.1
 gunicorn==19.9.0
+gevent==1.4.0
