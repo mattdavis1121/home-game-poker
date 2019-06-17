@@ -8,11 +8,9 @@
 
     <script>
         // TODO: Get this data from initialize API call
-        let table = new URL(window.location.href).pathname.split("/")[2];
-        let baseSseUrl = "{{ url_for('sse.stream') }}";
         var initialData = {
-            tableName: table,
-            sseUrl: baseSseUrl + "?channel=" + table,
+            tableName: "{{ table.name }}",
+            sseUrl: "{{ url_for('sse.stream', channel=table.name) }}"
         };
     </script>
 

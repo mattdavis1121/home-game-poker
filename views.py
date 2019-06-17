@@ -5,20 +5,24 @@ from models import Table
 
 @app.route("/")
 def index():
-    return "<h1>Hello, World!</h1>"
+    return redirect(url_for("tables"))
 
 
-@app.route("/table/create/", methods=["POST", "GET"])
-def create_table():
-    table = Table()
-    table.save()
-    return redirect(url_for("show_table", table_name=table.name))
+@app.route("/tables/", methods=["POST", "GET"])
+def tables():
+    if request.method == "POST":
+        table = Table()
+        table.save()
+        return redirect(url_for("show_table", table_name=table.name))
+    else:
+        records = Table.query.all()
+        return render_template("index.html", tables=records)
 
 
-@app.route("/table/<table_name>/", methods=["GET"])
+@app.route("/tables/<table_name>/", methods=["GET"])
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    return render_template("game.html")
+    return render_template("game.html", table=table)
 
 
 @app.route("/button_clicked", methods=["POST"])
