@@ -4,9 +4,11 @@ class SSE {
         this.source = new EventSource(url);
     }
 
-    addListener(type, callback, callbackContext, ...callbackArgs) {
-        this.source.addEventListener(type, (event, ...callbackArgs) => {
-            callbackContext.callback(...callbackArgs, event);
+    addListener(type, callback, callbackContext, ...args) {
+        this.source.addEventListener(type, (event) => {
+            callback.call(callbackContext, ...args, event);
         });
     }
 }
+
+export default SSE;
