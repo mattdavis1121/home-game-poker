@@ -38,3 +38,16 @@ class CRUDMixin(object):
 
 class BaseModel(CRUDMixin, MetaData, db.Model):
     __abstract__ = True
+
+    @classmethod
+    def get_by_id(cls, record_id):
+        """Get record by ID."""
+        if any(
+                (
+                        isinstance(record_id,
+                                   basestring) and record_id.isdigit(),
+                        isinstance(record_id, (int, float)),
+                )
+        ):
+            return cls.query.get(int(record_id))
+        return None

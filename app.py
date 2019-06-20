@@ -1,6 +1,6 @@
 from flask import Flask
 
-from extensions import db, migrate, sse
+from extensions import db, migrate, sse, login_manager, bcrypt
 
 
 def create_app(config_object="settings"):
@@ -18,6 +18,8 @@ def register_extensions(app):
     """Register Flask extensions."""
     db.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
+    bcrypt.init_app(app)
 
 
 app = create_app()

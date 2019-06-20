@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Poker App | DEV</title>
+</head>
+<body>
+
+<form method="POST" action="">
+  {{ form.csrf_token }}
+  {{ form.email.label }} {{ form.email(size=20) }}
+  {{ form.password.label }} {{ form.password(size=20) }}
+  <input type="submit" value="Go">
+</form>
+
+<p>
+  Or <a href="{{ url_for('register') }}">register</a>
+</p>
+
+</body>
+</html>
