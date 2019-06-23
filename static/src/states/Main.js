@@ -8,20 +8,21 @@ class Main extends Phaser.State {
 
     create() {
         this.background = this.game.add.image(0, 0, "background");
-        this.dealBtn = this.makeBtn("deal", this.game.textures.whiteRect, this.btnClicked);
+        this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteRect, this.deal);
+        this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteRect, this.btnClicked);
 
         this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
         this.card.anchor.setTo(0.5);
 
-        this.sse.addListener("event", this.updateBtn, this, this.dealBtn);
+        this.sse.addListener("event", this.updateBtn, this, this.otherBtn);
     }
 
     update() {
 
     }
 
-    makeBtn(text, texture, callback) {
-        let btn = this.game.add.button(100, 100, texture, callback, this);
+    makeBtn(x, y, text, texture, callback) {
+        let btn = this.game.add.button(x, y, texture, callback, this);
         btn.anchor.setTo(0.5);
 
         let btnText = this.game.add.text(0, 0, text);
@@ -35,6 +36,15 @@ class Main extends Phaser.State {
     btnClicked(btn) {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/button_clicked');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({
+            tableName: initialData.tableName,
+        }));
+    }
+
+    deal() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/tables/' + this.gameData.tableName + '/deal/');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,

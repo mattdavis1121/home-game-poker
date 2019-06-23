@@ -4,8 +4,8 @@ from deuces import Deck, Card, Evaluator
 class PokerHand:
     def __init__(self, num_players):
         self.num_players = num_players
-        self.player_hands = []
-        self.community_cards = []
+        self.holdings = []
+        self.board = []
         self.deal()
 
     def deal(self):
@@ -18,8 +18,8 @@ class PokerHand:
 class TexasHoldemHand(PokerHand):
     def deal(self):
         deck = Deck()
-        self.player_hands = [deck.draw(2) for i in range(self.num_players)]
-        self.community_cards = deck.draw(5)
+        self.holdings = [deck.draw(2) for i in range(self.num_players)]
+        self.board = deck.draw(5)
 
 
 # TODO - Remove test code

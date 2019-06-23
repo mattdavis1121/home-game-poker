@@ -1,10 +1,11 @@
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, sse
-from models import Table, User
+from models import Table, User, Hand, Holding
 from forms import RegisterForm, LoginForm
 from extensions import login_manager
+from poker import TexasHoldemHand
 
 
 @login_manager.user_loader
@@ -72,6 +73,24 @@ def tables():
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
     return render_template("game.html", table=table)
+
+
+@app.route("/tables/<table_name>/deal/", methods=["POST"])
+def deal(table_name):
+    table = Table.query.filter_by(name=table_name).first()
+    poker_hand = TexasHoldemHand(6)
+    hand = Hand()
+    hand.table = table
+    hand.board = poker_hand.board
+    for player_holding in poker_hand.holdings:
+        holding = Holding()
+        holding.user = User.query.first()
+        holding.hand = hand
+        holding.cards = player_holding
+        holding.save()
+    hand.save()
+    table.save()
+    return jsonify({"success": True, "hand": hand.id})
 
 
 @app.route("/button_clicked", methods=["POST"])
