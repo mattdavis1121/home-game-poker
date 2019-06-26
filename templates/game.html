@@ -10,7 +10,9 @@
         // TODO: Get this data from initialize API call
         var initialData = {
             tableName: "{{ table.name }}",
-            sseUrl: "{{ url_for('sse.stream', channel=table.name) }}"
+            tableSSEUrl: "{{ url_for('sse.stream', channel=table.name) }}",
+            userSSEUrl: "{{ url_for('sse.stream', channel='{}_u{}'.format(table.name, current_user.id)) }}"
+
         };
     </script>
 

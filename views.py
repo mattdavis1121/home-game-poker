@@ -72,24 +72,41 @@ def tables():
 @login_required
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
+
+    # TODO - This shouldn't happen here
+    current_user.join_table(table=table)
+
     return render_template("game.html", table=table)
 
 
 @app.route("/tables/<table_name>/deal/", methods=["POST"])
 def deal(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    poker_hand = TexasHoldemHand(6)
+    poker_hand = TexasHoldemHand(len(table.users))
     hand = Hand()
     hand.table = table
     hand.board = poker_hand.board
-    for player_holding in poker_hand.holdings:
+    for i, player_holding in enumerate(poker_hand.holdings):
         holding = Holding()
-        holding.user = User.query.first()
+        holding.user = table.users[i]
         holding.hand = hand
         holding.cards = player_holding
         holding.save()
     hand.save()
     table.save()
+
+    sse.publish({
+        "id": hand.id,
+        "start_utc": hand.created_utc
+    }, type="newHand", channel=table.name)
+
+    for holding in hand.holdings:
+        sse.publish({
+            "id": hand.id,
+            "user_id": holding.user.id,
+            "holdings":holding.cards
+        }, type="newHand", channel="{}_u{}".format(table.name, holding.user.id))
+
     return jsonify({"success": True, "hand": hand.id})
 
 

@@ -3,7 +3,8 @@ import SSE from "../SSE"
 class Main extends Phaser.State {
     init() {
         this.gameData = initialData;
-        this.sse = new SSE(this.game, this.gameData.sseUrl);
+        this.table_sse = new SSE(this.game, this.gameData.tableSSEUrl);
+        this.user_sse = new SSE(this.game, this.gameData.userSSEUrl);
     }
 
     create() {
@@ -14,7 +15,10 @@ class Main extends Phaser.State {
         this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
         this.card.anchor.setTo(0.5);
 
-        this.sse.addListener("event", this.updateBtn, this, this.otherBtn);
+        this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
+        this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
+
+        this.user_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
     }
 
     update() {
