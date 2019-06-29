@@ -2,11 +2,13 @@ from deuces import Deck, Card, Evaluator
 
 
 class PokerHand:
-    def __init__(self, num_players):
+    def __init__(self, num_players=0, deal=True):
         self.num_players = num_players
         self.holdings = []
         self.board = []
-        self.deal()
+
+        if deal:
+            self.deal()
 
     def deal(self):
         raise NotImplementedError(
@@ -23,12 +25,11 @@ class TexasHoldemHand(PokerHand):
 
     @classmethod
     def from_hand_record(cls, record):
-        hand = cls(0)
+        hand = cls(deal=False)
         hand.num_players = len(record.holdings)
         hand.holdings = record.holdings
         hand.board = record.board
         return hand
-
 
 
 # TODO - Remove test code

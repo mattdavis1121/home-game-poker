@@ -1,5 +1,8 @@
 import random
+from enum import IntEnum
+
 from flask_login import UserMixin
+
 from database import db, BaseModel
 from extensions import bcrypt
 
@@ -22,7 +25,7 @@ class User(UserMixin, BaseModel):
     active = db.Column(db.Boolean(), default=False)
     is_admin = db.Column(db.Boolean(), default=False)
 
-    holdings = db.relationship("Holding", backref="user", lazy=True)
+    holdings = db.relationship("Holding", backref="user", lazy="dynamic")
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=True)
 
     def __init__(self, username, email, password=None, **kwargs):
@@ -52,6 +55,13 @@ class User(UserMixin, BaseModel):
         if self.table:
             self.update(table=None)
 
+    @property
+    def current_holding(self):
+        if not self.table:
+            return None
+
+        return self.holdings.filter_by(in_progress=True)
+
 
 class Player(BaseModel):
     __tablename__ = "players"
@@ -65,7 +75,12 @@ class Table(BaseModel):
 
     name = db.Column(db.String(80), unique=False, nullable=False, default=make_random_name)
     users = db.relationship("User", backref="table", lazy=True)
-    hands = db.relationship("Hand", backref="table", lazy=True)
+    hands = db.relationship("Hand", backref="table", lazy="dynamic")
+
+    @property
+    def current_hand(self):
+        # TODO - It's possible that a table has two in-progress hands, but it shouldn't be
+        return self.hands.filter_by(in_progress=True).first()
 
     def __repr__(self):
         return "Table: {}".format(self.name)
@@ -78,14 +93,29 @@ class Hand(BaseModel):
     holdings = db.relationship("Holding", backref="hand", lazy=True)
     board = db.Column(db.ARRAY(db.Integer), nullable=False)
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
+    dealer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    dealer_pos = db.Column(db.Integer, nullable=False, default=0)
+    next_to_act_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    next_to_act_pos = db.Column(db.Integer, nullable=False, default=0)
+    pot_pennies = db.Column(db.Integer, nullable=False, default=0)
+    in_progress = db.Column(db.Boolean, nullable=False, default=True)
 
-    # @classmethod
-    # def from_poker_hand(cls, poker_hand):
-    #     record = cls()
-    #     record.board = poker_hand.board
-    #     for holding in poker_hand.holdings:
-    #         record.holdings.append(Holding)
-    #     return record
+    actions = db.relationship("Action", backref="hand", lazy="dynamic")
+
+    def to_dict(self):
+        return {
+            **{
+                "holdings": [hold.to_dict() for hold in self.holdings],
+                "board": self.board,
+                "table_id": self.table_id,
+                "dealer_pos": self.dealer_pos,
+                "next_pos": self.next_pos,
+                "pot_pennies": self.pot_pennies,
+                "in_progress": self.in_progress,
+                "actions": [action.to_dict() for action in self.actions]
+            },
+            **super().to_dict()
+        }
 
 
 class Holding(BaseModel):
@@ -95,3 +125,42 @@ class Holding(BaseModel):
     cards = db.Column(db.ARRAY(db.Integer), nullable=False)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    in_progress = db.Column(db.Boolean, nullable=False, default=True)
+
+    def to_dict(self):
+        return {
+            **{
+                "cards": self.cards,
+                "hand_id": self.hand_id,
+                "user_id": self.user_id
+            },
+            **super().to_dict()
+        }
+
+
+class ActionTypes(IntEnum):
+    FOLD = 0
+    CALL = 1
+    RAISE = 2
+    BLIND = 3
+
+
+class Action(BaseModel):
+    """A single action within a hand of poker -- e.g. Bet, Fold, etc"""
+
+    __tablename__ = "actions"
+    hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    holding_id = db.Column(db.Integer, db.ForeignKey("holdings.id"), nullable=False)
+    action_type = db.Column(db.Enum(ActionTypes), nullable=False)
+
+    def to_dict(self):
+        return {
+            **{
+                "hand_id": self.hand_id,
+                "user_id": self.user_id,
+                "holding_id": self.holding_id,
+                "action_type": self.action_type
+            },
+            **super().to_dict()
+        }

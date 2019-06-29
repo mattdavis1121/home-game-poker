@@ -7,6 +7,13 @@ class MetaData:
     created_utc = db.Column(db.DateTime, nullable=False, default=dt.utcnow)
     modified_utc = db.Column(db.DateTime, nullable=False, default=dt.utcnow)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "created_utc": self.created_utc,
+            "modified_utc": self.modified_utc
+        }
+
 
 class CRUDMixin(object):
     """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
