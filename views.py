@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, login_user, logout_user, current_user
+from sqlalchemy.exc import IntegrityError
 
 from app import app, sse
 from models import Table, User, Hand, Holding, Action, ActionTypes
@@ -85,7 +86,7 @@ def show_table(table_name):
 def deal(table_name):
     table = Table.query.filter_by(name=table_name).first()
     poker_hand = TexasHoldemHand(len(table.users))
-    hand = Hand(table_id=table.id, board=poker_hand.board, dealer_id=1,
+    hand = Hand.create(table_id=table.id, board=poker_hand.board, dealer_id=1,
                 next_to_act_id=2, next_to_act_pos=1)
     for i, player_holding in enumerate(poker_hand.holdings):
         Holding.create(user_id=table.users[i].id, hand_id=hand.id, cards=player_holding)
@@ -121,14 +122,20 @@ def action(table_name):
     if not user:
         # TODO - Handle no found user state
         return jsonify({"success": False, "msg": "No user found"})
-    elif user != User.query.get(hand.next_pos):
+    elif user.id != hand.next_to_act_id:
         # TODO - Handle action by wrong user state
         return jsonify({"success": False, "msg": "User acting out of turn"})
 
-    act = Action.create(action_type=data.get("actionType"),
-                        hand_id=hand.id,
-                        user_id=user.id,
-                        holding_id=118)
+    try:
+        act = Action.create(action_type=data.get("actionType"),
+                            hand_id=hand.id,
+                            user_id=user.id,
+                            holding_id=user.current_holding.id)
+    except IntegrityError:
+        return jsonify({"success": False, "msg": "Database error"})
+    except:
+        return jsonify({"success": False, "msg": "Unknown error"})
+
     return jsonify({"success": True})
 
 

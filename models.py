@@ -48,8 +48,21 @@ class User(UserMixin, BaseModel):
         """Represent instance as a unique string."""
         return "<User({username!r})>".format(username=self.username)
 
-    def join_table(self, table):
-        self.update(table=table)
+    def join_table(self, table, position=None):
+        try:
+            # TODO - Does player have enough money to sit down?
+
+            if position is None:
+                position = table.open_position
+
+            new_player = Player.create(position=position, user_id=self.id,
+                                       table_id=table.id)
+
+            # TODO - Don't track current table on User model
+            self.update(table=table)
+        except:
+            # TODO - Handle
+            return False
 
     def leave_table(self):
         if self.table:
@@ -60,27 +73,51 @@ class User(UserMixin, BaseModel):
         if not self.table:
             return None
 
-        return self.holdings.filter_by(in_progress=True)
+        # TODO - It's possible that a user as multiple current holdings, but it shouldn't be
+        return self.holdings.filter_by(in_progress=True).first()
 
 
 class Player(BaseModel):
+    """
+    A player at a poker table.
+
+    Each user may only have once associated Player record at a time. This table
+    represents a user's attendance at a table, their position and stack, etc.
+
+    These records are transient and should not be used to store long-term data.
+
+    """
     __tablename__ = "players"
 
-    name = db.Column(db.String(80), unique=False, nullable=False)
     balance = db.Column(db.Integer, nullable=False, default=500000)
+    position = db.Column(db.Integer, nullable=False, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
+    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
 
 
 class Table(BaseModel):
     __tablename__ = "tables"
 
     name = db.Column(db.String(80), unique=False, nullable=False, default=make_random_name)
+    seats = db.Column(db.Integer, nullable=False, default=9)    # Number of seats at the table
     users = db.relationship("User", backref="table", lazy=True)
+    players = db.relationship("Player", backref="table", lazy="dynamic")
     hands = db.relationship("Hand", backref="table", lazy="dynamic")
 
     @property
     def current_hand(self):
         # TODO - It's possible that a table has two in-progress hands, but it shouldn't be
         return self.hands.filter_by(in_progress=True).first()
+
+    @property
+    def open_position(self):
+        filled_positions = [player.position for player in self.players.order_by(Player.position).all()]
+        i = 0
+        while i < self.seats:
+            if i not in filled_positions:
+                return i
+            i += 1
+        return False
 
     def __repr__(self):
         return "Table: {}".format(self.name)
@@ -109,13 +146,22 @@ class Hand(BaseModel):
                 "board": self.board,
                 "table_id": self.table_id,
                 "dealer_pos": self.dealer_pos,
-                "next_pos": self.next_pos,
+                "next_to_act_pos": self.next_to_act_pos,
                 "pot_pennies": self.pot_pennies,
                 "in_progress": self.in_progress,
                 "actions": [action.to_dict() for action in self.actions]
             },
             **super().to_dict()
         }
+
+    def resolve_action(self, bet=0):
+        self.pot_pennies += bet
+        self.next_to_act_pos = self.next_to_act_pos + 1 % self.num_players
+        self.next_to_act_id = User.query.get(self.next_to_act_id).id
+
+    @property
+    def num_players(self):
+        return len(self.holdings)
 
 
 class Holding(BaseModel):
