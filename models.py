@@ -49,6 +49,10 @@ class User(UserMixin, BaseModel):
         return "<User({username!r})>".format(username=self.username)
 
     def join_table(self, table, position=None):
+        if table == self.current_table:
+            # Ignore if user already sitting at this table
+            return True
+
         try:
             # TODO - Does player have enough money to sit down?
 
@@ -60,6 +64,7 @@ class User(UserMixin, BaseModel):
 
             # TODO - Don't track current table on User model
             self.update(table=table)
+            return True
         except:
             # TODO - Handle
             return False
