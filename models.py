@@ -76,6 +76,10 @@ class User(UserMixin, BaseModel):
         # TODO - It's possible that a user as multiple current holdings, but it shouldn't be
         return self.holdings.filter_by(in_progress=True).first()
 
+    @property
+    def current_table(self):
+        return self.table
+
 
 class Player(BaseModel):
     """

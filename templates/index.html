@@ -6,11 +6,16 @@
 </head>
 <body>
 
+    <h1>Tables</h1>
+    <h3>Current table: <a href="{{ url_for("show_table", table_name=current_user.current_table.name) }}">{{ current_user.current_table.name }}</a></h3>
+    <h3>Tables</h3>
     <ul>
         {% for table in tables %}
+            {% if table != current_user.current_table %}
             <li>
                 <a href="{{ url_for("show_table", table_name=table.name) }}">{{ table.name }}</a>
             </li>
+            {% endif %}
         {% endfor %}
     </ul>
 
