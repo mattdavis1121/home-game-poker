@@ -85,13 +85,11 @@ def show_table(table_name):
 @app.route("/tables/<table_name>/deal/", methods=["POST"])
 def deal(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    poker_hand = TexasHoldemHand(len(table.users))
-    hand = Hand.create(table_id=table.id, board=poker_hand.board, dealer_id=1,
-                next_to_act_id=2, next_to_act_pos=1)
-    for i, player_holding in enumerate(poker_hand.holdings):
-        Holding.create(user_id=table.users[i].id, hand_id=hand.id, cards=player_holding)
-    hand.save()
-    table.save()
+    hand = table.new_hand()
+
+    # TODO - new_hand() returns False if it fails and a Hand object if success. Probably wrong.
+    if hand is False:
+        return jsonify({"success": False, "msg": "Cannot start a hand while hand in progress."})
 
     sse.publish({
         "id": hand.id,

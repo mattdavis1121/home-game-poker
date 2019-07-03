@@ -5,6 +5,7 @@ from flask_login import UserMixin
 
 from database import db, BaseModel
 from extensions import bcrypt
+from poker import TexasHoldemHand
 
 
 def make_random_name():
@@ -103,6 +104,10 @@ class Player(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
 
+    @property
+    def user(self):
+        return User.query.get(self.user_id)
+
 
 class Table(BaseModel):
     __tablename__ = "tables"
@@ -113,10 +118,48 @@ class Table(BaseModel):
     players = db.relationship("Player", backref="table", lazy="dynamic")
     hands = db.relationship("Hand", backref="table", lazy="dynamic")
 
+    def new_hand(self):
+        if self.current_hand:
+            return False
+
+        previous_hand = self.previous_hand
+        num_players = len(self.players.all())
+
+        if num_players >= 2:
+            poker_hand = TexasHoldemHand(num_players=num_players)
+            hand = Hand(table_id=self.id, board=poker_hand.board)
+
+            if previous_hand:
+                hand.dealer_pos = (previous_hand.dealer_pos + 1) % num_players
+                hand.next_to_act_pos = (hand.dealer_pos + 1) % num_players
+            else:
+                hand.dealer_pos = 0
+                hand.next_to_act_pos = 1
+
+            # TODO - These should be player IDs, not user
+            print(hand.next_to_act_pos)
+            hand.dealer_id = self.player_from_position(hand.dealer_pos).user_id
+            hand.next_to_act_id = self.player_from_position(hand.next_to_act_pos).user_id
+
+            hand.save()
+
+            # TODO - Create Holding for each player at table. Holding model should use player_id, not user_id
+            for i, player_holding in enumerate(poker_hand.holdings):
+                Holding.create(user_id=self.users[i].id, hand_id=hand.id,
+                               cards=player_holding)
+
+            return hand
+
+        return False
+
     @property
     def current_hand(self):
         # TODO - It's possible that a table has two in-progress hands, but it shouldn't be
         return self.hands.filter_by(in_progress=True).first()
+
+    @property
+    def previous_hand(self):
+        return self.hands.filter_by(in_progress=False).order_by(Hand.created_utc.desc()).first()
 
     @property
     def open_position(self):
@@ -127,6 +170,9 @@ class Table(BaseModel):
                 return i
             i += 1
         return False
+
+    def player_from_position(self, position):
+        return self.players.filter_by(position=position).first()
 
     def __repr__(self):
         return "Table: {}".format(self.name)
