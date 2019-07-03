@@ -137,7 +137,6 @@ class Table(BaseModel):
                 hand.next_to_act_pos = 1
 
             # TODO - These should be player IDs, not user
-            print(hand.next_to_act_pos)
             hand.dealer_id = self.player_from_position(hand.dealer_pos).user_id
             hand.next_to_act_id = self.player_from_position(hand.next_to_act_pos).user_id
 
