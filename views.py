@@ -3,13 +3,14 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import app, sse
-from models import Table, User, Hand, Holding, Action, ActionTypes
+from models import Table, User, Hand, Holding, Action, ActionType
 from forms import RegisterForm, LoginForm
 from extensions import login_manager
 from poker import TexasHoldemHand
 
 
 login_manager.login_view = "login"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -125,10 +126,27 @@ def action(table_name):
         return jsonify({"success": False, "msg": "User acting out of turn"})
 
     try:
+        action_type = ActionType[data.get("actionType")]
+    except KeyError:
+        return jsonify({"success": False, "msg": "Invalid action type"})
+
+    bet_amt = data.get("betAmt", 0)
+    if action_type == ActionType.CHECK:
+        if hand.current_bet > 0:
+            return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
+    elif action_type == ActionType.BET:
+        if bet_amt > user.player.balance:
+            return jsonify({"success": False, "msg": "Bet > balance"})
+        elif bet_amt < hand.current_bet:
+            return jsonify({"success": False, "msg": "Bet < current bet"})
+        # TODO - Check for illegal raise here (enforce raise minimum)
+
+    try:
         act = Action.create(action_type=data.get("actionType"),
                             hand_id=hand.id,
                             user_id=user.id,
                             holding_id=user.current_holding.id)
+        hand.resolve_action(bet_amt)
     except IntegrityError:
         return jsonify({"success": False, "msg": "Database error"})
     except:

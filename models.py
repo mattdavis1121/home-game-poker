@@ -86,6 +86,10 @@ class User(UserMixin, BaseModel):
     def current_table(self):
         return self.table
 
+    @property
+    def player(self):
+        return Player.query.filter_by(user_id=self.id).first()
+
 
 class Player(BaseModel):
     """
@@ -190,6 +194,7 @@ class Hand(BaseModel):
     next_to_act_pos = db.Column(db.Integer, nullable=False, default=0)
     pot_pennies = db.Column(db.Integer, nullable=False, default=0)
     in_progress = db.Column(db.Boolean, nullable=False, default=True)
+    current_bet = db.Column(db.Integer, nullable=False, default=0)
 
     actions = db.relationship("Action", backref="hand", lazy="dynamic")
 
@@ -210,8 +215,10 @@ class Hand(BaseModel):
 
     def resolve_action(self, bet=0):
         self.pot_pennies += bet
-        self.next_to_act_pos = self.next_to_act_pos + 1 % self.num_players
-        self.next_to_act_id = User.query.get(self.next_to_act_id).id
+        self.current_bet += bet
+        self.next_to_act_pos = (self.next_to_act_pos + 1) % self.num_players
+        self.next_to_act_id = self.table.player_from_position(self.next_to_act_pos).user_id
+        self.save()
 
     @property
     def num_players(self):
@@ -238,11 +245,11 @@ class Holding(BaseModel):
         }
 
 
-class ActionTypes(IntEnum):
-    FOLD = 0
-    CALL = 1
-    RAISE = 2
-    BLIND = 3
+class ActionType(IntEnum):
+    BLIND = 0
+    FOLD = 1
+    CHECK = 2
+    BET = 3
 
 
 class Action(BaseModel):
@@ -252,7 +259,7 @@ class Action(BaseModel):
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     holding_id = db.Column(db.Integer, db.ForeignKey("holdings.id"), nullable=False)
-    action_type = db.Column(db.Enum(ActionTypes), nullable=False)
+    action_type = db.Column(db.Enum(ActionType), nullable=False)
 
     def to_dict(self):
         return {
