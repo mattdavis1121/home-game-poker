@@ -256,10 +256,13 @@ class Hand(BaseModel):
         return BettingRound.create(name=round_name, hand_id=self.id)
 
     def go_to_next_round(self):
-        self.current_round_id += 1
         self.current_betting_round.in_progress = False
 
+        self.next_to_act_pos = (self.dealer_pos + 1) % self.num_players
+        self.next_to_act_id = self.table.player_from_position(self.next_to_act_pos).user_id
+
         try:
+            self.current_round_id += 1
             self.new_betting_round(self.rounds[self.current_round_id])
         except IndexError:
             # No next round, hand complete
