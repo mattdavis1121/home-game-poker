@@ -131,7 +131,7 @@ class Table(BaseModel):
 
         if num_players >= 2:
             poker_hand = TexasHoldemHand(num_players=num_players)
-            hand = Hand(table_id=self.id, board=poker_hand.board)
+            hand = Hand(table_id=self.id, board=poker_hand.board, rounds=poker_hand.rounds)
 
             if previous_hand:
                 hand.dealer_pos = (previous_hand.dealer_pos + 1) % num_players
@@ -145,6 +145,7 @@ class Table(BaseModel):
             hand.next_to_act_id = self.player_from_position(hand.next_to_act_pos).user_id
 
             hand.save()
+            hand.new_betting_round(poker_hand.rounds[0])
 
             # TODO - Create Holding for each player at table. Holding model should use player_id, not user_id
             for i, player_holding in enumerate(poker_hand.holdings):
@@ -195,8 +196,12 @@ class Hand(BaseModel):
     pot_pennies = db.Column(db.Integer, nullable=False, default=0)
     in_progress = db.Column(db.Boolean, nullable=False, default=True)
     current_bet = db.Column(db.Integer, nullable=False, default=0)
+    lead_bettor_pos = db.Column(db.Integer, nullable=True)
+    rounds = db.Column(db.ARRAY(db.String), nullable=False)
+    current_round_id = db.Column(db.Integer, nullable=False, default=0)
 
     actions = db.relationship("Action", backref="hand", lazy="dynamic")
+    betting_rounds = db.relationship("BettingRound", backref="hand", lazy="dynamic")
 
     def to_dict(self):
         return {
@@ -213,16 +218,96 @@ class Hand(BaseModel):
             **super().to_dict()
         }
 
-    def resolve_action(self, bet=0):
-        self.pot_pennies += bet
-        self.current_bet += bet
+    def resolve_action(self, action, current_bet, total_bet):
+        self.pot_pennies += current_bet
+
+        # TODO - WTF do we do with folds?
+
+        if action.action_type != ActionType.FOLD:
+            if self.lead_bettor_pos is None or (total_bet > self.current_bet):
+                self.current_bet = total_bet
+                self.lead_bettor_pos = self.next_to_act_pos
+
         self.next_to_act_pos = (self.next_to_act_pos + 1) % self.num_players
         self.next_to_act_id = self.table.player_from_position(self.next_to_act_pos).user_id
+
+        # Round is complete if:
+        #   - hand_complete == True
+        #   - This action is a check or call and next to act is initiator
+        round_complete = self.next_to_act_pos == self.lead_bettor_pos
+        if round_complete:
+            self.current_bet = 0
+            self.lead_bettor_pos = None
+            self.go_to_next_round()
+
+        # Hand is complete if:
+        #   - This action is a fold and only one player remains
+        #   - This action is a check or call, next to act is initiator, and no
+        #     rounds remaining
+        last_round = self.current_betting_round is None
+        hand_complete = last_round and round_complete
+        if hand_complete:
+            self.in_progress = False
+            # TODO - Pay winner(s)
+
         self.save()
+
+    def new_betting_round(self, round_name=None):
+        return BettingRound.create(name=round_name, hand_id=self.id)
+
+    def go_to_next_round(self):
+        self.current_round_id += 1
+        self.current_betting_round.in_progress = False
+
+        try:
+            self.new_betting_round(self.rounds[self.current_round_id])
+        except IndexError:
+            # No next round, hand complete
+            self.current_round_id = -1
+            pass
+
+
+    @property
+    def current_betting_round(self):
+        return self.betting_rounds.filter_by(in_progress=True).first()
 
     @property
     def num_players(self):
         return len(self.holdings)
+
+
+class BettingRound(BaseModel):
+    __tablename__ = "betting_rounds"
+
+    name = db.Column(db.String(80), nullable=True)     # The common name for round (preflop, river, etc) TODO - Keep?
+    hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
+    in_progress = db.Column(db.Boolean, nullable=False, default=True)
+
+    bets = db.relationship("Bet", backref="betting_round", lazy="dynamic")
+
+    # TODO - Stub
+    def check_is_balanced(self):
+        """Check if all users in hand have contributed the same amount."""
+        return False
+
+    def new_bet(self, user_id, amount=0):
+        return Bet.create(user_id=user_id, amount=amount, betting_round_id=self.id)
+
+    def user_total_bet(self, user_id):
+        """Get sum of bets by a user in this round."""
+        user_bets = self.bets.filter_by(user_id=user_id).all()
+        if user_bets:
+            return sum([bet.amount for bet in user_bets])
+        else:
+            return 0
+
+
+class Bet(BaseModel):
+    __tablename__ = "bets"
+
+    amount = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    betting_round_id = db.Column(db.Integer, db.ForeignKey("betting_rounds.id"), nullable=False)
 
 
 class Holding(BaseModel):

@@ -3,7 +3,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import app, sse
-from models import Table, User, Hand, Holding, Action, ActionType
+from models import Table, User, Hand, Holding, Action, ActionType, BettingRound
 from forms import RegisterForm, LoginForm
 from extensions import login_manager
 from poker import TexasHoldemHand
@@ -130,23 +130,31 @@ def action(table_name):
     except KeyError:
         return jsonify({"success": False, "msg": "Invalid action type"})
 
-    bet_amt = data.get("betAmt", 0)
-    if action_type == ActionType.CHECK:
+    current_bet = data.get("betAmt", 0)
+    prev_bet = hand.current_betting_round.user_total_bet(user.id)
+    total_bet = prev_bet + current_bet
+
+    if action_type == ActionType.BLIND:
+        if hand.board:
+            return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
+    elif action_type == ActionType.CHECK:
         if hand.current_bet > 0:
             return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
     elif action_type == ActionType.BET:
-        if bet_amt > user.player.balance:
+        if current_bet > user.player.balance:
             return jsonify({"success": False, "msg": "Bet > balance"})
-        elif bet_amt < hand.current_bet:
+        elif total_bet < hand.current_bet:
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Check for illegal raise here (enforce raise minimum)
+
+    hand.current_betting_round.new_bet(user.id, current_bet)
 
     try:
         act = Action.create(action_type=data.get("actionType"),
                             hand_id=hand.id,
                             user_id=user.id,
                             holding_id=user.current_holding.id)
-        hand.resolve_action(bet_amt)
+        hand.resolve_action(act, current_bet, total_bet)
     except IntegrityError:
         return jsonify({"success": False, "msg": "Database error"})
     except:
