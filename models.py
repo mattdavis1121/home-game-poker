@@ -186,7 +186,7 @@ class Hand(BaseModel):
     """A hand of poker."""
 
     __tablename__ = "hands"
-    holdings = db.relationship("Holding", backref="hand", lazy=True)
+    holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
     board = db.Column(db.ARRAY(db.Integer), nullable=False)
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
     dealer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -221,15 +221,17 @@ class Hand(BaseModel):
     def resolve_action(self, action, current_bet, total_bet):
         self.pot_pennies += current_bet
 
-        # TODO - WTF do we do with folds?
+        # TODO - Folds are working, but hand does not end if all players fold
 
-        if action.action_type != ActionType.FOLD:
+        if action.action_type == ActionType.FOLD:
+            User.query.get(self.next_to_act_id).current_holding.fold()
+
+        else:
             if self.lead_bettor_pos is None or (total_bet > self.current_bet):
                 self.current_bet = total_bet
                 self.lead_bettor_pos = self.next_to_act_pos
 
-        self.next_to_act_pos = (self.next_to_act_pos + 1) % self.num_players
-        self.next_to_act_id = self.table.player_from_position(self.next_to_act_pos).user_id
+        self.update_next_to_act()
 
         # Round is complete if:
         #   - hand_complete == True
@@ -245,7 +247,7 @@ class Hand(BaseModel):
         #   - This action is a check or call, next to act is initiator, and no
         #     rounds remaining
         last_round = self.current_betting_round is None
-        hand_complete = last_round and round_complete
+        hand_complete = (last_round and round_complete) or self.num_live_hands == 1
         if hand_complete:
             self.in_progress = False
             # TODO - Pay winner(s)
@@ -269,6 +271,20 @@ class Hand(BaseModel):
             self.current_round_id = -1
             pass
 
+    def update_next_to_act(self):
+        start_pos = self.next_to_act_pos
+        while True:
+            self.next_to_act_pos = (self.next_to_act_pos + 1) % self.num_players
+            self.next_to_act_id = self.table.player_from_position(self.next_to_act_pos).user_id
+
+            # Found the next player with a live hand
+            if self.holdings.filter_by(user_id=self.next_to_act_id).first().in_progress:
+                return
+
+            # Looked all the way around table, but all other players are folded
+            if self.next_to_act_pos == start_pos:
+                # TODO - Raise a custom error here
+                raise KeyError
 
     @property
     def current_betting_round(self):
@@ -276,7 +292,11 @@ class Hand(BaseModel):
 
     @property
     def num_players(self):
-        return len(self.holdings)
+        return len(self.holdings.all())
+
+    @property
+    def num_live_hands(self):
+        return len(self.holdings.filter_by(in_progress=True).all())
 
 
 class BettingRound(BaseModel):
@@ -321,6 +341,9 @@ class Holding(BaseModel):
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     in_progress = db.Column(db.Boolean, nullable=False, default=True)
+
+    def fold(self):
+        self.update(in_progress=False)
 
     def to_dict(self):
         return {

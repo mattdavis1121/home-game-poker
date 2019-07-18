@@ -157,8 +157,8 @@ def action(table_name):
         hand.resolve_action(act, current_bet, total_bet)
     except IntegrityError:
         return jsonify({"success": False, "msg": "Database error"})
-    except:
-        return jsonify({"success": False, "msg": "Unknown error"})
+    except Exception as e:
+        return jsonify({"success": False, "msg": "Unknown error", "error": e})
 
     return jsonify({"success": True})
 
