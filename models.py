@@ -90,6 +90,24 @@ class User(UserMixin, BaseModel):
         """Represent instance as a unique string."""
         return "<User({username!r})>".format(username=self.username)
 
+    @property
+    def current_table(self):
+        current_player = self.current_player
+
+        if not current_player:
+            return None
+
+        return current_player.table
+
+    @property
+    def current_player(self):
+        active = PlayerActive.query.filter_by(user_id=self.id).first()
+
+        if not active:
+            return None
+
+        return Player.query.get(active.player_id)
+
 
 class Transaction(BaseModel):
     """Buy-ins and cash-outs."""
@@ -109,6 +127,8 @@ class Table(BaseModel):
     name = db.Column(db.String(80), default=make_random_name)
     seats = db.Column(db.Integer, default=9)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    players = db.relationship("Player", backref="table", lazy=True)
 
 
 class Player(BaseModel):

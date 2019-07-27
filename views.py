@@ -51,8 +51,9 @@ def register():
         new_user = User.create(
             email=form.email.data,
             password=form.password.data,
-            username=form.email.data,
-            active=True
+            active=True,
+            role_id=1,
+            group_id=1
         )
         login_user(new_user)
         redirect_url = request.args.get('next') or url_for("tables")
