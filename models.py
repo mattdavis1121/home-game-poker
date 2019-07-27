@@ -16,6 +16,13 @@ def make_random_name():
     return "".join([random.choice(words).title() for words in (adjectives, gerunds, nouns)])
 
 
+players_active = db.Table('players_active',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False, unique=True),
+    db.Column('player_id', db.Integer, db.ForeignKey('players.id'), primary_key=True, nullable=False),
+    db.Column('table_id', db.Integer, db.ForeignKey('tables.id'), primary_key=True, nullable=False),
+)
+
+
 class Group(BaseModel):
     __tablename__ = "groups"
 
@@ -70,6 +77,11 @@ class User(UserMixin, BaseModel):
     active = db.Column(db.Boolean, default=True)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    active_player = db.relationship("Player", secondary=players_active,
+                                     lazy="subquery",
+                                     backref=db.backref("user", lazy=True),
+                                     uselist=False)
+
     def __init__(self, email, password=None, **kwargs):
         """Create instance."""
         db.Model.__init__(self, email=email, **kwargs)
@@ -86,27 +98,11 @@ class User(UserMixin, BaseModel):
         """Check password."""
         return bcrypt.check_password_hash(self.password, value)
 
-    def __repr__(self):
-        """Represent instance as a unique string."""
-        return "<User({username!r})>".format(username=self.username)
-
     @property
     def current_table(self):
-        current_player = self.current_player
-
-        if not current_player:
+        if not self.active_player:
             return None
-
-        return current_player.table
-
-    @property
-    def current_player(self):
-        active = PlayerActive.query.filter_by(user_id=self.id).first()
-
-        if not active:
-            return None
-
-        return Player.query.get(active.player_id)
+        return self.active_player.table
 
 
 class Transaction(BaseModel):
@@ -128,7 +124,9 @@ class Table(BaseModel):
     seats = db.Column(db.Integer, default=9)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
-    players = db.relationship("Player", backref="table", lazy=True)
+    active_players = db.relationship("Player", secondary=players_active,
+                                     lazy="subquery",
+                                     backref=db.backref("table", lazy=True))
 
 
 class Player(BaseModel):
@@ -144,14 +142,6 @@ class Player(BaseModel):
     sitting_out = db.Column(db.Boolean, default=False)
     seat = db.Column(db.Integer)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
-
-
-class PlayerActive(BaseModel):
-    __tablename__ = "players_active"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
 
 
 class State(IntEnum):
