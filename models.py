@@ -15,6 +15,7 @@ def make_random_name():
 
     return "".join([random.choice(words).title() for words in (adjectives, gerunds, nouns)])
 
+
 # Non-model tables must be defined first to build proper relationships
 players_active = db.Table('players_active',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False, unique=True),
@@ -144,6 +145,45 @@ class Table(BaseModel):
                                   lazy="subquery",
                                   backref=db.backref("table", lazy=True),
                                   uselist=False)
+
+    @property
+    def active_players(self):
+        return self.players.join(players_active).all()
+
+    def join(self, user, seat=None):
+        """
+        Sit a user down at this table
+
+        First finds a suitable position if none provided, then creates a
+        Player record representing the user's attendance at this table. Fail if
+        provided seat is occupied, or if there are no open seats at the table.
+
+        :param user: The User to seat at the table
+        :param seat: The seat number to seat the User at
+        :return: ID of the newly created player
+        """
+        # TODO: Check for player already at a seat
+
+        taken_seats = [ap.seat for ap in self.active_players]
+        if seat and (seat in taken_seats):
+            raise Exception('seat taken')
+        else:
+            # Search for open seat
+            for i in range(self.seats):
+                if i not in taken_seats:
+                    seat = i
+                    break
+
+            if seat is None:
+                raise Exception('no open seats')
+
+        player = Player.create(user_id=user.id, table_id=self.id, seat=seat)
+        if user.active_player:
+            user.active_player.delete()
+        user.active_player = player
+        self.save()
+
+        return player.id
 
 
 class Player(BaseModel):

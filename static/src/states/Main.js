@@ -11,6 +11,7 @@ class Main extends Phaser.State {
         this.background = this.game.add.image(0, 0, "background");
         this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteRect, this.deal);
         this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteRect, this.btnClicked);
+        this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteRect, this.joinTable);
 
         this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
         this.card.anchor.setTo(0.5);
@@ -52,6 +53,16 @@ class Main extends Phaser.State {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
+        }));
+    }
+
+    joinTable() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/tables/' + this.gameData.tableName + '/join/');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({
+            tableName: initialData.tableName,
+            userID: initialData.userID
         }));
     }
 

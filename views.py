@@ -65,7 +65,7 @@ def register():
 @login_required
 def tables():
     if request.method == "POST":
-        table = Table()
+        table = Table(group_id=1)
         table.save()
         return redirect(url_for("show_table", table_name=table.name))
     else:
@@ -77,11 +77,24 @@ def tables():
 @login_required
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
-
-    # TODO - This shouldn't happen here
-    current_user.join_table(table=table)
-
     return render_template("game.html", table=table)
+
+
+@app.route("/tables/<table_name>/join/", methods=["POST"])
+def join_table(table_name):
+    data = request.get_json()
+    table = Table.query.filter_by(name=table_name).first()
+    user = User.query.get(data.get("userID", -1))
+    position = data.get("position")
+
+    if not user:
+        return jsonify({"success": False, "msg": "No user found"})
+
+    try:
+        player_id = table.join(user, position)
+        return jsonify({"success": True, "playerID": player_id})
+    except Exception as e:
+        return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 
 
 @app.route("/tables/<table_name>/deal/", methods=["POST"])
