@@ -15,11 +15,27 @@ def make_random_name():
 
     return "".join([random.choice(words).title() for words in (adjectives, gerunds, nouns)])
 
-
+# Non-model tables must be defined first to build proper relationships
 players_active = db.Table('players_active',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False, unique=True),
     db.Column('player_id', db.Integer, db.ForeignKey('players.id'), primary_key=True, nullable=False),
     db.Column('table_id', db.Integer, db.ForeignKey('tables.id'), primary_key=True, nullable=False),
+)
+
+hands_active = db.Table("hands_active",
+    db.Column("table_id", db.Integer, db.ForeignKey("tables.id"), primary_key=True, nullable=False),
+    db.Column("hand_id", db.Integer, db.ForeignKey("hands.id"), primary_key=True, nullable=False)
+)
+
+betting_rounds_active = db.Table("betting_rounds_active",
+    db.Column("betting_round_id", db.Integer, db.ForeignKey("betting_rounds.id"), primary_key=True, nullable=False),
+    db.Column("hand_id", db.Integer, db.ForeignKey("hands.id"), primary_key=True, nullable=False)
+)
+
+cards = db.Table('holdings_to_cards',
+    db.Column('holding_id', db.Integer, db.ForeignKey('holdings.id'), primary_key=True, nullable=False),
+    db.Column('card_id', db.Integer, db.ForeignKey('cards.id'), primary_key=True, nullable=False),
+    db.Column('exposed', db.Boolean, default=False)
 )
 
 
@@ -126,7 +142,12 @@ class Table(BaseModel):
 
     active_players = db.relationship("Player", secondary=players_active,
                                      lazy="subquery",
-                                     backref=db.backref("table", lazy=True))
+                                     backref=db.backref("table", lazy=True),
+                                     order_by="Player.seat")
+    active_hand = db.relationship("Hand", secondary=hands_active,
+                                  lazy="subquery",
+                                  backref=db.backref("table", lazy=True),
+                                  uselist=False)
 
 
 class Player(BaseModel):
@@ -161,13 +182,11 @@ class Hand(BaseModel):
     state = db.Column(db.Enum(State))
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
-
-class HandActive(BaseModel):
-    __tablename__= "hands_active"
-
-    id = db.Column(db.Integer, primary_key=True)
-    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
-    hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
+    active_betting_round = db.relationship("BettingRound",
+                                           secondary=betting_rounds_active,
+                                           lazy="subquery",
+                                           backref=db.backref("hand", lazy=True),
+                                           uselist=False)
 
 
 class Pot(BaseModel):
@@ -199,14 +218,6 @@ class BettingRound(BaseModel):
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
 
-class BettingRoundActive(BaseModel):
-    __tablename__= "betting_rounds_active"
-
-    id = db.Column(db.Integer, primary_key=True)
-    betting_round_id = db.Column(db.Integer, db.ForeignKey("betting_rounds.id"), nullable=False)
-    hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
-
-
 class Bet(BaseModel):
     __tablename__= "bets"
 
@@ -215,13 +226,6 @@ class Bet(BaseModel):
     betting_round_id = db.Column(db.Integer, db.ForeignKey("betting_rounds.id"), nullable=False)
     amount = db.Column(db.Integer)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
-
-
-cards = db.Table('holdings_to_cards',
-    db.Column('holding_id', db.Integer, db.ForeignKey('holdings.id'), primary_key=True, nullable=False),
-    db.Column('card_id', db.Integer, db.ForeignKey('cards.id'), primary_key=True, nullable=False),
-    db.Column('exposed', db.Boolean, default=False)
-)
 
 
 class Holding(BaseModel):
