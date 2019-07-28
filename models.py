@@ -148,9 +148,6 @@ class Table(BaseModel):
 
 class Player(BaseModel):
     __tablename__ = "players"
-    __table_args__ = (
-        db.UniqueConstraint("table_id", "seat", name="unique_table_seat"),
-    )
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -175,7 +172,7 @@ class Hand(BaseModel):
     dealer_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     next_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     rounds = db.Column(db.Integer)  # Number of betting rounds per hand
-    state = db.Column(db.Enum(State))
+    state = db.Column(db.Enum(State), default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
     active_betting_round = db.relationship("BettingRound",
