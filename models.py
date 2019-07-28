@@ -19,7 +19,6 @@ def make_random_name():
 players_active = db.Table('players_active',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False, unique=True),
     db.Column('player_id', db.Integer, db.ForeignKey('players.id'), primary_key=True, nullable=False),
-    db.Column('table_id', db.Integer, db.ForeignKey('tables.id'), primary_key=True, nullable=False),
 )
 
 hands_active = db.Table("hands_active",
@@ -140,10 +139,7 @@ class Table(BaseModel):
     seats = db.Column(db.Integer, default=9)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
-    active_players = db.relationship("Player", secondary=players_active,
-                                     lazy="subquery",
-                                     backref=db.backref("table", lazy=True),
-                                     order_by="Player.seat")
+    players = db.relationship("Player", backref="table", lazy="dynamic")
     active_hand = db.relationship("Hand", secondary=hands_active,
                                   lazy="subquery",
                                   backref=db.backref("table", lazy=True),
