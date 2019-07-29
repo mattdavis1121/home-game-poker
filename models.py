@@ -140,15 +140,42 @@ class Table(BaseModel):
     seats = db.Column(db.Integer, default=9)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
-    players = db.relationship("Player", backref="table", lazy="dynamic")
+    players = db.relationship("Player", backref="table", lazy="dynamic",
+                              order_by="Player.seat")
+    hands = db.relationship("Hand", backref="table", lazy=True,
+                            order_by="desc(Hand.created_utc)")
     active_hand = db.relationship("Hand", secondary=hands_active,
                                   lazy="subquery",
-                                  backref=db.backref("table", lazy=True),
                                   uselist=False)
 
     @property
     def active_players(self):
+        """
+        Players sitting at table regardless of sitting_out value
+        :return: List of Players
+        """
         return self.players.join(players_active).all()
+
+    @property
+    def ready_players(self):
+        """
+        Active players who are not sitting out
+        :return: List of Players
+        """
+        return self.players.filter_by(sitting_out=False).join(players_active).all()
+
+    @property
+    def previous_hand(self):
+        """
+        Get the most recent non-active hand for this table
+        :return: Hand instance if exists, else None
+        """
+        previous_hand = None
+        for hand in self.hands:
+            if hand != self.active_hand:
+                previous_hand = hand
+                break
+        return previous_hand
 
     def join(self, user, seat=None):
         """
@@ -184,6 +211,23 @@ class Table(BaseModel):
         self.save()
 
         return player.id
+
+    def new_hand(self, hand_type):
+        if self.active_hand:
+            raise Exception("Table already has active hand")
+
+        if len(self.ready_players) < 2:
+            raise Exception("Not enough players")
+
+        poker_hand = hand_type(num_players=len(self.ready_players))
+        hand = Hand(table_id=self.id, rounds=poker_hand.rounds)
+
+        # TODO - Pass dealer button around table each hand
+        hand.dealer_id = self.ready_players[0].id
+        hand.next_id = self.ready_players[1].id
+
+        hand.save()
+        hand.new_betting_round()
 
 
 class Player(BaseModel):

@@ -100,7 +100,7 @@ def join_table(table_name):
 @app.route("/tables/<table_name>/deal/", methods=["POST"])
 def deal(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    hand = table.new_hand()
+    hand = table.new_hand(hand_type=TexasHoldemHand)    # TODO - get hand type from json
 
     # TODO - new_hand() returns False if it fails and a Hand object if success. Probably wrong.
     if hand is False:

@@ -20,9 +20,7 @@ class PokerHand:
 class TexasHoldemHand(PokerHand):
     def __init__(self, num_players=0, deal=True):
         super().__init__(num_players, deal)
-
-        # TODO - 'blinds' should be first
-        self.rounds = ["preflop", "flop", "turn", "river"]
+        self.rounds = 4 # preflop, flop, turn, river
 
     def deal(self):
         deck = Deck()
