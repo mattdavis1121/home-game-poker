@@ -229,6 +229,12 @@ class Table(BaseModel):
         hand.save()
         hand.new_betting_round()
 
+        hand.board = hand.new_holding(cards=poker_hand.board)
+        for i, poker_holding in enumerate(poker_hand.holdings):
+            hand.new_holding(player=self.ready_players[i], cards=poker_holding)
+
+        return hand
+
 
 class Player(BaseModel):
     __tablename__ = "players"
@@ -264,6 +270,31 @@ class Hand(BaseModel):
                                            lazy="subquery",
                                            backref=db.backref("hand", lazy=True),
                                            uselist=False)
+    holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
+
+    @property
+    def player_holdings(self):
+        return self.holdings.filter_by(is_board=False).all()
+
+    @property
+    def board(self):
+        return self.holdings.filter_by(is_board=True).first()
+
+    def new_betting_round(self):
+        round_num = 0
+        if self.active_betting_round:
+            round_num = self.active_betting_round.round_num + 1
+
+        new_round = BettingRound.create(hand_id=self.id, round_num=round_num)
+        self.active_betting_round = new_round
+        self.save()
+
+        return new_round
+
+    def new_holding(self, player=None, cards=None, **kwargs):
+        kwargs["player_id"] = None if player is None else player.id
+        kwargs["is_board"] = player is None
+        return Holding.create(hand_id=self.id, cards=cards, **kwargs)
 
 
 class Pot(BaseModel):
@@ -288,10 +319,9 @@ class BettingRound(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
     round_num = db.Column(db.Integer)
-    name = db.Column(db.String(80), nullable=True)  # preflop, flop, turn, etc
     bet = db.Column(db.Integer) # The highest current bet for round
-    bettor = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
-    state = db.Column(db.Enum(State))
+    bettor_id = db.Column(db.Integer, db.ForeignKey("players.id"))
+    state = db.Column(db.Enum(State), nullable=False, default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
 
@@ -321,12 +351,48 @@ class Holding(BaseModel):
     cards = db.relationship("Card", secondary=cards, lazy="subquery",
                            backref=db.backref("holding", lazy=True))
 
+    def __init__(self, cards=None, **kwargs):
+        super().__init__(**kwargs)
+        self.add_cards(cards)
+
+    @property
+    def codes(self):
+        """Get the Deuces codes for each card in holding"""
+        return [card.code for card in self.cards]
+
+    def add_cards(self, cards):
+        """
+        Append to cards collection and create new Card records if necessary
+        :param cards: List of card ints or objects
+        :return: cards collection
+        """
+        ints_or_objs = list(cards)
+        for card in ints_or_objs:
+            if isinstance(card, int):
+                card = Card.get_or_create(card)
+            elif not isinstance(card, Card):
+                raise Exception("Cannot create card")
+            self.cards.append(card)
+        return self.cards
+
 
 class Card(BaseModel):
     __tablename__ = "cards"
 
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.Integer)    # Deuces code for card
+
+    @classmethod
+    def get_or_create(cls, code):
+        """
+        Lookup a card by its code and create if it doesn't exist
+        :param code: Deuces card code
+        :return: The created Card
+        """
+        card = cls.query.filter_by(code=code).first()
+        if not card:
+            card = cls.create(code=code)
+        return card
 
 
 class ActionType(IntEnum):
