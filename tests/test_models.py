@@ -1,6 +1,7 @@
 import pytest
 import datetime
 from models import *
+from exceptions import *
 
 
 class TestGroup:
@@ -83,7 +84,7 @@ class TestTable:
 
         # TODO - Check for custom error raised. This will still
         #  pass with a custom error, so it needs to be updated
-        with pytest.raises(Exception):
+        with pytest.raises(SeatOccupiedError):
             table.join(users[1], seat=2)
 
         users[0].active_player = None
@@ -105,8 +106,10 @@ class TestTable:
 
         for user in users[:-1]:
             table.join(user)
-        with pytest.raises(Exception):
+        with pytest.raises(TableFullError):
             table.join(users[-1])
+
+    # def test_new_hand(self):
 
 
 class TestUser:

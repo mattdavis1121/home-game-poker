@@ -6,6 +6,8 @@ from flask_login import UserMixin
 
 from database import db, BaseModel
 from extensions import bcrypt
+from exceptions import (TableFullError, SeatOccupiedError,
+                        DuplicateActiveRecordError, InsufficientPlayersError)
 
 
 def make_random_name():
@@ -198,7 +200,7 @@ class Table(BaseModel):
 
         taken_seats = [ap.seat for ap in self.active_players]
         if seat and (seat in taken_seats):
-            raise Exception('seat taken')
+            raise SeatOccupiedError
         else:
             # Search for open seat
             for i in range(self.seats):
@@ -207,7 +209,7 @@ class Table(BaseModel):
                     break
 
             if seat is None:
-                raise Exception('no open seats')
+                raise TableFullError
 
         player = Player.create(user_id=user.id, table_id=self.id, seat=seat)
         user.active_player = player
@@ -217,10 +219,10 @@ class Table(BaseModel):
 
     def new_hand(self, hand_type):
         if self.active_hand:
-            raise Exception("Table already has active hand")
+            raise DuplicateActiveRecordError("Table already has active hand")
 
         if len(self.ready_players) < 2:
-            raise Exception("Not enough players")
+            raise InsufficientPlayersError
 
         poker_hand = hand_type(num_players=len(self.ready_players))
         hand = Hand(table_id=self.id, rounds=poker_hand.rounds)
