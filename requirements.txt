@@ -26,6 +26,10 @@ WTForms==2.2.1
 # Environment variable parsing
 environs==4.0.0
 
+# Testing
+pytest==5.0.1
+pytest-flask==0.15.0
+
 # Other
 eventlet==0.24.1
 gunicorn==19.9.0

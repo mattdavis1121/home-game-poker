@@ -48,6 +48,9 @@ class Group(BaseModel):
     paid_through = db.Column(db.Date, nullable=True)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    tables = db.relationship("Table", backref="group", lazy=True)
+    users = db.relationship("User", backref="group", lazy=True)
+
 
 # TODO - Stub
 class PaymentType(BaseModel):
@@ -73,6 +76,8 @@ class Role(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
 
+    users = db.relationship("User", backref="role", lazy=True)
+
 
 class User(UserMixin, BaseModel):
     """
@@ -93,9 +98,9 @@ class User(UserMixin, BaseModel):
     active = db.Column(db.Boolean, default=True)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    players = db.relationship("Player", backref="user", lazy=True)
     active_player = db.relationship("Player", secondary=players_active,
                                      lazy="subquery",
-                                     backref=db.backref("user", lazy=True),
                                      uselist=False)
 
     def __init__(self, email, password=None, **kwargs):
@@ -205,8 +210,6 @@ class Table(BaseModel):
                 raise Exception('no open seats')
 
         player = Player.create(user_id=user.id, table_id=self.id, seat=seat)
-        if user.active_player:
-            user.active_player.delete()
         user.active_player = player
         self.save()
 
