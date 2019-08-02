@@ -31,20 +31,21 @@ from models import *
 
 @app.shell_context_processor
 def make_shell_context():
-    return {"db": db,
-            "Group": Group,
-            "PaymentType": PaymentType,
-            "Payment": Payment,
-            "Role": Role,
-            "User": User,
-            "Transaction": Transaction,
-            "Table": Table,
-            "Player": Player,
-            "Hand": Hand,
-            "Pot": Pot,
-            "BettingRound": BettingRound,
-            "Bet": Bet,
-            "Holding": Holding,
-            "Card": Card,
-            "Action": Action
-            }
+    return {
+        "db": db,
+        "Group": Group,
+        "PaymentType": PaymentType,
+        "Payment": Payment,
+        "Role": Role,
+        "User": User,
+        "Transaction": Transaction,
+        "Table": Table,
+        "Player": Player,
+        "Hand": Hand,
+        "Pot": Pot,
+        "BettingRound": BettingRound,
+        "Bet": Bet,
+        "Holding": Holding,
+        "Card": Card,
+        "Action": Action
+    }
