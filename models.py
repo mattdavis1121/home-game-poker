@@ -4,6 +4,7 @@ from datetime import datetime as dt
 
 from flask_login import UserMixin
 
+from poker import determine_next_seat
 from database import db, BaseModel
 from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
@@ -227,18 +228,31 @@ class Table(BaseModel):
         poker_hand = hand_type(num_players=len(self.ready_players))
         hand = Hand(table_id=self.id, rounds=poker_hand.rounds)
 
-        # TODO - Pass dealer button around table each hand
-        hand.dealer_id = self.ready_players[0].id
-        hand.next_id = self.ready_players[1].id
+        ready_player_seats = [player.seat for player in self.ready_players]
+        if self.previous_hand:
+            dealer_seat = determine_next_seat(self.previous_hand.dealer.seat,
+                                              ready_player_seats)
+            under_the_gun = determine_next_seat(dealer_seat, ready_player_seats)
+            hand.dealer_id = self.player_at_seat(dealer_seat).id
+            hand.next_id = self.player_at_seat(under_the_gun).id
+        else:
+            hand.dealer_id = self.player_at_seat(ready_player_seats[0]).id
+            hand.next_id = self.player_at_seat(ready_player_seats[1]).id
 
         hand.save()
         hand.new_betting_round()
 
-        hand.board = hand.new_holding(cards=poker_hand.board)
+        hand.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):
             hand.new_holding(player=self.ready_players[i], cards=poker_holding)
 
+        self.active_hand = hand
+        self.save()
+
         return hand
+
+    def player_at_seat(self, seat):
+        return self.players.filter_by(seat=seat).join(players_active).first()
 
 
 class Player(BaseModel):
@@ -251,6 +265,9 @@ class Player(BaseModel):
     sitting_out = db.Column(db.Boolean, default=False)
     seat = db.Column(db.Integer)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    hands_dealt = db.relationship("Hand", backref="dealer", lazy=True, foreign_keys="[Hand.dealer_id]")
+    # TODO - Currently no way to know what hands a player participated in
 
 
 class State(IntEnum):

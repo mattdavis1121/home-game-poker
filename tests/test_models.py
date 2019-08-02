@@ -2,6 +2,7 @@ import pytest
 import datetime
 from models import *
 from exceptions import *
+from poker import TexasHoldemHand
 
 
 class TestGroup:
@@ -109,7 +110,41 @@ class TestTable:
         with pytest.raises(TableFullError):
             table.join(users[-1])
 
-    # def test_new_hand(self):
+    def test_new_hand(self, table, group, role, make_user, make_player):
+        num_players = 3
+        with pytest.raises(InsufficientPlayersError):
+            table.new_hand(TexasHoldemHand)
+
+        for i in range(num_players):
+            user = make_user(email="test{}@example.com".format(i),
+                                   password="test", group_id=group.id,
+                                   role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i)
+            user.active_player = player
+
+        assert len(table.hands) == 0
+        assert table.active_hand is None
+
+        hand = table.new_hand(TexasHoldemHand)
+
+        assert len(table.hands) == 1
+        assert table.active_hand is not None
+        assert table.active_hand is hand
+
+        assert len(hand.player_holdings) == num_players
+        assert hand.board is not None
+
+        with pytest.raises(DuplicateActiveRecordError):
+            table.new_hand(TexasHoldemHand)
+
+        hand.status = State.CLOSED
+        table.active_hand = None
+        hand2 = table.new_hand(TexasHoldemHand)
+
+        assert len(table.hands) == 2
+        assert table.active_hand is not None
+        assert table.active_hand is hand2
+
 
 
 class TestUser:
