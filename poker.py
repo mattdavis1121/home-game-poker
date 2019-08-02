@@ -1,8 +1,20 @@
 from deuces import Deck, Card, Evaluator
 
 
+def determine_next_seat(prev_seat, seats):
+    try:
+        dealer_index = seats.index(prev_seat)
+        return seats[(dealer_index + 1) % len(seats)]
+    except ValueError:
+        sorted_seats = sorted(seats)
+        for seat in sorted_seats:
+            if prev_seat < seat:
+                return seat
+        return sorted_seats[0]
+
+
 class PokerHand:
-    def __init__(self, num_players=0, deal=True):
+    def __init__(self, num_players=0, players=None, deal=True):
         self.num_players = num_players
         self.holdings = []
         self.board = []
