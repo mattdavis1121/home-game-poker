@@ -27,6 +27,48 @@ class TestGroup:
         assert len(group.tables) == 1
 
 
+class TestUser:
+    def test_password_hash(self, user):
+        user.set_password("just_testing")
+        assert user.password != "just_testing"
+        assert user.check_password("just_testing")
+
+    def test_players_relationship(self, user, table, make_player):
+        assert len(user.players) == 0
+        make_player(user_id=user.id, table_id=table.id)
+        assert len(user.players) == 1
+        make_player(user_id=user.id, table_id=table.id)
+        assert len(user.players) == 2
+        user.players[0].delete()
+        assert len(user.players) == 1
+
+    def test_active_player_relationship(self, user, table, make_player):
+        player1 = make_player(user_id=user.id, table_id=table.id)
+        player2 = make_player(user_id=user.id, table_id=table.id)
+
+        assert user.active_player is None
+
+        user.active_player = player1
+        assert user.active_player is not None
+        assert user.active_player is player1
+
+        user.active_player = player2
+        assert user.active_player is not None
+        assert user.active_player is player2
+        assert user.active_player is not player1
+
+        user.active_player = None
+        assert user.active_player is None
+        assert user.active_player is not player1
+        assert user.active_player is not player2
+
+    def test_current_table(self, user, player):
+        assert user.current_table is None
+        user.active_player = player
+        assert user.current_table is not None
+        assert user.current_table == player.table
+
+
 class TestTable:
     def test_create(self, group):
         table = Table.create(id=1, group_id=group.id,
@@ -144,46 +186,3 @@ class TestTable:
         assert len(table.hands) == 2
         assert table.active_hand is not None
         assert table.active_hand is hand2
-
-
-
-class TestUser:
-    def test_password_hash(self, user):
-        user.set_password("just_testing")
-        assert user.password != "just_testing"
-        assert user.check_password("just_testing")
-
-    def test_players_relationship(self, user, table, make_player):
-        assert len(user.players) == 0
-        make_player(user_id=user.id, table_id=table.id)
-        assert len(user.players) == 1
-        make_player(user_id=user.id, table_id=table.id)
-        assert len(user.players) == 2
-        user.players[0].delete()
-        assert len(user.players) == 1
-
-    def test_active_player_relationship(self, user, table, make_player):
-        player1 = make_player(user_id=user.id, table_id=table.id)
-        player2 = make_player(user_id=user.id, table_id=table.id)
-
-        assert user.active_player is None
-
-        user.active_player = player1
-        assert user.active_player is not None
-        assert user.active_player is player1
-
-        user.active_player = player2
-        assert user.active_player is not None
-        assert user.active_player is player2
-        assert user.active_player is not player1
-
-        user.active_player = None
-        assert user.active_player is None
-        assert user.active_player is not player1
-        assert user.active_player is not player2
-
-    def test_current_table(self, user, player):
-        assert user.current_table is None
-        user.active_player = player
-        assert user.current_table is not None
-        assert user.current_table == player.table

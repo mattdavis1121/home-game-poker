@@ -49,19 +49,6 @@ def role(db):
 
 
 @pytest.fixture
-def make_table():
-    def _make_table(*args, **kwargs):
-        return Table.create(*args, **kwargs)
-    return _make_table
-
-
-@pytest.fixture
-def table(group):
-    return Table.create(id=1, group_id=group.id, name="QuicklyRunningHumans",
-                        seats=9, created_utc=datetime.datetime(2019, 7, 31))
-
-
-@pytest.fixture
 def make_user():
     def _make_user(*args, **kwargs):
         return User.create(*args, **kwargs)
@@ -74,6 +61,19 @@ def user(group, role):
                        email="test@example.com", display_name=None,
                        password="test", active=True,
                        created_utc=datetime.datetime(2019, 7, 31))
+
+
+@pytest.fixture
+def make_table():
+    def _make_table(*args, **kwargs):
+        return Table.create(*args, **kwargs)
+    return _make_table
+
+
+@pytest.fixture
+def table(group):
+    return Table.create(id=1, group_id=group.id, name="QuicklyRunningHumans",
+                        seats=9, created_utc=datetime.datetime(2019, 7, 31))
 
 
 @pytest.fixture
