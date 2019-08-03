@@ -10,7 +10,8 @@ from models import *
 
 @pytest.fixture
 def app():
-    app = create_app("testing")
+    app = create_app()
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
     return app
 
 
