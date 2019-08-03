@@ -267,6 +267,7 @@ class Player(BaseModel):
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
     hands_dealt = db.relationship("Hand", backref="dealer", lazy=True, foreign_keys="[Hand.dealer_id]")
+    holdings = db.relationship("Holding", backref="player", lazy=True)
     # TODO - Currently no way to know what hands a player participated in
 
 

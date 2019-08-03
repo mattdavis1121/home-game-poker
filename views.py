@@ -102,21 +102,17 @@ def deal(table_name):
     table = Table.query.filter_by(name=table_name).first()
     hand = table.new_hand(hand_type=TexasHoldemHand)    # TODO - get hand type from json
 
-    # TODO - new_hand() returns False if it fails and a Hand object if success. Probably wrong.
-    if hand is False:
-        return jsonify({"success": False, "msg": "Cannot start a hand while hand in progress."})
-
     sse.publish({
         "id": hand.id,
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
 
-    for holding in hand.holdings:
+    for holding in hand.player_holdings:
         sse.publish({
             "id": hand.id,
-            "user_id": holding.user.id,
-            "holdings":holding.cards
-        }, type="newHand", channel="{}_u{}".format(table.name, holding.user.id))
+            "player_id": holding.player_id,
+            "holdings": [card.code for card in holding.cards]
+        }, type="newHand", channel="{}_u{}".format(table.name, holding.player.user_id))
 
     return jsonify({"success": True, "hand": hand.id})
 
