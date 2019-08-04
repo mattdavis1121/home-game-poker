@@ -294,6 +294,7 @@ class Hand(BaseModel):
                                            secondary=betting_rounds_active,
                                            lazy="subquery", uselist=False)
     holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
+    next_to_act = db.relationship("Player", backref="hand", lazy=True, foreign_keys="[Hand.next_id]")
 
     @property
     def player_holdings(self):

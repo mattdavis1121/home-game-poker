@@ -272,8 +272,9 @@ class TestHand:
         assert hand.active_betting_round == betting_round2
         assert betting_round2.round_num == 1
 
-    def test_dealer_relationship(self, group, role, table, make_hand,
-                                 make_player, make_user):
+    def test_dealer_and_next_to_act_relationships(self, group, role, table,
+                                                  make_hand, make_player,
+                                                  make_user):
         players = []
         for i in range(2):
             user = make_user(email="test{}@example.com".format(i),
@@ -288,6 +289,11 @@ class TestHand:
 
         assert hand.dealer is not None
         assert hand.dealer is players[0]
+        assert type(hand.dealer) is Player
+
+        assert hand.next_to_act is not None
+        assert hand.next_to_act is players[1]
+        assert type(hand.next_to_act) is Player
 
 
 class TestHolding:
