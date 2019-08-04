@@ -1,5 +1,7 @@
 import pytest
 import datetime
+import sqlalchemy
+
 from models import *
 from exceptions import *
 from poker import TexasHoldemHand
@@ -311,9 +313,11 @@ class TestHolding:
         assert len(Card.query.all()) == 2
 
         with pytest.raises(InvalidCardError):
-            holding_cards_objs = make_holding(player_id=hand.dealer.id,
-                                              hand_id=hand.id,
-                                              cards=["invalid card"])
+            make_holding(player_id=hand.dealer.id, hand_id=hand.id,
+                         cards=["invalid card"])
+
+        with pytest.raises(sqlalchemy.exc.IntegrityError):
+            make_holding(player_id=None, is_board=False, hand_id=hand.id)
 
     def test_cards_relationship(self, hand, make_holding, make_card):
         holding = make_holding(player_id=hand.dealer.id, hand_id=hand.id)
