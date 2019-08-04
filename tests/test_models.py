@@ -305,7 +305,50 @@ class TestPot:
 
 
 class TestBettingRound:
-    pass
+    def test_bets_relationship(self, betting_round, make_bet):
+        assert len(betting_round.bets.all()) == 0
+
+        make_bet(player_id=betting_round.hand.dealer_id,
+                 betting_round_id=betting_round.id, amount=100)
+        assert len(betting_round.bets.all()) == 1
+
+        make_bet(player_id=betting_round.hand.dealer_id,
+                 betting_round_id=betting_round.id, amount=100)
+        assert len(betting_round.bets.all()) == 2
+
+    def test_player_bets(self, betting_round, make_bet):
+        player1 = betting_round.hand.dealer
+        player2 = betting_round.hand.next_to_act
+        assert len(betting_round.player_bets(player1)) == 0
+
+        make_bet(player_id=player1.id, betting_round_id=betting_round.id,
+                 amount=100)
+        assert len(betting_round.player_bets(player1)) == 1
+
+        make_bet(player_id=player2.id, betting_round_id=betting_round.id,
+                 amount=100)
+        assert len(betting_round.player_bets(player1)) == 1
+
+    def test_sum_property_and_sum_player_bets(self, betting_round, make_bet):
+        player1 = betting_round.hand.dealer
+        player2 = betting_round.hand.next_to_act
+        assert betting_round.sum == 0
+        assert betting_round.sum_player_bets(player1) == 0
+
+        make_bet(player_id=player1.id, betting_round_id=betting_round.id,
+                 amount=100)
+        assert betting_round.sum == 100
+        assert betting_round.sum_player_bets(player1) == 100
+
+        make_bet(player_id=player1.id, betting_round_id=betting_round.id,
+                 amount=100)
+        assert betting_round.sum == 200
+        assert betting_round.sum_player_bets(player1) == 200
+
+        make_bet(player_id=player2.id, betting_round_id=betting_round.id,
+                 amount=100)
+        assert betting_round.sum == 300
+        assert betting_round.sum_player_bets(player1) == 200
 
 
 class TestBet:

@@ -343,10 +343,28 @@ class BettingRound(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
     round_num = db.Column(db.Integer)
-    bet = db.Column(db.Integer) # The highest current bet for round
+    bet = db.Column(db.Integer)  # The highest current bet for round
     bettor_id = db.Column(db.Integer, db.ForeignKey("players.id"))
     state = db.Column(db.Enum(State), nullable=False, default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    bets = db.relationship("Bet", backref="betting_round", lazy="dynamic")
+
+    @property
+    def sum(self):
+        bets = self.bets.all()
+        if not bets:
+            return 0
+        return sum([bet.amount for bet in bets])
+
+    def player_bets(self, player):
+        return self.bets.filter_by(player_id=player.id).all()
+
+    def sum_player_bets(self, player):
+        player_bets = self.player_bets(player)
+        if not player_bets:
+            return 0
+        return sum([bet.amount for bet in player_bets])
 
 
 class Bet(BaseModel):

@@ -101,8 +101,22 @@ def make_betting_round():
 @pytest.fixture
 def betting_round(hand):
     return BettingRound.create(id=1, hand_id=hand.id, round_num=0, bet=None,
-                               bettor=None, state=State.OPEN,
+                               bettor_id=None, state=State.OPEN,
                                created_utc=datetime.datetime(2019, 7, 31))
+
+
+@pytest.fixture
+def make_bet():
+    def _make_bet(*args, **kwargs):
+        return Bet.create(*args, **kwargs)
+    return _make_bet
+
+
+@pytest.fixture
+def bet(betting_round):
+    return Bet.create(id=1, player_id=betting_round.hand.dealer_id,
+                      betting_round_id=betting_round.id, amount=100,
+                      created_utc=datetime.datetime(2019, 7, 31))
 
 
 @pytest.fixture
