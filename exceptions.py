@@ -22,3 +22,8 @@ class InsufficientPlayersError(Error):
     """Not enough players at table to begin a hand"""
     pass
 
+
+class InvalidCardError(Error):
+    """Attempting to create an invalid Card record"""
+    pass
+

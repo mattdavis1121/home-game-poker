@@ -8,7 +8,8 @@ from poker import determine_next_seat
 from database import db, BaseModel
 from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
-                        DuplicateActiveRecordError, InsufficientPlayersError)
+                        DuplicateActiveRecordError, InsufficientPlayersError,
+                        InvalidCardError)
 
 
 def make_random_name():
@@ -288,11 +289,10 @@ class Hand(BaseModel):
     state = db.Column(db.Enum(State), default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    betting_rounds = db.relationship("BettingRound", backref="hand", lazy=True)
     active_betting_round = db.relationship("BettingRound",
                                            secondary=betting_rounds_active,
-                                           lazy="subquery",
-                                           backref=db.backref("hand", lazy=True),
-                                           uselist=False)
+                                           lazy="subquery", uselist=False)
     holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
 
     @property
@@ -376,7 +376,8 @@ class Holding(BaseModel):
 
     def __init__(self, cards=None, **kwargs):
         super().__init__(**kwargs)
-        self.add_cards(cards)
+        if cards:
+            self.add_cards(cards)
 
     @property
     def codes(self):
@@ -394,7 +395,7 @@ class Holding(BaseModel):
             if isinstance(card, int):
                 card = Card.get_or_create(card)
             elif not isinstance(card, Card):
-                raise Exception("Cannot create card")
+                raise InvalidCardError
             self.cards.append(card)
         return self.cards
 

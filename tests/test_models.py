@@ -3,6 +3,7 @@ import datetime
 from models import *
 from exceptions import *
 from poker import TexasHoldemHand
+from deuces import Card as PokerCard
 
 
 class TestGroup:
@@ -186,3 +187,171 @@ class TestTable:
         assert len(table.hands) == 2
         assert table.active_hand is not None
         assert table.active_hand is hand2
+
+
+class TestHand:
+    def test_holdings_relationship(self, hand, make_holding):
+        holding = make_holding(player_id=hand.dealer_id, hand_id=hand.id)
+
+        assert len(hand.holdings.all()) == 1
+        assert hand.holdings[0] is holding
+
+    def test_board_and_player_holdings_relationships(self, hand, make_holding):
+        player_holding1 = make_holding(player_id=hand.dealer_id, hand_id=hand.id)
+        player_holding2 = make_holding(player_id=hand.next_id, hand_id=hand.id)
+        board = make_holding(hand_id=hand.id, is_board=True)
+
+        assert len(hand.holdings.all()) == 3
+
+        assert len(hand.player_holdings) == 2
+        assert hand.player_holdings[0] is player_holding1
+        assert hand.player_holdings[1] is player_holding2
+
+        assert hand.board is not None
+        assert hand.board is board
+
+    def test_new_holding(self, hand):
+        assert len(hand.holdings.all()) == 0
+        assert len(hand.player_holdings) == 0
+        assert hand.board is None
+
+        player_holding = hand.new_holding(player=hand.dealer)
+        assert len(hand.holdings.all()) == 1
+        assert len(hand.player_holdings) == 1
+        assert hand.holdings.first() == player_holding
+        assert hand.player_holdings[0] == player_holding
+        assert hand.board is None
+        assert player_holding.hand is hand
+
+        board = hand.new_holding()
+        assert len(hand.holdings.all()) == 2
+        assert len(hand.player_holdings) == 1
+        assert hand.board is not None
+        assert hand.board is board
+        assert board.hand is hand
+
+    def test_betting_rounds_relationship(self, hand, make_betting_round):
+        assert len(hand.betting_rounds) == 0
+
+        betting_round1 = make_betting_round(hand_id=hand.id)
+        assert len(hand.betting_rounds) == 1
+        assert hand.betting_rounds[0] is betting_round1
+
+        betting_round2 = make_betting_round(hand_id=hand.id)
+        assert len(hand.betting_rounds) == 2
+        assert hand.betting_rounds[1] is betting_round2
+
+    def test_active_betting_round_relationship(self, hand, make_betting_round):
+        assert hand.active_betting_round is None
+
+        betting_round1 = make_betting_round(hand_id=hand.id)
+        hand.active_betting_round = betting_round1
+        assert hand.active_betting_round is not None
+        assert hand.active_betting_round is betting_round1
+
+        betting_round2 = make_betting_round(hand_id=hand.id)
+        hand.active_betting_round = betting_round2
+        assert hand.active_betting_round is not None
+        assert hand.active_betting_round is not betting_round1
+        assert hand.active_betting_round is betting_round2
+
+    def test_new_betting_round(self, hand):
+        assert len(hand.betting_rounds) == 0
+
+        betting_round1 = hand.new_betting_round()
+        assert len(hand.betting_rounds) == 1
+        assert hand.betting_rounds[0] == betting_round1
+        assert hand.active_betting_round == betting_round1
+        assert betting_round1.round_num == 0
+
+        betting_round2 = hand.new_betting_round()
+        assert len(hand.betting_rounds) == 2
+        assert betting_round1 in hand.betting_rounds
+        assert hand.active_betting_round == betting_round2
+        assert betting_round2.round_num == 1
+
+    def test_dealer_relationship(self, group, role, table, make_hand,
+                                 make_player, make_user):
+        players = []
+        for i in range(2):
+            user = make_user(email="test{}@example.com".format(i),
+                             password="test", group_id=group.id,
+                             role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i)
+            user.active_player = player
+            players.append(player)
+
+        hand = make_hand(table_id=table.id, dealer_id=players[0].id,
+                         next_id=players[1].id)
+
+        assert hand.dealer is not None
+        assert hand.dealer is players[0]
+
+
+class TestHolding:
+    def test_init(self, hand, make_holding):
+        holding_no_cards = make_holding(player_id=hand.dealer.id, hand_id=hand.id)
+        assert holding_no_cards.id > 0
+        assert len(holding_no_cards.cards) == 0
+        assert len(Card.query.all()) == 0
+
+        holding_cards_ints = make_holding(player_id=hand.dealer.id,
+                                          hand_id=hand.id,
+                                          cards=[PokerCard.new('As'),
+                                                 PokerCard.new('Ac')])
+        assert holding_cards_ints.id > 0
+        assert len(holding_cards_ints.cards) == 2
+        assert len(Card.query.all()) == 2
+
+        holding_cards_objs = make_holding(player_id=hand.dealer.id,
+                                          hand_id=hand.id,
+                                          cards=Card.query.all())
+        assert holding_cards_objs.id > 0
+        assert len(holding_cards_objs.cards) == 2
+        assert len(Card.query.all()) == 2
+
+        with pytest.raises(InvalidCardError):
+            holding_cards_objs = make_holding(player_id=hand.dealer.id,
+                                              hand_id=hand.id,
+                                              cards=["invalid card"])
+
+    def test_cards_relationship(self, hand, make_holding, make_card):
+        holding = make_holding(player_id=hand.dealer.id, hand_id=hand.id)
+        card1 = make_card(code=PokerCard.new('As'))
+        card2 = make_card(code=PokerCard.new('Ac'))
+
+        assert len(holding.cards) == 0
+
+        holding.cards.append(card1)
+        assert len(holding.cards) == 1
+        assert holding.cards[0] is card1
+
+        holding.cards.append(card2)
+        assert len(holding.cards) == 2
+        assert holding.cards[1] is card2
+
+    def test_codes_property(self, hand, make_holding):
+        holding = make_holding(player_id=hand.dealer.id, hand_id=hand.id,
+                               cards=[PokerCard.new('As'),
+                                      PokerCard.new('Ac')])
+        assert holding.codes == [PokerCard.new('As'), PokerCard.new('Ac')]
+
+    def test_add_cards(self, hand, make_holding):
+        holding = make_holding(player_id=hand.dealer_id, hand_id=hand.id)
+        assert len(holding.cards) == 0
+        assert len(Card.query.all()) == 0
+
+        holding.add_cards([PokerCard.new('As'), PokerCard.new('Ac')])
+        assert len(holding.cards) == 2
+        assert len(Card.query.all()) == 2
+
+        holding.add_cards([PokerCard.new('As'), PokerCard.new('Ac')])
+        assert len(holding.cards) == 4
+        assert len(Card.query.all()) == 2
+
+        holding.add_cards(holding.cards)
+        assert len(holding.cards) == 8
+        assert len(Card.query.all()) == 2
+
+        with pytest.raises(InvalidCardError):
+            holding.add_cards('not an int or Card obj')
