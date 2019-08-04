@@ -167,3 +167,16 @@ def make_card():
 @pytest.fixture
 def card():
     return Card.create(id=1, code=PokerCard.new('As'))
+
+
+@pytest.fixture
+def make_action():
+    def _make_action(*args, **kwargs):
+        return Action.create(*args, **kwargs)
+    return _make_action
+
+
+@pytest.fixture
+def action(holding):
+    return Action.create(id=1, holding_id=holding.id, type=ActionType.CHECK,
+                         created_utc=datetime.datetime(2019, 7, 31))

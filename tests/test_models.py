@@ -456,6 +456,17 @@ class TestHolding:
         assert len(holding.cards) == 2
         assert holding.cards[1] is card2
 
+    def test_actions_relationship(self, holding, make_action):
+        assert len(holding.actions) == 0
+
+        action1 = make_action(holding_id=holding.id)
+        assert len(holding.actions) == 1
+        assert holding.actions[0] is action1
+
+        action2 = make_action(holding_id=holding.id)
+        assert len(holding.actions) == 2
+        assert holding.actions[1] is action2
+
     def test_codes_property(self, hand, make_holding):
         holding = make_holding(player_id=hand.dealer.id, hand_id=hand.id,
                                cards=[PokerCard.new('As'),

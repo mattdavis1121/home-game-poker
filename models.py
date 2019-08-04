@@ -399,6 +399,7 @@ class Holding(BaseModel):
     active = db.Column(db.Boolean, default=True)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    actions = db.relationship("Action", backref="holding", lazy=True)
     cards = db.relationship("Card", secondary=cards, lazy="subquery",
                            backref=db.backref("holding", lazy=True))
 
