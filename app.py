@@ -1,3 +1,5 @@
+import pytest
+import click
 from flask import Flask
 
 from extensions import db, migrate, sse, login_manager, bcrypt
@@ -49,3 +51,9 @@ def make_shell_context():
         "Card": Card,
         "Action": Action
     }
+
+
+@app.cli.command()
+@click.argument("path", default="tests")
+def test(path):
+    pytest.main(["-vx", "-p", "no:warnings", path])
