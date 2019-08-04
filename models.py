@@ -366,6 +366,10 @@ class BettingRound(BaseModel):
             return 0
         return sum([bet.amount for bet in player_bets])
 
+    def new_bet(self, player, amount):
+        return Bet.create(player_id=player.id, betting_round_id=self.id,
+                          amount=amount)
+
 
 class Bet(BaseModel):
     __tablename__= "bets"

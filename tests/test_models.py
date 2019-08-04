@@ -350,6 +350,17 @@ class TestBettingRound:
         assert betting_round.sum == 300
         assert betting_round.sum_player_bets(player1) == 200
 
+    def test_new_bet(self, betting_round):
+        player = betting_round.hand.dealer
+        assert len(betting_round.bets.all()) == 0
+        assert len(betting_round.player_bets(player)) == 0
+        assert betting_round.sum_player_bets(player) == 0
+
+        betting_round.new_bet(player, 100)
+        assert len(betting_round.bets.all()) == 1
+        assert len(betting_round.player_bets(player)) == 1
+        assert betting_round.sum_player_bets(player) == 100
+
 
 class TestBet:
     pass
