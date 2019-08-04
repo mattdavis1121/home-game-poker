@@ -268,8 +268,13 @@ class Player(BaseModel):
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
     hands_dealt = db.relationship("Hand", backref="dealer", lazy=True, foreign_keys="[Hand.dealer_id]")
-    holdings = db.relationship("Holding", backref="player", lazy=True)
-    # TODO - Currently no way to know what hands a player participated in
+    holdings = db.relationship("Holding", backref="player", lazy="dynamic")
+
+    @property
+    def active_holding(self):
+        if not self.table.active_hand:
+            return None
+        return self.holdings.filter_by(hand_id=self.table.active_hand.id).first()
 
 
 class State(IntEnum):

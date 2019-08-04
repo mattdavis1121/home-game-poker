@@ -192,7 +192,53 @@ class TestTable:
 
 
 class TestPlayer:
-    pass
+    def test_holdings_relationship(self, hand, make_holding):
+        player1 = hand.dealer
+        player2 = hand.next_to_act
+        assert len(player1.holdings.all()) == 0
+
+        holding1 = make_holding(player_id=player1.id, hand_id=hand.id)
+        assert len(player1.holdings.all()) == 1
+        assert player1.holdings.all()[0] == holding1
+
+        holding2 = make_holding(player_id=player1.id, hand_id=hand.id)
+        assert len(player1.holdings.all()) == 2
+        assert player1.holdings.all()[1] == holding2
+
+        holding3 = make_holding(player_id=player2.id, hand_id=hand.id)
+        assert len(player1.holdings.all()) == 2
+        assert holding3 not in player1.holdings.all()
+
+    def test_active_holding_relationship(self, group, role, table, make_user,
+                                         make_player, make_hand, make_holding):
+        players = []
+        for i in range(2):
+            user = make_user(email="test{}@example.com".format(i),
+                             password="test", group_id=group.id,
+                             role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i)
+            user.active_player = player
+            players.append(player)
+
+        player = players[0]
+        hand1 = make_hand(table_id=table.id, dealer_id=players[0].id,
+                          next_id=players[1].id)
+        table.active_hand = hand1
+        assert player.active_holding is None
+
+        holding1 = make_holding(player_id=player.id, hand_id=hand1.id)
+        assert player.active_holding is not None
+        assert player.active_holding is holding1
+
+        hand2 = make_hand(table_id=table.id, dealer_id=players[1].id,
+                          next_id=players[0].id)
+        table.active_hand = hand2
+        holding2 = make_holding(player_id=player.id, hand_id=hand2.id)
+        assert player.active_holding is not None
+        assert player.active_holding is not holding1
+        assert player.active_holding is holding2
+
+
 
 
 class TestHand:
