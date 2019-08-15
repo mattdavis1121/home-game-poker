@@ -300,11 +300,27 @@ class Hand(BaseModel):
                                            lazy="subquery", uselist=False)
     pots = db.relationship("Pot", backref="hand", lazy=True, order_by="desc(Pot.created_utc)")
     holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
+    dealer = db.relationship("Player", lazy=True, foreign_keys="[Hand.dealer_id]")
     next_to_act = db.relationship("Player", backref="hand", lazy=True, foreign_keys="[Hand.next_id]")
 
     @property
     def player_holdings(self):
-        return self.holdings.filter_by(is_board=False).all()
+        return sorted(self.holdings.filter_by(is_board=False).all(),
+                      key=lambda holding: holding.player.seat)
+
+    @property
+    def players(self):
+        return [holding.player for holding in self.player_holdings]
+
+    @property
+    def live_holdings(self):
+        return sorted(
+            self.holdings.filter_by(is_board=False, active=True).all(),
+            key=lambda holding: holding.player.seat)
+
+    @property
+    def live_players(self):
+        return [holding.player for holding in self.live_holdings]
 
     @property
     def board(self):

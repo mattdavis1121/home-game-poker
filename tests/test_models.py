@@ -260,6 +260,20 @@ class TestHand:
         assert hand.board is not None
         assert hand.board is board
 
+    def test_live_holdings_relationship(self, hand, make_holding):
+        player_holding1 = make_holding(player_id=hand.dealer_id, hand_id=hand.id)
+        player_holding2 = make_holding(player_id=hand.next_id, hand_id=hand.id)
+        board = make_holding(hand_id=hand.id, is_board=True)
+
+        assert len(hand.live_holdings) == 2
+        assert player_holding1 in hand.live_holdings
+        assert player_holding2 in hand.live_holdings
+
+        player_holding1.active = False
+        assert len(hand.live_holdings) == 1
+        assert player_holding1 not in hand.live_holdings
+        assert player_holding2 in hand.live_holdings
+
     def test_new_holding(self, hand):
         assert len(hand.holdings.all()) == 0
         assert len(hand.player_holdings) == 0
