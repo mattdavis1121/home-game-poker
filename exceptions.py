@@ -27,3 +27,7 @@ class InvalidCardError(Error):
     """Attempting to create an invalid Card record"""
     pass
 
+
+class InvalidRoundNumberError(Error):
+    """Attempting to create an invalid BettingRound record"""
+    pass

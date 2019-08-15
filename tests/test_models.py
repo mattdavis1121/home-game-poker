@@ -308,6 +308,7 @@ class TestHand:
         assert hand.active_betting_round is betting_round2
 
     def test_new_betting_round(self, hand):
+        hand.rounds = 2
         assert len(hand.betting_rounds) == 0
 
         betting_round1 = hand.new_betting_round()
@@ -321,6 +322,9 @@ class TestHand:
         assert betting_round1 in hand.betting_rounds
         assert hand.active_betting_round == betting_round2
         assert betting_round2.round_num == 1
+
+        with pytest.raises(InvalidRoundNumberError):
+            hand.new_betting_round()
 
     def test_dealer_and_next_to_act_relationships(self, group, role, table,
                                                   make_hand, make_player,

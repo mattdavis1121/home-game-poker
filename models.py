@@ -9,7 +9,7 @@ from database import db, BaseModel
 from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
                         DuplicateActiveRecordError, InsufficientPlayersError,
-                        InvalidCardError)
+                        InvalidCardError, InvalidRoundNumberError)
 
 
 def make_random_name():
@@ -314,7 +314,10 @@ class Hand(BaseModel):
         if self.active_betting_round:
             round_num = self.active_betting_round.round_num + 1
 
-        new_round = BettingRound.create(hand_id=self.id, round_num=round_num)
+            if round_num > self.rounds - 1:
+                raise InvalidRoundNumberError
+
+        new_round = BettingRound(hand_id=self.id, round_num=round_num)
         self.active_betting_round = new_round
         self.save()
 
