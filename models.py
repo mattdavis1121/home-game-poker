@@ -492,3 +492,7 @@ class Action(BaseModel):
     holding_id = db.Column(db.Integer, db.ForeignKey("holdings.id"), nullable=False)
     type = db.Column(db.Enum(ActionType))
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    @property
+    def player(self):
+        return self.holding.player

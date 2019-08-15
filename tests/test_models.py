@@ -560,4 +560,10 @@ class TestCard:
 
 
 class TestAction:
-    pass
+    def test_player_property(self, holding, make_action):
+        action = make_action(holding_id=holding.id)
+        assert action.player is holding.player
+
+    def test_holding_property(self, holding, make_action):
+        action = make_action(holding_id=holding.id)
+        assert action.holding is holding
