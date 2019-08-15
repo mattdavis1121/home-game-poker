@@ -383,6 +383,7 @@ class BettingRound(BaseModel):
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
     bets = db.relationship("Bet", backref="betting_round", lazy="dynamic")
+    bettor = db.relationship("Player", lazy=True)
 
     @property
     def sum(self):

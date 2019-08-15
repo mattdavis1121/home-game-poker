@@ -399,6 +399,30 @@ class TestBettingRound:
                  betting_round_id=betting_round.id, amount=100)
         assert len(betting_round.bets.all()) == 2
 
+    def test_bet_and_bettor_properties(self, betting_round, make_holding):
+        make_holding(player_id=betting_round.hand.dealer.id,
+                     hand_id=betting_round.hand.id)
+        make_holding(player_id=betting_round.hand.next_to_act.id,
+                     hand_id=betting_round.hand.id)
+        assert betting_round.bet is None
+        assert betting_round.bettor is None
+
+        bet1 = betting_round.new_bet(betting_round.hand.live_players[0], 100)
+        betting_round.bet = bet1.amount
+        betting_round.bettor_id = bet1.player_id
+        assert betting_round.bet == 100
+        assert betting_round.bettor is betting_round.hand.players[0]
+
+        bet2 = betting_round.new_bet(betting_round.hand.live_players[1], 200)
+        betting_round.bet = bet2.amount
+        betting_round.bettor_id = bet2.player_id
+        assert betting_round.bet == 200
+        assert betting_round.bettor is betting_round.hand.players[1]
+
+        bet3 = betting_round.new_bet(betting_round.hand.live_players[0], 100)
+        assert betting_round.bet == 200
+        assert betting_round.bettor is betting_round.hand.players[1]
+
     def test_player_bets(self, betting_round, make_bet):
         player1 = betting_round.hand.dealer
         player2 = betting_round.hand.next_to_act
