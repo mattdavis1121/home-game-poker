@@ -297,6 +297,7 @@ class Hand(BaseModel):
     active_betting_round = db.relationship("BettingRound",
                                            secondary=betting_rounds_active,
                                            lazy="subquery", uselist=False)
+    pots = db.relationship("Pot", backref="hand", lazy=True, order_by="desc(Pot.created_utc)")
     holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
     next_to_act = db.relationship("Player", backref="hand", lazy=True, foreign_keys="[Hand.next_id]")
 
@@ -307,6 +308,12 @@ class Hand(BaseModel):
     @property
     def board(self):
         return self.holdings.filter_by(is_board=True).first()
+
+    @property
+    def active_pot(self):
+        if not self.pots:
+            return None
+        return self.pots[0]
 
     def new_betting_round(self):
         round_num = 0

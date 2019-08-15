@@ -326,6 +326,15 @@ class TestHand:
         with pytest.raises(InvalidRoundNumberError):
             hand.new_betting_round()
 
+    def test_active_pot_relationship(self, hand):
+        assert hand.active_pot is None
+
+        pot1 = hand.new_pot()
+        assert hand.active_pot is pot1
+
+        pot2 = hand.new_pot()
+        assert hand.active_pot is pot2
+
     def test_dealer_and_next_to_act_relationships(self, group, role, table,
                                                   make_hand, make_player,
                                                   make_user):
