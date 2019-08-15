@@ -143,6 +143,19 @@ def hand(table, group, role, make_user, make_player):
 
 
 @pytest.fixture
+def make_pot():
+    def _make_pot(*args, **kwargs):
+        return Pot.create(*args, **kwargs)
+    return _make_pot
+
+
+@pytest.fixture
+def pot(hand):
+    return Pot.create(id=1, hand_id=hand.id, amount=0,
+                      created_utc=datetime.datetime(2019, 7, 31))
+
+
+@pytest.fixture
 def make_holding():
     def _make_holding(*args, **kwargs):
         return Holding.create(*args, **kwargs)

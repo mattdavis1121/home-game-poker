@@ -382,6 +382,226 @@ class TestHand:
         assert hand.next_to_act is players[1]
         assert type(hand.next_to_act) is Player
 
+    def test_resolve_action(self, group, role, table, make_user, make_player,
+                            make_hand, make_holding, make_action, make_pot,
+                            make_betting_round):
+        players = []
+        for i in range(3):
+            user = make_user(email="test{}@example.com".format(i),
+                             password="test", group_id=group.id,
+                             role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i,
+                                 stack=2000)
+            user.active_player = player
+            players.append(player)
+
+        hand = make_hand(table_id=table.id, dealer_id=players[0].id,
+                         next_id=players[1].id, rounds=4)
+        table.active_hand = hand
+
+        betting_round = make_betting_round(hand_id=hand.id, round_num=0)
+        hand.active_betting_round = betting_round
+
+        make_pot(hand_id=hand.id, amount=0)
+
+        for player in players:
+            make_holding(player_id=player.id, hand_id=hand.id, cards=[PokerCard.new('As'), PokerCard.new('Ac')])
+        make_holding(is_board=True, hand_id=hand.id,
+                     cards=[PokerCard.new('2h'), PokerCard.new('2c'),
+                            PokerCard.new('2s'), PokerCard.new('2d'),
+                            PokerCard.new('3h')])
+
+        assert hand.next_to_act is players[1]
+        assert hand.active_pot.amount == 0
+        assert hand.active_betting_round.bet is None
+        assert hand.active_betting_round.bettor is None
+        assert len(hand.live_players) == 3
+        assert len(hand.betting_rounds) == 1
+        assert hand.active_betting_round is hand.betting_rounds[0]
+        assert hand.active_betting_round.state is State.OPEN
+        assert players[1].stack == 2000
+
+        # Check
+        act1 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.CHECK)
+        current_bet = 0
+        total_bet = 0
+        hand.resolve_action(act1, current_bet, total_bet)
+        assert hand.next_to_act is players[2]
+        assert hand.active_pot.amount == 0
+        assert hand.active_betting_round.bet == 0
+        assert hand.active_betting_round.bettor is players[1]
+        assert len(hand.live_players) == 3
+        assert len(hand.betting_rounds) == 1
+
+        # Bet
+        act2 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 100
+        total_bet = 100
+        hand.resolve_action(act2, current_bet, total_bet)
+        assert hand.next_to_act is players[0]
+        assert hand.active_pot.amount == 100
+        assert hand.active_betting_round.bet == 100
+        assert hand.active_betting_round.bettor is players[2]
+        assert len(hand.live_players) == 3
+        assert len(hand.betting_rounds) == 1
+
+        # Call
+        act3 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 100
+        total_bet = 100
+        hand.resolve_action(act3, current_bet, total_bet)
+        assert hand.next_to_act is players[1]
+        assert hand.active_pot.amount == 200
+        assert hand.active_betting_round.bet == 100
+        assert hand.active_betting_round.bettor is players[2]
+        assert len(hand.live_players) == 3
+        assert len(hand.betting_rounds) == 1
+
+        # Raise
+        act4 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 200
+        total_bet = 200
+        hand.resolve_action(act4, current_bet, total_bet)
+        assert hand.next_to_act is players[2]
+        assert hand.active_pot.amount == 400
+        assert hand.active_betting_round.bet == 200
+        assert hand.active_betting_round.bettor is players[1]
+        assert len(hand.live_players) == 3
+        assert len(hand.betting_rounds) == 1
+
+        # Fold
+        act5 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.FOLD)
+        current_bet = 0
+        total_bet = 100
+        hand.resolve_action(act5, current_bet, total_bet)
+        assert hand.next_to_act is players[0]
+        assert hand.active_pot.amount == 400
+        assert hand.active_betting_round.bet == 200
+        assert hand.active_betting_round.bettor is players[1]
+        assert len(hand.live_players) == 2
+        assert len(hand.betting_rounds) == 1
+
+        # Re-raise
+        act6 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 300
+        total_bet = 400
+        hand.resolve_action(act6, current_bet, total_bet)
+        assert hand.next_to_act is players[1]
+        assert hand.active_pot.amount == 700
+        assert hand.active_betting_round.bet == 400
+        assert hand.active_betting_round.bettor is players[0]
+        assert len(hand.live_players) == 2
+        assert len(hand.betting_rounds) == 1
+
+        # Call
+        act7 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 200
+        total_bet = 400
+        hand.resolve_action(act7, current_bet, total_bet)
+        assert hand.next_to_act is players[1]
+        assert hand.active_pot.amount == 900
+        assert hand.active_betting_round.bet is None
+        assert hand.active_betting_round.bettor is None
+        assert len(hand.live_players) == 2
+        assert len(hand.betting_rounds) == 2
+        assert hand.betting_rounds[0].state is State.CLOSED
+
+        # Bet
+        act8 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.BET)
+        current_bet = 1000
+        total_bet = 1000
+        hand.resolve_action(act8, current_bet, total_bet)
+        assert hand.next_to_act is players[0]
+        assert hand.active_pot.amount == 1900
+        assert hand.active_betting_round.bet == 1000
+        assert hand.active_betting_round.bettor is players[1]
+        assert len(hand.live_players) == 2
+        assert len(hand.betting_rounds) == 2
+
+        # Fold
+        act9 = make_action(holding_id=hand.next_to_act.active_holding.id,
+                           type=ActionType.FOLD)
+        current_bet = 0
+        total_bet = 0
+        hand.resolve_action(act9, current_bet, total_bet)
+        assert hand.next_to_act is players[1]
+        assert hand.active_pot.amount == 0
+        assert hand.active_betting_round.bet == 1000
+        assert hand.active_betting_round.bettor is players[1]
+        assert len(hand.live_players) == 1
+        assert len(hand.betting_rounds) == 2
+        assert hand.state is State.CLOSED
+        assert players[1].stack == 3900
+
+    def test_update_next_to_act(self, group, role, table, make_user,
+                                make_player, make_hand, make_holding):
+        players = []
+        for i in range(3):
+            user = make_user(email="test{}@example.com".format(i),
+                             password="test", group_id=group.id,
+                             role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i)
+            user.active_player = player
+            players.append(player)
+
+        hand = make_hand(table_id=table.id, dealer_id=players[0].id,
+                         next_id=players[1].id, rounds=4)
+        table.active_hand = hand
+
+        for player in players:
+            make_holding(player_id=player.id, hand_id=hand.id)
+
+        assert len(hand.live_players) == 3
+        assert hand.next_to_act is players[1]
+
+        hand.update_next_to_act()
+        assert hand.next_to_act is players[2]
+
+        hand.update_next_to_act()
+        assert hand.next_to_act is players[0]
+
+        players[1].active_holding.active = False
+        hand.update_next_to_act()
+        assert hand.next_to_act is players[2]
+
+    def test_determine_winner(self, group, role, table, make_hand,
+                              make_holding, make_player, make_user):
+        players = []
+        for i in range(2):
+            user = make_user(email="test{}@example.com".format(i),
+                             password="test", group_id=group.id,
+                             role_id=role.id)
+            player = make_player(user_id=user.id, table_id=table.id, seat=i)
+            user.active_player = player
+            players.append(player)
+
+        hand = make_hand(table_id=table.id, dealer_id=players[0].id,
+                         next_id=players[1].id, rounds=4)
+
+        # As, Ac
+        make_holding(player_id=players[0].id, hand_id=hand.id,
+                     cards=[PokerCard.new('As'), PokerCard.new('Ac')])
+        # Ks, Kc
+        make_holding(player_id=players[1].id, hand_id=hand.id,
+                     cards=[PokerCard.new('Ks'), PokerCard.new('Kc')])
+        # 2s, 4c, 6h, 8d, Ts
+        make_holding(is_board=True, hand_id=hand.id,
+                     cards=[PokerCard.new('2s'), PokerCard.new('4c'),
+                            PokerCard.new('6h'), PokerCard.new('8d'),
+                            PokerCard.new('Ts')])
+
+        winner = hand.determine_winner()
+        assert type(winner) is Player
+        assert winner is players[0]
+
 
 class TestPot:
     pass

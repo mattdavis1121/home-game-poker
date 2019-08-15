@@ -4,6 +4,7 @@ from datetime import datetime as dt
 
 from flask_login import UserMixin
 
+from deuces.evaluator import Evaluator
 from poker import determine_next_seat
 from database import db, BaseModel
 from extensions import bcrypt
@@ -354,6 +355,57 @@ class Hand(BaseModel):
         kwargs["is_board"] = player is None
         return Holding.create(hand_id=self.id, cards=cards, **kwargs)
 
+    def resolve_action(self, action, current_bet, total_bet):
+        if action.type == ActionType.FOLD:
+            action.holding.fold()
+        else:
+            self.active_pot.amount += current_bet
+            if self.active_betting_round.bettor is None or (
+                    total_bet > self.active_betting_round.bet):
+                self.active_betting_round.bet = total_bet
+                self.active_betting_round.bettor = action.player
+
+        self.update_next_to_act()
+        hand_complete = len(self.live_holdings) == 1
+
+        # Bet has gone around table. Betting round complete.
+        if self.next_to_act == self.active_betting_round.bettor:
+            self.active_betting_round.state = State.CLOSED
+
+            if not hand_complete:
+                next_seat = determine_next_seat(self.dealer.seat, [player.seat for player in self.live_players])
+                self.next_to_act = self.table.player_at_seat(next_seat)
+
+                try:
+                    self.new_betting_round()
+                except InvalidRoundNumberError:
+                    # Final round of hand complete
+                    hand_complete = True
+
+        if hand_complete:
+            self.state = State.CLOSED
+            winner = self.determine_winner()
+            winner.stack += self.active_pot.amount
+            winner.save()
+            self.active_pot.amount = 0
+
+        self.save()
+
+    def determine_winner(self):
+        evaluator = Evaluator()
+        scores = []
+        for holding in self.live_holdings:
+            scores.append({"player": holding.player,
+                           "score": evaluator.evaluate(holding.codes,
+                                                       self.board.codes)})
+        return sorted(scores, key=lambda x: x["score"])[0]["player"]
+
+    def update_next_to_act(self):
+        seats = [holding.player.seat for holding in self.live_holdings]
+        seat = determine_next_seat(self.next_to_act.seat, seats)
+        self.next_to_act = self.table.player_at_seat(seat)
+        return self.next_to_act
+
 
 class Pot(BaseModel):
     """
@@ -457,6 +509,9 @@ class Holding(BaseModel):
                 raise InvalidCardError
             self.cards.append(card)
         return self.cards
+
+    def fold(self):
+        self.update(active=False)
 
 
 class Card(BaseModel):
