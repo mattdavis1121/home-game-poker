@@ -56,4 +56,4 @@ def make_shell_context():
 @app.cli.command()
 @click.argument("path", default="tests")
 def test(path):
-    pytest.main(["-vx", "-p", "no:warnings", path])
+    pytest.main(["-v", "-p", "no:warnings", path])
