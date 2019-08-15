@@ -3,7 +3,8 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import app, sse
-from models import Table, User, Hand, Holding, Action, ActionType, BettingRound
+from models import (Table, User, Hand, Holding, Action, ActionType,
+                    BettingRound, Player)
 from forms import RegisterForm, LoginForm
 from extensions import login_manager
 from poker import TexasHoldemHand
@@ -122,18 +123,18 @@ def action(table_name):
     data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
 
-    hand = table.current_hand
+    hand = table.active_hand
     if not hand:
         # TODO - Handle no current hand state
         return jsonify({"success": False, "msg": "No current hand"})
 
-    user = User.query.get(data.get("userId", -1))
-    if not user:
+    player = Player.query.get(data.get("playerID", -1))
+    if not player:
         # TODO - Handle no found user state
-        return jsonify({"success": False, "msg": "No user found"})
-    elif user.id != hand.next_to_act_id:
+        return jsonify({"success": False, "msg": "No player found"})
+    elif player != hand.next_to_act:
         # TODO - Handle action by wrong user state
-        return jsonify({"success": False, "msg": "User acting out of turn"})
+        return jsonify({"success": False, "msg": "Player acting out of turn"})
 
     try:
         action_type = ActionType[data.get("actionType")]
@@ -141,34 +142,34 @@ def action(table_name):
         return jsonify({"success": False, "msg": "Invalid action type"})
 
     current_bet = data.get("betAmt", 0)
-    prev_bet = hand.current_betting_round.user_total_bet(user.id)
+    prev_bet = hand.active_betting_round.sum_player_bets(player)
     total_bet = prev_bet + current_bet
 
     if action_type == ActionType.BLIND:
         if hand.board:
             return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
     elif action_type == ActionType.CHECK:
-        if hand.current_bet > 0:
+        current_bet = 0
+        if hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
     elif action_type == ActionType.BET:
-        if current_bet > user.player.balance:
-            return jsonify({"success": False, "msg": "Bet > balance"})
-        elif total_bet < hand.current_bet:
+        if current_bet > player.stack:
+            return jsonify({"success": False, "msg": "Bet > stack"})
+        elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Check for illegal raise here (enforce raise minimum)
 
-    hand.current_betting_round.new_bet(user.id, current_bet)
+    # TODO - This isn't actually charging the player for their bet
+    hand.active_betting_round.new_bet(player, current_bet)
 
     try:
-        act = Action.create(action_type=data.get("actionType"),
-                            hand_id=hand.id,
-                            user_id=user.id,
-                            holding_id=user.current_holding.id)
+        act = Action.create(holding_id=player.active_holding.id,
+                            type=data.get("actionType"))
         hand.resolve_action(act, current_bet, total_bet)
     except IntegrityError:
         return jsonify({"success": False, "msg": "Database error"})
     except Exception as e:
-        return jsonify({"success": False, "msg": "Unknown error", "error": e})
+        return jsonify({"success": False, "msg": "Unknown error", "error": str(e)})
 
     return jsonify({"success": True})
 
