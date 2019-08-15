@@ -3,8 +3,8 @@ from deuces import Deck, Card, Evaluator
 
 def determine_next_seat(prev_seat, seats):
     try:
-        dealer_index = seats.index(prev_seat)
-        return seats[(dealer_index + 1) % len(seats)]
+        prev_seat_index = seats.index(prev_seat)
+        return seats[(prev_seat_index + 1) % len(seats)]
     except ValueError:
         sorted_seats = sorted(seats)
         for seat in sorted_seats:
