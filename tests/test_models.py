@@ -333,6 +333,18 @@ class TestHand:
         pot2 = hand.new_pot()
         assert hand.active_pot is pot2
 
+    def test_new_pot(self, hand):
+        assert len(hand.pots) == 0
+
+        pot1 = hand.new_pot()
+        assert len(hand.pots) == 1
+        assert pot1 in hand.pots
+
+        pot2 = hand.new_pot()
+        assert len(hand.pots) == 2
+        assert pot1 in hand.pots
+        assert pot2 in hand.pots
+
     def test_dealer_and_next_to_act_relationships(self, group, role, table,
                                                   make_hand, make_player,
                                                   make_user):

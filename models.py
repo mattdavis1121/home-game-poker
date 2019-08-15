@@ -242,6 +242,7 @@ class Table(BaseModel):
 
         hand.save()
         hand.new_betting_round()
+        hand.new_pot()
 
         hand.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):
@@ -328,6 +329,9 @@ class Hand(BaseModel):
         self.save()
 
         return new_round
+
+    def new_pot(self):
+        return Pot.create(hand_id=self.id, amount=0)
 
     def new_holding(self, player=None, cards=None, **kwargs):
         kwargs["player_id"] = None if player is None else player.id
