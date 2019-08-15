@@ -290,7 +290,7 @@ class Hand(BaseModel):
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
     dealer_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     next_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
-    rounds = db.Column(db.Integer)  # Number of betting rounds per hand
+    rounds = db.Column(db.Integer, nullable=False)  # Number of betting rounds per hand
     state = db.Column(db.Enum(State), default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
@@ -350,7 +350,7 @@ class BettingRound(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
-    round_num = db.Column(db.Integer)
+    round_num = db.Column(db.Integer, nullable=False)
     bet = db.Column(db.Integer)  # The highest current bet for round
     bettor_id = db.Column(db.Integer, db.ForeignKey("players.id"))
     state = db.Column(db.Enum(State), nullable=False, default=State.OPEN)

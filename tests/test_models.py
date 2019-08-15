@@ -222,7 +222,7 @@ class TestPlayer:
 
         player = players[0]
         hand1 = make_hand(table_id=table.id, dealer_id=players[0].id,
-                          next_id=players[1].id)
+                          next_id=players[1].id, rounds=4)
         table.active_hand = hand1
         assert player.active_holding is None
 
@@ -231,7 +231,7 @@ class TestPlayer:
         assert player.active_holding is holding1
 
         hand2 = make_hand(table_id=table.id, dealer_id=players[1].id,
-                          next_id=players[0].id)
+                          next_id=players[0].id, rounds=4)
         table.active_hand = hand2
         holding2 = make_holding(player_id=player.id, hand_id=hand2.id)
         assert player.active_holding is not None
@@ -285,23 +285,23 @@ class TestHand:
     def test_betting_rounds_relationship(self, hand, make_betting_round):
         assert len(hand.betting_rounds) == 0
 
-        betting_round1 = make_betting_round(hand_id=hand.id)
+        betting_round1 = make_betting_round(hand_id=hand.id, round_num=0)
         assert len(hand.betting_rounds) == 1
         assert hand.betting_rounds[0] is betting_round1
 
-        betting_round2 = make_betting_round(hand_id=hand.id)
+        betting_round2 = make_betting_round(hand_id=hand.id, round_num=1)
         assert len(hand.betting_rounds) == 2
         assert hand.betting_rounds[1] is betting_round2
 
     def test_active_betting_round_relationship(self, hand, make_betting_round):
         assert hand.active_betting_round is None
 
-        betting_round1 = make_betting_round(hand_id=hand.id)
+        betting_round1 = make_betting_round(hand_id=hand.id, round_num=0)
         hand.active_betting_round = betting_round1
         assert hand.active_betting_round is not None
         assert hand.active_betting_round is betting_round1
 
-        betting_round2 = make_betting_round(hand_id=hand.id)
+        betting_round2 = make_betting_round(hand_id=hand.id, round_num=1)
         hand.active_betting_round = betting_round2
         assert hand.active_betting_round is not None
         assert hand.active_betting_round is not betting_round1
@@ -339,7 +339,7 @@ class TestHand:
             players.append(player)
 
         hand = make_hand(table_id=table.id, dealer_id=players[0].id,
-                         next_id=players[1].id)
+                         next_id=players[1].id, rounds=4)
 
         assert hand.dealer is not None
         assert hand.dealer is players[0]
