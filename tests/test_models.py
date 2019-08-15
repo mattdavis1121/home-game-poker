@@ -239,8 +239,6 @@ class TestPlayer:
         assert player.active_holding is holding2
 
 
-
-
 class TestHand:
     def test_holdings_relationship(self, hand, make_holding):
         holding = make_holding(player_id=hand.dealer_id, hand_id=hand.id)
