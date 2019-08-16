@@ -29,6 +29,7 @@ environs==4.0.0
 # Testing
 pytest==5.0.1
 pytest-flask==0.15.0
+pytest-xdist==1.29.0
 
 # Other
 eventlet==0.24.1
