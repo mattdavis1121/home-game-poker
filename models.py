@@ -409,20 +409,35 @@ class Hand(BaseModel):
         return self.next_to_act
 
 
+class PotState(IntEnum):
+    VOID = -1
+    CLOSED = 0
+    OPEN = 1
+    SPLIT = 2
+
+
 class Pot(BaseModel):
     """
     A collection of bets to be won in a hand of poker
 
-    TODO
-        - Allow pots to be split
-        - Allow multiple pots per hand (sidepots)
+    TODO - Allow multiple pots per hand (sidepots)
     """
     __tablename__ = "pots"
+    __table_args__ = (
+        db.CheckConstraint("(state != 'CLOSED' AND winner_id IS NULL) OR "
+                           "(state = 'CLOSED' and winner_id IS NOT NULL)"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
-    amount = db.Column(db.Integer)
+    parent_id = db.Column(db.Integer, db.ForeignKey("pots.id"), nullable=True)
+    winner_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=True)
+    amount = db.Column(db.Integer, default=0)
+    state = db.Column(db.Enum(PotState), nullable=False, default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    parent = db.relationship("Pot", backref="children", remote_side=[id], lazy=True)
+    winner = db.relationship("Player", lazy=True)
 
 
 class BettingRound(BaseModel):
