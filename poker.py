@@ -13,6 +13,26 @@ def determine_next_seat(prev_seat, seats):
         return sorted_seats[0]
 
 
+def determine_winners(players_and_cards, board):
+    """
+    Find the player with the most valuable five-card hand, using
+    two hole cards and five community cards.
+
+    :return: List of Player objects
+    """
+    evaluator = Evaluator()
+    winners = []
+    high_score = None
+    for player_id, cards in players_and_cards:
+        score = evaluator.evaluate(cards, board)
+        if high_score is None or score < high_score:
+            high_score = score
+            winners = [player_id]
+        elif score == high_score:
+            winners.append(player_id)
+    return winners
+
+
 class PokerHand:
     def __init__(self, num_players=0, players=None, deal=True):
         self.num_players = num_players

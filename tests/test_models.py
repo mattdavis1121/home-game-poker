@@ -572,7 +572,7 @@ class TestHand:
         hand.update_next_to_act()
         assert hand.next_to_act is players[2]
 
-    def test_determine_winner(self, group, role, table, make_hand,
+    def test_determine_winners(self, group, role, table, make_hand,
                               make_holding, make_player, make_user):
         players = []
         for i in range(2):
@@ -598,9 +598,9 @@ class TestHand:
                             PokerCard.new('6h'), PokerCard.new('8d'),
                             PokerCard.new('Ts')])
 
-        winner = hand.determine_winner()
-        assert type(winner) is Player
-        assert winner is players[0]
+        winners = hand.determine_winners()
+        assert len(winners) == 1
+        assert winners[0] is players[0]
 
 
 class TestPot:

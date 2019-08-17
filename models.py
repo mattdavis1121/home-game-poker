@@ -5,7 +5,7 @@ from datetime import datetime as dt
 from flask_login import UserMixin
 
 from deuces.evaluator import Evaluator
-from poker import determine_next_seat
+from poker import determine_next_seat, determine_winners
 from database import db, BaseModel
 from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
@@ -391,14 +391,16 @@ class Hand(BaseModel):
 
         self.save()
 
-    def determine_winner(self):
-        evaluator = Evaluator()
-        scores = []
-        for holding in self.live_holdings:
-            scores.append({"player": holding.player,
-                           "score": evaluator.evaluate(holding.codes,
-                                                       self.board.codes)})
-        return sorted(scores, key=lambda x: x["score"])[0]["player"]
+    def determine_winners(self):
+        """
+        Find the player(s) with the most valuable five-card hand, using
+        two hole cards and five community cards.
+
+        :return: List of Player objects
+        """
+        players_and_cards = [(holding.player.id, holding.codes) for holding in self.live_holdings]
+        winners = determine_winners(players_and_cards, self.board.codes)
+        return [Player.query.get(winner) for winner in winners]
 
     def update_next_to_act(self):
         seats = [holding.player.seat for holding in self.live_holdings]
