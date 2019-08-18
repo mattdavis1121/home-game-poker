@@ -604,7 +604,36 @@ class TestHand:
 
 
 class TestPot:
-    pass
+    def test_state_and_winner_constraint(self, hand, make_pot):
+        pot = make_pot(hand_id=hand.id)
+        assert pot.id
+
+        with pytest.raises(sqlalchemy.exc.IntegrityError):
+            make_pot(hand_id=hand.id, state=PotState.CLOSED, winner_id=None)
+        db.session.rollback()   # Next test won't work if we don't rollback
+
+        with pytest.raises(sqlalchemy.exc.IntegrityError):
+            make_pot(hand_id=hand.id, state=PotState.OPEN,
+                     winner_id=hand.dealer.id)
+
+    def test_parent_children_relationship(self, hand, make_pot):
+        parent = make_pot(hand_id=hand.id)
+        child1 = make_pot(hand_id=hand.id, parent_id=parent.id)
+        child2 = make_pot(hand_id=hand.id, parent_id=parent.id)
+
+        assert len(parent.children) == 2
+        assert child1 in parent.children
+        assert child2 in parent.children
+        assert parent.parent is None
+
+        assert child1.parent is parent
+        assert len(child1.children) == 0
+        assert child2.parent is parent
+        assert len(child2.children) == 0
+
+    def test_winner_relationship(self, hand, make_pot):
+        pot = make_pot(hand_id=hand.id, state=PotState.CLOSED, winner_id=hand.dealer.id)
+        assert pot.winner is hand.dealer
 
 
 class TestBettingRound:
