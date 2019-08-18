@@ -439,6 +439,17 @@ class Pot(BaseModel):
     parent = db.relationship("Pot", backref="children", remote_side=[id], lazy=True)
     winner = db.relationship("Player", lazy=True)
 
+    def split(self, children=2):
+        self.update(state=PotState.SPLIT)
+        for child in range(children):
+            amount = self.amount // children
+            if child == 0:
+                # Add remainder of uneven pot to first child
+                amount += self.amount % children
+            Pot.create(hand_id=self.hand.id, parent_id=self.id, amount=amount)
+        return self.children
+
+
 
 class BettingRound(BaseModel):
     __tablename__= "betting_rounds"

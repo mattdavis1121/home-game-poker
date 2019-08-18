@@ -635,6 +635,29 @@ class TestPot:
         pot = make_pot(hand_id=hand.id, state=PotState.CLOSED, winner_id=hand.dealer.id)
         assert pot.winner is hand.dealer
 
+    def test_split(self, hand, make_pot):
+        parent1 = make_pot(hand_id=hand.id, amount=100)
+        children1 = parent1.split()
+        assert len(children1) == 2
+        assert parent1.state is PotState.SPLIT
+        assert all([child.parent is parent1 for child in children1])
+        assert all([child.amount == 50 for child in children1])
+        assert all([child.state is PotState.OPEN for child in children1])
+
+        parent2 = make_pot(hand_id=hand.id, amount=100)
+        children2 = parent2.split(children=4)
+        assert len(children2) == 4
+        assert children2[0].parent is parent2
+        assert all([child.amount == 25 for child in children2])
+
+        parent3 = make_pot(hand_id=hand.id, amount=100)
+        children3 = parent3.split(children=3)
+        assert len(children3) == 3
+        assert children3[0].parent is parent3
+        assert children3[0].amount == 34
+        assert children3[1].amount == 33
+        assert children3[2].amount == 33
+
 
 class TestBettingRound:
     def test_bets_relationship(self, betting_round, make_bet):
