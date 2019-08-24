@@ -533,12 +533,13 @@ class TestHand:
         total_bet = 0
         hand.resolve_action(act9, current_bet, total_bet)
         assert hand.next_to_act is players[1]
-        assert hand.active_pot.amount == 0
-        assert hand.active_betting_round.bet == 1000
-        assert hand.active_betting_round.bettor is players[1]
+        assert hand.active_betting_round is None
+        assert hand.betting_rounds[-1].bet == 1000
+        assert hand.betting_rounds[-1].bettor is players[1]
         assert len(hand.live_players) == 1
         assert len(hand.betting_rounds) == 2
         assert hand.state is State.CLOSED
+        assert hand.active_pot.state is PotState.CLOSED
         assert players[1].stack == 3900
 
     def test_update_next_to_act(self, group, role, table, make_user,

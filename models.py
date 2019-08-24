@@ -334,9 +334,11 @@ class Hand(BaseModel):
         return self.pots[0]
 
     def new_betting_round(self):
+        """Start a new betting round for the hand."""
         round_num = 0
-        if self.active_betting_round:
-            round_num = self.active_betting_round.round_num + 1
+        if self.betting_rounds:
+            # New round num will be one greater than previous
+            round_num = self.betting_rounds[-1].round_num + 1
 
             if round_num > self.rounds - 1:
                 raise InvalidRoundNumberError
@@ -370,7 +372,7 @@ class Hand(BaseModel):
 
         # Bet has gone around table. Betting round complete.
         if self.next_to_act == self.active_betting_round.bettor:
-            self.active_betting_round.state = State.CLOSED
+            self.active_betting_round.close()
 
             if not hand_complete:
                 next_seat = determine_next_seat(self.dealer.seat, [player.seat for player in self.live_players])
@@ -383,11 +385,17 @@ class Hand(BaseModel):
                     hand_complete = True
 
         if hand_complete:
-            self.state = State.CLOSED
-            winner = self.determine_winner()
-            winner.stack += self.active_pot.amount
-            winner.save()
-            self.active_pot.amount = 0
+            winners = self.determine_winners()
+            pots = [self.active_pot]
+            if len(winners) > 1:
+                pots = self.active_pot.split(children=len(winners))
+
+            # Pay all winners and set pot(s) to CLOSED
+            for winner, pot in zip(winners, pots):
+                winner.update(stack=winner.stack + pot.amount)
+                pot.update(state=PotState.CLOSED, winner_id=winner.id)
+
+            self.close()
 
         self.save()
 
@@ -407,6 +415,15 @@ class Hand(BaseModel):
         seat = determine_next_seat(self.next_to_act.seat, seats)
         self.next_to_act = self.table.player_at_seat(seat)
         return self.next_to_act
+
+    def close(self):
+        # if any([pot.state == PotState.OPEN for pot in self.pots]):
+        #     raise Exception("Can't close a hand with open pots")
+        # elif any([round.state == State.OPEN for round in self.betting_rounds]):
+        #     raise Exception("Can't close a hand with open betting rounds")
+        self.state = State.CLOSED
+        self.table.active_hand = None
+        self.save()
 
 
 class PotState(IntEnum):
@@ -450,7 +467,6 @@ class Pot(BaseModel):
         return self.children
 
 
-
 class BettingRound(BaseModel):
     __tablename__= "betting_rounds"
 
@@ -484,6 +500,12 @@ class BettingRound(BaseModel):
     def new_bet(self, player, amount):
         return Bet.create(player_id=player.id, betting_round_id=self.id,
                           amount=amount)
+
+    def close(self):
+        self.state = State.CLOSED
+        self.hand.active_betting_round = None
+        self.save()
+
 
 
 class Bet(BaseModel):

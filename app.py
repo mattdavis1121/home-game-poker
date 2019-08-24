@@ -49,7 +49,9 @@ def make_shell_context():
         "Bet": Bet,
         "Holding": Holding,
         "Card": Card,
-        "Action": Action
+        "Action": Action,
+        "State": State,
+        "PotState": PotState
     }
 
 
