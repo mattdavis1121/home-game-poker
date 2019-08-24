@@ -391,7 +391,7 @@ class TestHand:
                              password="test", group_id=group.id,
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i,
-                                 stack=2000)
+                                 balance=2000)
             user.active_player = player
             players.append(player)
 
@@ -419,7 +419,7 @@ class TestHand:
         assert len(hand.betting_rounds) == 1
         assert hand.active_betting_round is hand.betting_rounds[0]
         assert hand.active_betting_round.state is State.OPEN
-        assert players[1].stack == 2000
+        assert players[1].balance == 2000
 
         # Check
         act1 = make_action(holding_id=hand.next_to_act.active_holding.id,
@@ -540,7 +540,7 @@ class TestHand:
         assert len(hand.betting_rounds) == 2
         assert hand.state is State.CLOSED
         assert hand.active_pot.state is PotState.CLOSED
-        assert players[1].stack == 3900
+        assert players[1].balance == 3900
 
     def test_update_next_to_act(self, group, role, table, make_user,
                                 make_player, make_hand, make_holding):

@@ -153,8 +153,8 @@ def action(table_name):
         if hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
     elif action_type == ActionType.BET:
-        if current_bet > player.stack:
-            return jsonify({"success": False, "msg": "Bet > stack"})
+        if current_bet > player.balance:
+            return jsonify({"success": False, "msg": "Bet > balance"})
         elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Check for illegal raise here (enforce raise minimum)

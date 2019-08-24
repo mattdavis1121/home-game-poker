@@ -87,7 +87,7 @@ def make_player():
 @pytest.fixture
 def player(user, table):
     return Player.create(id=1, user_id=user.id, table_id=table.id,
-                         stack=0, sitting_out=False, seat=0,
+                         balance=0, sitting_out=False, seat=0,
                          created_utc=datetime.datetime(2019, 7, 31))
 
 

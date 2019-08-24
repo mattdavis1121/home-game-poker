@@ -264,7 +264,7 @@ class Player(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
-    stack = db.Column(db.Integer, default=0)
+    balance = db.Column(db.Integer, default=0)
     sitting_out = db.Column(db.Boolean, default=False)
     seat = db.Column(db.Integer)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
@@ -392,7 +392,7 @@ class Hand(BaseModel):
 
             # Pay all winners and set pot(s) to CLOSED
             for winner, pot in zip(winners, pots):
-                winner.update(stack=winner.stack + pot.amount)
+                winner.update(balance=winner.balance + pot.amount)
                 pot.update(state=PotState.CLOSED, winner_id=winner.id)
 
             self.close()
