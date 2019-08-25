@@ -159,9 +159,6 @@ def action(table_name):
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Check for illegal raise here (enforce raise minimum)
 
-    # TODO - This isn't actually charging the player for their bet
-    hand.active_betting_round.new_bet(player, current_bet)
-
     try:
         act = Action.create(holding_id=player.active_holding.id,
                             type=data.get("actionType"))

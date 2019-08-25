@@ -87,7 +87,7 @@ def make_player():
 @pytest.fixture
 def player(user, table):
     return Player.create(id=1, user_id=user.id, table_id=table.id,
-                         balance=0, sitting_out=False, seat=0,
+                         balance=2000, sitting_out=False, seat=0,
                          created_utc=datetime.datetime(2019, 7, 31))
 
 
@@ -133,7 +133,8 @@ def hand(table, group, role, make_user, make_player):
         user = make_user(email="test{}@example.com".format(i),
                          password="test", group_id=group.id,
                          role_id=role.id)
-        player = make_player(user_id=user.id, table_id=table.id, seat=i)
+        player = make_player(user_id=user.id, table_id=table.id, seat=i,
+                             balance=2000)
         user.active_player = player
         players.append(player)
 

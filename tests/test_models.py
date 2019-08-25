@@ -540,7 +540,7 @@ class TestHand:
         assert len(hand.betting_rounds) == 2
         assert hand.state is State.CLOSED
         assert hand.active_pot.state is PotState.CLOSED
-        assert players[1].balance == 3900
+        assert players[1].balance == 2500
 
     def test_update_next_to_act(self, group, role, table, make_user,
                                 make_player, make_hand, make_holding):
@@ -736,10 +736,15 @@ class TestBettingRound:
         assert len(betting_round.player_bets(player)) == 0
         assert betting_round.sum_player_bets(player) == 0
 
+        pre_bet_balance = player.balance
         betting_round.new_bet(player, 100)
         assert len(betting_round.bets.all()) == 1
         assert len(betting_round.player_bets(player)) == 1
         assert betting_round.sum_player_bets(player) == 100
+        assert player.balance == pre_bet_balance - 100
+
+        with pytest.raises(InsufficientBalanceError):
+            betting_round.new_bet(player, pre_bet_balance)
 
 
 class TestBet:

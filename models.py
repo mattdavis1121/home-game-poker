@@ -10,7 +10,8 @@ from database import db, BaseModel
 from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
                         DuplicateActiveRecordError, InsufficientPlayersError,
-                        InvalidCardError, InvalidRoundNumberError)
+                        InvalidCardError, InvalidRoundNumberError,
+                        InsufficientBalanceError)
 
 
 def make_random_name():
@@ -361,6 +362,8 @@ class Hand(BaseModel):
         if action.type == ActionType.FOLD:
             action.holding.fold()
         else:
+            self.active_betting_round.new_bet(action.player, current_bet)
+
             self.active_pot.amount += current_bet
             if self.active_betting_round.bettor is None or (
                     total_bet > self.active_betting_round.bet):
@@ -498,6 +501,12 @@ class BettingRound(BaseModel):
         return sum([bet.amount for bet in player_bets])
 
     def new_bet(self, player, amount):
+        if amount > player.balance:
+            raise InsufficientBalanceError
+
+        if amount > 0:
+            player.update(balance=player.balance - amount)
+
         return Bet.create(player_id=player.id, betting_round_id=self.id,
                           amount=amount)
 

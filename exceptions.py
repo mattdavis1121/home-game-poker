@@ -31,3 +31,8 @@ class InvalidCardError(Error):
 class InvalidRoundNumberError(Error):
     """Attempting to create an invalid BettingRound record"""
     pass
+
+
+class InsufficientBalanceError(Error):
+    """Player attempting to make bet greater than available balance"""
+    pass
