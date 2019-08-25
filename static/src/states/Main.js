@@ -1,3 +1,4 @@
+import Player from "../Player"
 import SSE from "../SSE"
 
 class Main extends Phaser.State {
@@ -20,6 +21,13 @@ class Main extends Phaser.State {
         this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
 
         this.user_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
+
+        this.game.players = [];
+        for (let i = 0; i < this.gameData.players.length; i++) {
+            let player = new Player(this.game);
+            player.initialize(this.gameData.players[i]);
+            this.game.players.push(player);
+        }
     }
 
     update() {

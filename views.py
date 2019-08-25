@@ -1,3 +1,5 @@
+import json
+
 from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
@@ -78,7 +80,8 @@ def tables():
 @login_required
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    return render_template("game.html", table=table)
+    players = [player.serialize() for player in table.active_players]
+    return render_template("game.html", table=table, players=json.dumps(players))
 
 
 @app.route("/tables/<table_name>/join/", methods=["POST"])

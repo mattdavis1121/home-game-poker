@@ -1,3 +1,4 @@
+import json
 import random
 from enum import IntEnum
 from datetime import datetime as dt
@@ -278,6 +279,14 @@ class Player(BaseModel):
             return None
         return self.holdings.filter_by(hand_id=self.table.active_hand.id).first()
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "userId": self.user_id,
+            "balance": self.balance,
+            "sittingOut": self.sitting_out,
+            "seat": self.seat
+        }
 
 class State(IntEnum):
     VOID = -1
