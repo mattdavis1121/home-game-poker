@@ -593,6 +593,8 @@ class Card(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.Integer)    # Deuces code for card
+    suit = db.Column(db.String(1), nullable=False)
+    rank = db.Column(db.String(1), nullable=False)
 
     @classmethod
     def get_or_create(cls, code):
