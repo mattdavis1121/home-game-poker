@@ -1,4 +1,5 @@
-import Player from "../Player"
+import Player from "../classes/Player"
+import PlayerManager from "../managers/PlayerManager";
 import SSE from "../SSE"
 
 class Main extends Phaser.State {
@@ -10,9 +11,9 @@ class Main extends Phaser.State {
 
     create() {
         this.background = this.game.add.image(0, 0, "background");
-        this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteRect, this.deal);
-        this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteRect, this.btnClicked);
-        this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteRect, this.joinTable);
+        this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteSquare, this.deal);
+        this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteSquare, this.btnClicked);
+        this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteSquare, this.joinTable);
 
         this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
         this.card.anchor.setTo(0.5);
@@ -22,12 +23,8 @@ class Main extends Phaser.State {
 
         this.user_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
 
-        this.game.players = [];
-        for (let i = 0; i < this.gameData.players.length; i++) {
-            let player = new Player(this.game);
-            player.initialize(this.gameData.players[i]);
-            this.game.players.push(player);
-        }
+        this.game.players = new PlayerManager(this.game);
+        this.game.players.initialize(this.gameData.players);
     }
 
     update() {

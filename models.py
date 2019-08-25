@@ -132,6 +132,12 @@ class User(UserMixin, BaseModel):
             return None
         return self.active_player.table
 
+    @property
+    def name(self):
+        if self.display_name:
+            return self.display_name
+        return self.email
+
 
 class Transaction(BaseModel):
     """Buy-ins and cash-outs."""

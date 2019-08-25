@@ -81,6 +81,8 @@ def tables():
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
     players = [player.serialize() for player in table.active_players]
+    for player in players:
+        player["name"] = User.query.get(player["userId"]).name
     return render_template("game.html", table=table, players=json.dumps(players))
 
 
