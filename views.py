@@ -90,7 +90,7 @@ def show_table(table_name):
 def join_table(table_name):
     data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
-    user = User.query.get(data.get("userID", -1))
+    user = User.query.get(data.get("userId", -1))
     position = data.get("position")
 
     if not user:

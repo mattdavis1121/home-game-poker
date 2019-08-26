@@ -294,6 +294,7 @@ class Player(BaseModel):
             "seat": self.seat
         }
 
+
 class State(IntEnum):
     VOID = -1
     CLOSED = 0
@@ -529,7 +530,6 @@ class BettingRound(BaseModel):
         self.state = State.CLOSED
         self.hand.active_betting_round = None
         self.save()
-
 
 
 class Bet(BaseModel):

@@ -1,6 +1,5 @@
-import Player from "../classes/Player"
 import PlayerManager from "../managers/PlayerManager";
-import SSE from "../SSE"
+import SSE from "../SSE";
 
 class Main extends Phaser.State {
     init() {
@@ -67,7 +66,7 @@ class Main extends Phaser.State {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
-            userID: initialData.userID
+            userId: initialData.userId
         }));
     }
 
