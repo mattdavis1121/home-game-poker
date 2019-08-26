@@ -14,16 +14,21 @@ class Main extends Phaser.State {
         this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteSquare, this.btnClicked);
         this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteSquare, this.joinTable);
 
-        this.card = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, "cards");
-        this.card.anchor.setTo(0.5);
+        this.game.players = new PlayerManager(this.game);
+        this.game.players.initialize(this.gameData.players);
 
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
         this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
 
-        this.user_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
-
-        this.game.players = new PlayerManager(this.game);
-        this.game.players.initialize(this.gameData.players);
+        this.user_sse.addListener("newHand", (event) => {
+            let data = JSON.parse(event.data);
+            console.log(data);
+            for (let i = 0; i < this.game.players.players.length; i++) {
+                if (this.game.players.players[i].id === this.gameData.playerId) {
+                    this.game.players.players[i].cards.setCardNames(data.holdings);
+                }
+            }
+        }, this);
     }
 
     update() {

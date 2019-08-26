@@ -11,6 +11,7 @@
         var initialData = {
             tableName: "{{ table.name }}",
             userId: {{ current_user.id }},
+            playerId: {{ current_user.active_player.id }},
             tableSSEUrl: "{{ url_for('sse.stream', channel=table.name) }}",
             userSSEUrl: "{{ url_for('sse.stream', channel='{}_u{}'.format(table.name, current_user.id)) }}",
             players: {{ players|safe }}

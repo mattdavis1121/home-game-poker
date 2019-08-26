@@ -117,7 +117,7 @@ def deal(table_name):
         sse.publish({
             "id": hand.id,
             "player_id": holding.player_id,
-            "holdings": [card.code for card in holding.cards]
+            "holdings": [card.name for card in holding.cards]
         }, type="newHand", channel="{}_u{}".format(table.name, holding.player.user_id))
 
     return jsonify({"success": True, "hand": hand.id})

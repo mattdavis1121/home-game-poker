@@ -596,6 +596,10 @@ class Card(BaseModel):
     suit = db.Column(db.String(1), nullable=False)
     rank = db.Column(db.String(1), nullable=False)
 
+    @property
+    def name(self):
+        return "{}{}".format(self.rank, self.suit)
+
     @classmethod
     def get_or_create(cls, code):
         """

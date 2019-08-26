@@ -1,8 +1,10 @@
 import Util from "../Util";
+import CardManager from "../managers/CardManager";
 
 class Player {
-    constructor(game) {
+    constructor(game, manager) {
         this.game = game;
+        this.manager = manager;
 
         this.id = null;
         this.userId = null;
@@ -13,6 +15,8 @@ class Player {
 
         this.display = {};
         this.displayGroup = this.game.add.group();
+
+        this.cards = new CardManager(this.game);
     }
 
     initialize(data) {
@@ -22,6 +26,8 @@ class Player {
         this.sittingOut = data.sittingOut;
         this.seat = data.seat;
         this.name = data.name;
+
+        this.cards.initialize();
     }
 
     initializeDisplay() {
@@ -35,6 +41,11 @@ class Player {
         this.display.balance = this.game.add.text(0, 20, "");
         this.display.balance.anchor.setTo(0.5);
         this.displayGroup.add(this.display.balance);
+
+        this.display.cards = this.cards.displayGroup;
+        this.display.cards.centerX = 0;
+        this.display.cards.centerY = -120;
+        this.displayGroup.add(this.display.cards);
 
         this.updateDisplay();
     }
