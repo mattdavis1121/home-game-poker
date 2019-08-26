@@ -1,9 +1,7 @@
 class Load extends Phaser.State {
     preload() {
-        this.game.load.image("background", "/static/assets/background.png");
-        this.game.load.atlasJSONHash("cards", "/static/assets/cards-hd.png", "/static/assets/cards-hd.json");
-        this.game.load.atlasJSONHash("chips", "/static/assets/chips-hd.png", "/static/assets/chips-hd.json");
-        this.game.load.atlasJSONHash("cardBacks", "/static/assets/cardBacks-hd.png", "/static/assets/cardBacks-hd.json");
+        this.game.load.image("background", "/static/assets/hd/background.png");
+        this.game.load.atlasJSONHash("cards", "/static/assets/hd/cards.png", "/static/assets/hd/cards.json");
 
         this.game.textures = this.createCustomTextures();
     }
