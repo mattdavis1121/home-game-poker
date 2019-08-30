@@ -98,7 +98,7 @@ def join_table(table_name):
 
     try:
         player_id = table.join(user, position)
-        return jsonify({"success": True, "playerID": player_id})
+        return jsonify({"success": True, "playerId": player_id})
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 
@@ -133,7 +133,7 @@ def action(table_name):
         # TODO - Handle no current hand state
         return jsonify({"success": False, "msg": "No current hand"})
 
-    player = Player.query.get(data.get("playerID", -1))
+    player = Player.query.get(data.get("playerId", -1))
     if not player:
         # TODO - Handle no found user state
         return jsonify({"success": False, "msg": "No player found"})
