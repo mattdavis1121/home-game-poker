@@ -22,7 +22,6 @@ class PlayerManager {
         }
 
         this.displayGroup.align(-1, 1, this.players[0].displayGroup.width * 1.2, 0);
-        this.displayGroup.position.setTo(this.game.world.centerX / 2, this.game.world.centerY / 6);
     }
 }
 

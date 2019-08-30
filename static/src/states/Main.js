@@ -17,6 +17,8 @@ class Main extends Phaser.State {
 
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
+        this.game.players.displayGroup.centerX = this.game.world.centerX;
+        this.game.players.displayGroup.centerY = this.game.world.centerX / 6;
 
         this.game.board = new CardManager(this.game);
         this.game.board.initialize(5);
