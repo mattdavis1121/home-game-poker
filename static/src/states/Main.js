@@ -1,11 +1,11 @@
+import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import SSE from "../SSE";
 
 class Main extends Phaser.State {
     init() {
-        this.gameData = initialData;
-        this.table_sse = new SSE(this.game, this.gameData.tableSSEUrl);
-        this.user_sse = new SSE(this.game, this.gameData.userSSEUrl);
+        this.table_sse = new SSE(this.game, this.game.initialData.tableSSEUrl);
+        this.user_sse = new SSE(this.game, this.game.initialData.userSSEUrl);
     }
 
     create() {
@@ -15,7 +15,7 @@ class Main extends Phaser.State {
         this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteSquare, this.joinTable);
 
         this.game.players = new PlayerManager(this.game);
-        this.game.players.initialize(this.gameData.players);
+        this.game.players.initialize(this.game.initialData.players);
 
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
         this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
@@ -24,7 +24,7 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log(data);
             for (let i = 0; i < this.game.players.players.length; i++) {
-                if (this.game.players.players[i].id === this.gameData.playerId) {
+                if (this.game.players.players[i].id === this.game.initialData.playerId) {
                     this.game.players.players[i].cards.setCardNames(data.holdings);
                 }
             }
@@ -58,7 +58,7 @@ class Main extends Phaser.State {
 
     deal() {
         let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/tables/' + this.gameData.tableName + '/deal/');
+        xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/deal/');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
@@ -67,7 +67,7 @@ class Main extends Phaser.State {
 
     joinTable() {
         let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/tables/' + this.gameData.tableName + '/join/');
+        xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/join/');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
