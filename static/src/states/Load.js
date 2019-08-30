@@ -14,6 +14,7 @@ class Load extends Phaser.State {
         let textures = {};
 
         let graphics = this.game.add.graphics();
+        graphics.lineStyle(4, 0x000000);
         graphics.beginFill(0xFFFFFF);
         graphics.drawRect(100, 100, 100, 100);
         textures["whiteSquare"] = graphics.generateTexture();
