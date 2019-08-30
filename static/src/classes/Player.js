@@ -54,6 +54,12 @@ class Player {
         this.display.name.text = this.name;
         this.display.balance.text = Util.parseCurrency(this.balance);
     }
+
+    update(data) {
+        // TODO - Flesh out the rest of the data -- do I like this method?
+        this.balance = data.balance === undefined ? this.balance : data.balance;
+        this.updateDisplay();
+    }
 }
 
 export default Player;

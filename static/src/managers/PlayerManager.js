@@ -23,6 +23,17 @@ class PlayerManager {
 
         this.displayGroup.align(-1, 1, this.players[0].displayGroup.width * 1.2, 0);
     }
+
+    getById(id) {
+        // TODO - Do this without iterating -- build map on init?
+        // TODO - Should this ever return null?
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i].id === id) {
+                return this.players[i];
+            }
+        }
+        return null;
+    }
 }
 
 export default PlayerManager;

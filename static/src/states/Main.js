@@ -44,6 +44,7 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
+            this.game.players.getById(data.playerId).update({balance: data.playerBalance});
         });
 
         this.user_sse.addListener("newHand", (event) => {
