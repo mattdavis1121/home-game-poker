@@ -17,8 +17,15 @@ class Main extends Phaser.State {
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
 
+        this.game.panel = new Panel(this.game);
+        this.game.panel.initialize();
+        this.game.panel.displayGroup.centerX = this.game.world.centerX;
+        this.game.panel.displayGroup.bottom = this.game.height - 20;
+        this.registerListeners();
+
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
         this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
+        this.table_sse.addListener("action", (event) => {console.log(event.data)}, this);
 
         this.user_sse.addListener("newHand", (event) => {
             let data = JSON.parse(event.data);
@@ -29,6 +36,12 @@ class Main extends Phaser.State {
                 }
             }
         }, this);
+    }
+
+    registerListeners() {
+        this.game.panel.betClicked.add(betAmt => this.game.controller.bet(betAmt));
+        this.game.panel.checkClicked.add(this.game.controller.check, this.game.controller);
+        this.game.panel.foldClicked.add(this.game.controller.fold, this.game.controller);
     }
 
     update() {

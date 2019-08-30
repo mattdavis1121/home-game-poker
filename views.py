@@ -173,6 +173,15 @@ def action(table_name):
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown error", "error": str(e)})
 
+    sse.publish({
+        "id": hand.id,
+        "playerId": act.player.id,
+        "playerBalance": act.player.balance,
+        "actionType": act.type,
+        "pot": hand.active_pot.amount,
+        "next": hand.next_to_act.id,
+    }, type="action", channel=table.name)
+
     return jsonify({"success": True})
 
 
