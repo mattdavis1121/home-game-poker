@@ -34,7 +34,7 @@ class Main extends Phaser.State {
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);
-            console.log("action: ", data);
+            console.log("newHand: ", data);
             this.game.board.reset();
             for (let i = 0; i < this.game.players.players.length; i++) {
                 this.game.players.players[i].cards.reset();
@@ -45,6 +45,14 @@ class Main extends Phaser.State {
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
             this.game.players.getById(data.playerId).update({balance: data.playerBalance});
+        });
+        this.table_sse.addListener("handComplete", event => {
+            let data = JSON.parse(event.data);
+            console.log("handComplete: ", data);
+            for (let i = 0; i < data.winners.length; i++) {
+                let winner = data.winners[i];
+                this.game.players.getById(winner.id).update({balance: winner.balance});
+            }
         });
 
         this.user_sse.addListener("newHand", (event) => {

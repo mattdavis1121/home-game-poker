@@ -350,6 +350,18 @@ class Hand(BaseModel):
             return None
         return self.pots[0]
 
+    @property
+    def complete(self):
+        return self.state == State.CLOSED
+
+    @property
+    def pots_paid(self):
+        return [pot for pot in self.pots if pot.closed]
+
+    @property
+    def winners(self):
+        return [pot.winner for pot in self.pots_paid]
+
     def new_betting_round(self):
         """Start a new betting round for the hand."""
         round_num = 0
@@ -474,6 +486,10 @@ class Pot(BaseModel):
 
     parent = db.relationship("Pot", backref="children", remote_side=[id], lazy=True)
     winner = db.relationship("Player", lazy=True)
+
+    @property
+    def closed(self):
+        return self.state == PotState.CLOSED
 
     def split(self, children=2):
         self.update(state=PotState.SPLIT)

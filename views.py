@@ -195,6 +195,16 @@ def action(table_name):
         "board": up_cards
     }, type="action", channel=table.name)
 
+    if hand.complete:
+        sse.publish({
+            "id": hand.id,
+            "winners": [{
+                "id": pot.winner.id,
+                "amount": pot.amount,
+                "balance": pot.winner.balance
+            } for pot in hand.pots_paid]
+        }, type="handComplete", channel=table.name)
+
     return jsonify({"success": True})
 
 
