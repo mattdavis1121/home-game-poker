@@ -27,6 +27,13 @@ class CardManager {
             this.cards[i].updateDisplay();
         }
     }
+
+    reset() {
+        for (let i = 0; i < this.cards.length; i++) {
+            this.cards[i].name = null;
+            this.cards[i].updateDisplay();
+        }
+    }
 }
 
 export default CardManager;

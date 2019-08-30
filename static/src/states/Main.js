@@ -32,7 +32,14 @@ class Main extends Phaser.State {
         this.registerListeners();
 
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
-        this.table_sse.addListener("newHand", event => console.log(event.data));
+        this.table_sse.addListener("newHand", event => {
+            let data = JSON.parse(event.data);
+            console.log("action: ", data);
+            this.game.board.reset();
+            for (let i = 0; i < this.game.players.players.length; i++) {
+                this.game.players.players[i].cards.reset();
+            }
+        });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
