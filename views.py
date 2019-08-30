@@ -110,6 +110,7 @@ def deal(table_name):
 
     sse.publish({
         "id": hand.id,
+        "next": hand.next_to_act.id,
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
 
@@ -173,6 +174,16 @@ def action(table_name):
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown error", "error": str(e)})
 
+    # TODO - This is such a hack. Fix it.
+    # Number of cards showing at each round num
+    try:
+        num_up_cards = [0, 3, 4, 5]
+        num_up_cards_round = num_up_cards[hand.active_betting_round.round_num]
+        up_cards = [card.name for card in hand.board.cards][:num_up_cards_round]
+    except AttributeError:
+        # Hand has ended, so hand.active_betting_round is None
+        up_cards = []
+
     sse.publish({
         "id": hand.id,
         "playerId": act.player.id,
@@ -180,6 +191,7 @@ def action(table_name):
         "actionType": act.type,
         "pot": hand.active_pot.amount,
         "next": hand.next_to_act.id,
+        "board": up_cards
     }, type="action", channel=table.name)
 
     return jsonify({"success": True})

@@ -7,9 +7,8 @@ class CardManager {
         this.displayGroup = this.game.add.group();
     }
 
-    initialize() {
-        const NUM_CARDS = 2;    // TODO - get this from somewhere else
-        for (let i = 0; i < NUM_CARDS; i++) {
+    initialize(num_cards) {
+        for (let i = 0; i < num_cards; i++) {
             let card = new Card(this.game, this);
             card.initialize({});
             card.initializeDisplay();

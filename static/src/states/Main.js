@@ -1,3 +1,4 @@
+import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import SSE from "../SSE";
@@ -17,6 +18,11 @@ class Main extends Phaser.State {
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
 
+        this.game.board = new CardManager(this.game);
+        this.game.board.initialize(5);
+        this.game.board.displayGroup.centerX = this.game.world.centerX;
+        this.game.board.displayGroup.centerY = this.game.world.centerY;
+
         this.game.panel = new Panel(this.game);
         this.game.panel.initialize();
         this.game.panel.displayGroup.centerX = this.game.world.centerX;
@@ -24,12 +30,16 @@ class Main extends Phaser.State {
         this.registerListeners();
 
         this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
-        this.table_sse.addListener("newHand", (event) => {console.log(event.data)}, this);
-        this.table_sse.addListener("action", (event) => {console.log(event.data)}, this);
+        this.table_sse.addListener("newHand", event => console.log(event.data));
+        this.table_sse.addListener("action", event => {
+            let data = JSON.parse(event.data);
+            console.log("action: ", data);
+            this.game.board.setCardNames(data.board);
+        });
 
         this.user_sse.addListener("newHand", (event) => {
             let data = JSON.parse(event.data);
-            console.log(data);
+            console.log("newHand: ", data);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 if (this.game.players.players[i].id === this.game.initialData.playerId) {
                     this.game.players.players[i].cards.setCardNames(data.holdings);

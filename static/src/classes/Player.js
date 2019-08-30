@@ -27,7 +27,7 @@ class Player {
         this.seat = data.seat;
         this.name = data.name;
 
-        this.cards.initialize();
+        this.cards.initialize(2);
     }
 
     initializeDisplay() {
