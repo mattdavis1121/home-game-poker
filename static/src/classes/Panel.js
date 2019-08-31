@@ -1,3 +1,5 @@
+import Util from "../Util";
+
 class Panel {
     constructor(game) {
         this.game = game;
@@ -13,11 +15,11 @@ class Panel {
     }
 
     initialize() {
-        this.display.bet = this.makeBtn(0, 0, "BET " + this.betAmt, this.game.textures.whiteSquare, () => this.betClicked.dispatch(this.betAmt));
+        this.display.bet = this.makeBtn(0, 0, "", this.game.textures.whiteSquare, () => this.betClicked.dispatch(this.betAmt));
         this.display.check = this.makeBtn(0, 0, "CHECK", this.game.textures.whiteSquare, () => this.checkClicked.dispatch());
         this.display.fold = this.makeBtn(0, 0, "FOLD", this.game.textures.whiteSquare, () => this.foldClicked.dispatch());
-        this.display.betUp = this.makeBtn(0, 0, "+10", this.game.textures.whiteSquare, this.betUpClicked);
-        this.display.betDown = this.makeBtn(0, 0, "-10", this.game.textures.whiteSquare, this.betDownClicked);
+        this.display.betUp = this.makeBtn(0, 0, "+$0.10", this.game.textures.whiteSquare, this.betUpClicked);
+        this.display.betDown = this.makeBtn(0, 0, "-$0.10", this.game.textures.whiteSquare, this.betDownClicked);
 
         this.updateDisplay();
 
@@ -25,7 +27,7 @@ class Panel {
     }
 
     updateDisplay() {
-        this.display.bet.text.text = "BET " + this.betAmt;
+        this.display.bet.text.text = "BET\n" + Util.parseCurrency(this.betAmt);
     }
 
     makeBtn(x, y, text, texture, callback, callbackContext = this) {
