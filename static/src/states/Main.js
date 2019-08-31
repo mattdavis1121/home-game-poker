@@ -45,7 +45,10 @@ class Main extends Phaser.State {
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
                 player.cards.reset();
-                player.update({isDealer: player.id === data.dealer});
+                player.update({
+                    isDealer: player.id === data.dealer,
+                    isNext: player.id === data.next
+                });
             }
             this.game.pot.setAmount(0);
         });
@@ -53,7 +56,8 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
-            this.game.players.getById(data.playerId).update({balance: data.playerBalance});
+            this.game.players.getById(data.playerId).update({balance: data.playerBalance, isNext: false});
+            this.game.players.getById(data.next).update({isNext: true});
             this.game.pot.setAmount(data.pot);
         });
         this.table_sse.addListener("handComplete", event => {

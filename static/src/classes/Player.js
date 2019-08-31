@@ -12,7 +12,9 @@ class Player {
         this.sittingOut = null;
         this.seat = null;
         this.name = null;
+
         this.isDealer = false;
+        this.isNext = false;
 
         this.display = {};
         this.displayGroup = this.game.add.group();
@@ -53,6 +55,11 @@ class Player {
         this.display.dealerButton.bottom = this.display.background.bottom - 5;
         this.displayGroup.add(this.display.dealerButton);
 
+        this.display.nextIndicator = this.game.add.sprite(0, 0, "redCircle");
+        this.display.nextIndicator.right = this.display.background.right - 5;
+        this.display.nextIndicator.bottom = this.display.background.bottom - 5;
+        this.displayGroup.add(this.display.nextIndicator);
+
         this.updateDisplay();
     }
 
@@ -60,12 +67,14 @@ class Player {
         this.display.name.text = this.name;
         this.display.balance.text = Util.parseCurrency(this.balance);
         this.display.dealerButton.visible = this.isDealer === true;
+        this.display.nextIndicator.visible = this.isNext === true;
     }
 
     update(data) {
         // TODO - Flesh out the rest of the data -- do I like this method?
         this.balance = data.balance === undefined ? this.balance : data.balance;
         this.isDealer = data.isDealer === undefined ? this.isDealer : data.isDealer;
+        this.isNext = data.isNext === undefined ? this.isNext : data.isNext;
         this.updateDisplay();
     }
 }
