@@ -37,7 +37,9 @@ class Main extends Phaser.State {
             console.log("newHand: ", data);
             this.game.board.reset();
             for (let i = 0; i < this.game.players.players.length; i++) {
-                this.game.players.players[i].cards.reset();
+                let player = this.game.players.players[i];
+                player.cards.reset();
+                player.update({isDealer: player.id === data.dealer});
             }
         });
         this.table_sse.addListener("action", event => {

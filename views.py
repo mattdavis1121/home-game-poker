@@ -112,6 +112,7 @@ def deal(table_name):
     sse.publish({
         "id": hand.id,
         "next": hand.next_to_act.id,
+        "dealer": hand.dealer.id,
         "numPlayers": len(hand.players),
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
