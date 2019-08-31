@@ -1,6 +1,7 @@
 import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
+import Pot from "../classes/Pot";
 import SSE from "../SSE";
 
 class Main extends Phaser.State {
@@ -25,6 +26,11 @@ class Main extends Phaser.State {
         this.game.board.displayGroup.centerX = this.game.world.centerX;
         this.game.board.displayGroup.centerY = this.game.world.centerY;
 
+        this.game.pot = new Pot(this.game);
+        this.game.pot.initializeDisplay();
+        this.game.pot.sprite.centerX = this.game.world.centerX;
+        this.game.pot.sprite.centerY = this.game.world.centerY - 140;
+
         this.game.panel = new Panel(this.game);
         this.game.panel.initialize();
         this.game.panel.displayGroup.centerX = this.game.world.centerX;
@@ -41,12 +47,14 @@ class Main extends Phaser.State {
                 player.cards.reset();
                 player.update({isDealer: player.id === data.dealer});
             }
+            this.game.pot.setAmount(0);
         });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
             this.game.players.getById(data.playerId).update({balance: data.playerBalance});
+            this.game.pot.setAmount(data.pot);
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
