@@ -5,7 +5,7 @@ from datetime import datetime as dt
 
 from flask_login import UserMixin
 
-from deuces.evaluator import Evaluator
+from deuces import Card as PokerCard
 from poker import determine_next_seat, determine_winners
 from database import db, BaseModel
 from extensions import bcrypt
@@ -625,7 +625,8 @@ class Card(BaseModel):
         """
         card = cls.query.filter_by(code=code).first()
         if not card:
-            card = cls.create(code=code)
+            rank, suit = PokerCard.int_to_str(code)
+            card = cls.create(code=code, suit=suit, rank=rank)
         return card
 
 
