@@ -21,7 +21,9 @@ class PlayerManager {
             this.displayGroup.add(player.displayGroup);
         }
 
-        this.displayGroup.align(-1, 1, this.players[0].displayGroup.width * 1.2, 0);
+        if (this.players.length) {
+            this.displayGroup.align(-1, 1, this.players[0].displayGroup.width * 1.2, 0);
+        }
     }
 
     getById(id) {
