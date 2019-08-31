@@ -2,17 +2,32 @@ class SSE {
     constructor(game, url) {
         this.game = game;
         this.url = url;
-        this.source = null;
-
-        this.connect();
+        this.listeners = [];
+        this.source = new EventSource(this.url);
+        this.source.onerror = this.reconnect;
     }
 
-    connect() {
+    reconnect() {
         this.source = new EventSource(this.url);
-        this.source.onerror = this.connect;  // TODO - Replace this hack with heartbeats
+        this.source.onerror = this.reconnect;  // TODO - Replace this hack with heartbeats
+
+        let listeners = this.listeners;
+        this.listeners = [];
+        for (let i = 0; i < listeners.length; i++) {
+            let listener = listeners[i];
+            this.addListener(listener.type, listener.callback, listener.callbackContext, ...listener.args);
+        }
     }
 
     addListener(type, callback, callbackContext, ...args) {
+        // Store listeners for eventual reconnect
+        this.listeners.push({
+            "type": type,
+            "callback": callback,
+            "callbackContext": callbackContext,
+            "args": args
+        });
+
         this.source.addEventListener(type, (event) => {
             callback.call(callbackContext, ...args, event);
         });
