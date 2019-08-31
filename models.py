@@ -205,7 +205,7 @@ class Table(BaseModel):
 
         :param user: The User to seat at the table
         :param seat: The seat number to seat the User at
-        :return: ID of the newly created player
+        :return: The newly created player
         """
         # TODO: Check for player already at a seat
 
@@ -226,7 +226,7 @@ class Table(BaseModel):
         user.active_player = player
         self.save()
 
-        return player.id
+        return player
 
     def new_hand(self, hand_type):
         if self.active_hand:

@@ -97,8 +97,9 @@ def join_table(table_name):
         return jsonify({"success": False, "msg": "No user found"})
 
     try:
-        player_id = table.join(user, position)
-        return jsonify({"success": True, "playerId": player_id})
+        player = table.join(user, position)
+        player.update(balance=5000)
+        return jsonify({"success": True, "playerId": player.id})
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 
