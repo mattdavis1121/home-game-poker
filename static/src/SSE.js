@@ -4,12 +4,12 @@ class SSE {
         this.url = url;
         this.listeners = [];
         this.source = new EventSource(this.url);
-        this.source.onerror = this.reconnect;
+        this.source.onerror = () => this.reconnect();
     }
 
     reconnect() {
         this.source = new EventSource(this.url);
-        this.source.onerror = this.reconnect;  // TODO - Replace this hack with heartbeats
+        this.source.onerror = () => this.reconnect();  // TODO - Replace this hack with heartbeats
 
         let listeners = this.listeners;
         this.listeners = [];
