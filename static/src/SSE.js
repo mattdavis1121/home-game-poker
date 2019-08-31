@@ -4,13 +4,12 @@ class SSE {
         this.url = url;
         this.source = null;
 
-        // TODO - Replace this hack with heartbeats
         this.connect();
-        this.source.onerror = this.connect;
     }
 
     connect() {
         this.source = new EventSource(this.url);
+        this.source.onerror = this.connect;  // TODO - Replace this hack with heartbeats
     }
 
     addListener(type, callback, callbackContext, ...args) {
