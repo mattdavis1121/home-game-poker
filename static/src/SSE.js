@@ -4,13 +4,15 @@ class SSE {
         this.url = url;
         this.listeners = [];
         this.source = new EventSource(this.url);
-        this.source.onerror = () => this.reconnect();
     }
 
-    reconnect() {
-        this.source = new EventSource(this.url);
-        this.source.onerror = () => this.reconnect();  // TODO - Replace this hack with heartbeats
-
+    /**
+     * @summary Re adds all listeners to this.source
+     *
+     * I originally wrote this to support client reconnects, but I don't need
+     * that anymore. Keeping the listener code just in case.
+     */
+    reAddAllListeners() {
         let listeners = this.listeners;
         this.listeners = [];
         for (let i = 0; i < listeners.length; i++) {
