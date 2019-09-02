@@ -3,8 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sse import sse
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
+from flask_apscheduler import APScheduler
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
+scheduler = APScheduler()

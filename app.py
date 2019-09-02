@@ -2,7 +2,7 @@ import pytest
 import click
 from flask import Flask
 
-from extensions import db, migrate, sse, login_manager, bcrypt
+from extensions import db, migrate, sse, login_manager, bcrypt, scheduler
 
 
 def create_app(config_object="settings"):
@@ -22,6 +22,8 @@ def register_extensions(app):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
 
 
 app = create_app()

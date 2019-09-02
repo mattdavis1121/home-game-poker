@@ -8,17 +8,26 @@ from app import app, sse
 from models import (Table, User, Hand, Holding, Action, ActionType,
                     BettingRound, Player)
 from forms import RegisterForm, LoginForm
-from extensions import login_manager
+from extensions import login_manager, scheduler
 from poker import TexasHoldemHand
 
 
 login_manager.login_view = "login"
+HEARTBEAT_FREQ = 14  # Allows for two attempts within 30s Heroku window
 
 
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
     return User.query.get(int(user_id))
+
+
+@scheduler.task('interval', id='heartbeat', seconds=HEARTBEAT_FREQ)
+def heartbeat():
+    """Send data to every channel regularly to keep alive"""
+    with app.app_context():
+        for channel in sse.redis.pubsub_channels():
+            sse.publish({"alive": True}, type="heartbeat", channel=channel)
 
 
 @app.route("/")
