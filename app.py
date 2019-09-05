@@ -23,7 +23,6 @@ def register_extensions(app):
     login_manager.init_app(app)
     bcrypt.init_app(app)
     scheduler.init_app(app)
-    app.logger.info("Starting scheduler")
     scheduler.start()
 
 
