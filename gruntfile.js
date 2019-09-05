@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
         browserify: {
             dev: {
-                src: ["static/src/Game.js"],
+                src: ["static/src/Game.js", "static/src/polyfills/*"],
                 dest: "static/build/output.js",
                 options: {
                     transform: [["babelify", {"presets": ["es2015"]}]],
@@ -14,7 +14,7 @@ module.exports = function (grunt) {
                 }
             },
             watch: {
-                src: ["static/src/Game.js"],
+                src: ["static/src/Game.js", "static/src/polyfills/*"],
                 dest: "static/build/output.js",
                 options: {
                     transform: [["babelify", {"presets": ["es2015"]}]],

@@ -8,6 +8,10 @@ class Main extends Phaser.State {
     init() {
         this.table_sse = new SSE(this.game, this.game.initialData.tableSSEUrl);
         this.user_sse = new SSE(this.game, this.game.initialData.userSSEUrl);
+
+        window.addEventListener("unload", () => {
+            this.game.controller.disconnectBeacon();
+        }, false);
     }
 
     create() {

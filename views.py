@@ -56,6 +56,12 @@ def logout():
     return redirect(url_for("index"))
 
 
+@app.route("/disconnect/", methods=["POST", "GET"])
+def disconnect():
+    data = request.get_json()
+    return jsonify({"success": True})
+
+
 @app.route("/register/", methods=["POST", "GET"])
 def register():
     form = RegisterForm()

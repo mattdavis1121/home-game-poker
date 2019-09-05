@@ -61,6 +61,19 @@ class Controller {
         this.action(data);
     }
 
+    /**
+     * @summary Send a beacon to the server on disconnect
+     *
+     * This allows for server to know when a client disconnects so
+     * it can clean up as necessary. No guarantee that this message
+     * will go through, so must have redundant measures in place.
+     */
+    disconnectBeacon() {
+        const data = {};
+        const url = "/disconnect/";
+        navigator.sendBeacon(url, data);
+    }
+
     buildPayload(actionType, betAmt = 0) {
         return {
             "playerId": this.playerId,
