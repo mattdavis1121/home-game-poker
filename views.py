@@ -137,7 +137,7 @@ def deal(table_name):
             "id": hand.id,
             "player_id": holding.player_id,
             "holdings": [card.name for card in holding.cards]
-        }, type="newHand", channel="{}_u{}".format(table.name, holding.player.user_id))
+        }, type="newHand", channel=holding.player.user_id)
 
     return jsonify({"success": True, "hand": hand.id})
 

@@ -13,7 +13,7 @@
             userId: {{ current_user.id if current_user else -1 }},
             playerId: {{ current_user.active_player.id if current_user.active_player else -1 }},
             tableSSEUrl: "{{ url_for('sse.stream', channel=table.name) }}",
-            userSSEUrl: "{{ url_for('sse.stream', channel='{}_u{}'.format(table.name, current_user.id)) }}",
+            userSSEUrl: "{{ url_for('sse.stream', channel=current_user.id) }}",
             tableUrl: "{{ url_for('show_table', table_name=table.name) }}",
             players: {{ players|safe }}
         };
