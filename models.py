@@ -109,6 +109,7 @@ class User(UserMixin, BaseModel):
     active_player = db.relationship("Player", secondary=players_active,
                                      lazy="subquery",
                                      uselist=False)
+    sse_channels = db.relationship("SSEChannel", backref="user", lazy=True)
 
     def __init__(self, email, password=None, **kwargs):
         """Create instance."""
@@ -137,6 +138,16 @@ class User(UserMixin, BaseModel):
         if self.display_name:
             return self.display_name
         return self.email
+
+
+class SSEChannel(BaseModel):
+    """Map users to SSE channels for easy removal."""
+    __tablename__ = "sse_channels"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    sse_id = db.Column(db.Integer, nullable=False)
+    created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
 
 class Transaction(BaseModel):

@@ -2,11 +2,12 @@ import json
 
 from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, login_user, logout_user, current_user
+from flask_sse import ServerSentEventsBlueprint, Message
 from sqlalchemy.exc import IntegrityError
 
-from app import app, sse
+from app import app, db
 from models import (Table, User, Hand, Holding, Action, ActionType,
-                    BettingRound, Player)
+                    BettingRound, Player, SSEChannel)
 from forms import RegisterForm, LoginForm
 from extensions import login_manager, scheduler
 from poker import TexasHoldemHand
@@ -20,6 +21,28 @@ HEARTBEAT_FREQ = 14  # Allows for two attempts within 30s Heroku window
 def load_user(user_id):
     """Load user by ID."""
     return User.query.get(int(user_id))
+
+
+class SSE(ServerSentEventsBlueprint):
+    def messages(self, channel='sse'):
+        """
+        A generator of :class:`~flask_sse.Message` objects from the given channel.
+
+
+        """
+        redis = self.redis
+        SSEChannel.create(user_id=current_user.id, sse_id=redis.client_id())
+        pubsub = redis.pubsub()
+        pubsub.subscribe(channel)
+        for pubsub_message in pubsub.listen():
+            if pubsub_message['type'] == 'message':
+                msg_dict = json.loads(pubsub_message['data'])
+                yield Message(**msg_dict)
+
+
+sse = SSE('sse', __name__)
+sse.add_url_rule(rule="", endpoint="stream", view_func=sse.stream)
+app.register_blueprint(sse, url_prefix="/stream")
 
 
 @scheduler.task('interval', id='heartbeat', seconds=HEARTBEAT_FREQ)
@@ -59,6 +82,10 @@ def logout():
 @app.route("/disconnect/", methods=["POST", "GET"])
 def disconnect():
     data = request.get_json()
+    for channel in current_user.sse_channels:
+        sse.redis.client_kill_filter(_id=channel.sse_id)
+        db.session.delete(channel)
+    db.session.commit()
     return jsonify({"success": True})
 
 
