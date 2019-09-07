@@ -1,16 +1,22 @@
-import json
+from flask import json
+from flask_login import current_user
 from flask_sse import ServerSentEventsBlueprint, Message
+
+from app import app
+from models import SSEChannel
 
 
 class SSE(ServerSentEventsBlueprint):
-    def messages(self, channel='sse', ):
+    def messages(self, channel='sse'):
         """
-        A generator of :class:`~flask_sse.Message` objects from the given channel.
+        Generate an infinite stream of messages from the given Redis channel
 
-
+        This method creates a new Redis pubsub connection and stores its
+        ID back into the application's database. This is used on client
+        disconnect to clean up lingering connections.
         """
         redis = self.redis
-        redis.client_setname(channel)
+        SSEChannel.create(user_id=current_user.id, sse_id=redis.client_id())
         pubsub = redis.pubsub()
         pubsub.subscribe(channel)
         for pubsub_message in pubsub.listen():
@@ -21,3 +27,4 @@ class SSE(ServerSentEventsBlueprint):
 
 sse = SSE('sse', __name__)
 sse.add_url_rule(rule="", endpoint="stream", view_func=sse.stream)
+app.register_blueprint(sse, url_prefix="/stream")
