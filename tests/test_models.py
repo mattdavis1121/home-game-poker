@@ -782,8 +782,8 @@ class TestHolding:
 
     def test_cards_relationship(self, hand, make_holding, make_card):
         holding = make_holding(player_id=hand.dealer.id, hand_id=hand.id)
-        card1 = make_card(code=PokerCard.new('As'))
-        card2 = make_card(code=PokerCard.new('Ac'))
+        card1 = make_card(code=PokerCard.new('As'), rank='A', suit='s')
+        card2 = make_card(code=PokerCard.new('Ac'), rank='A', suit='c')
 
         assert len(holding.cards) == 0
 

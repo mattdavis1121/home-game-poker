@@ -21,8 +21,9 @@ def register_extensions(app):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
-    scheduler.init_app(app)
-    scheduler.start()
+    if not scheduler.running:
+        scheduler.init_app(app)
+        scheduler.start()
 
 
 app = create_app()
