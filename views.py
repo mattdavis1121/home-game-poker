@@ -110,18 +110,6 @@ def group(id):
                            current_table=current_user.current_table)
 
 
-@app.route("/tables/", methods=["POST", "GET"])
-@login_required
-def tables():
-    if request.method == "POST":
-        table = Table(group_id=1)
-        table.save()
-        return redirect(url_for("show_table", table_name=table.name))
-    else:
-        records = Table.query.all()
-        return render_template("index.html", tables=records)
-
-
 @app.route("/tables/<table_name>/", methods=["GET"])
 @login_required
 def show_table(table_name):
