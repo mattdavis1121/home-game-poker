@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Poker App | DEV</title>
+</head>
+<body>
+
+    <h1>Group: {{ group.name }}</h1>
+
+    <h2>Tables</h2>
+
+    <h3>Current table: <a href="{{ url_for("show_table", table_name=current_user.current_table.name) }}">{{ current_user.current_table.name }}</a></h3>
+    <h3>Tables</h3>
+    <ul>
+        {% for table in tables %}
+            {% if table != current_user.current_table %}
+            <li>
+                <a href="{{ url_for("show_table", table_name=table.name) }}">{{ table.name }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <form action="" method="post">
+        <input type="submit" value="New Table">
+    </form>
+
+</body>
+</html>

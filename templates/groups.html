@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Poker App | DEV</title>
+</head>
+<body>
+
+    <h1>Groups</h1>
+
+    <h3>Your Groups</h3>
+    <ul>
+        {% for group in groups %}
+            <li>
+                <a href="{{ url_for("group", id=group.id) }}">{{ group.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Create New Group</h3>
+    <form method="POST" action="">
+      {{ form.csrf_token }}
+      {{ form.name.label }} {{ form.name }}
+    <input type="submit" value="Go">
+</form>
+
+</body>
+</html>

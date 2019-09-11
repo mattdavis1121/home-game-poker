@@ -45,18 +45,26 @@ cards = db.Table('holdings_to_cards',
     db.Column('exposed', db.Boolean, default=False)
 )
 
+groups_users = db.Table("groups_users",
+    db.Column("group_id", db.Integer, db.ForeignKey("groups.id"), primary_key=True, nullable=False),
+    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True, nullable=False)
+)
+
 
 class Group(BaseModel):
     __tablename__ = "groups"
 
     id = db.Column(db.Integer, primary_key=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     name = db.Column(db.String(80), unique=True)
     active = db.Column(db.Boolean, default=True)
     paid_through = db.Column(db.Date, nullable=True)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    creator = db.relationship("User", lazy=True, foreign_keys="[Group.creator_id]")
     tables = db.relationship("Table", backref="group", lazy=True)
-    users = db.relationship("User", backref="group", lazy=True)
+    users = db.relationship('User', secondary=groups_users, lazy='subquery',
+                            backref=db.backref('groups', lazy=True))
 
 
 # TODO - Stub
@@ -98,8 +106,7 @@ class User(UserMixin, BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
-    email = db.Column(db.String(80))    # TODO - Must be unique within group
+    email = db.Column(db.String(80), nullable=False, unique=True)
     display_name = db.Column(db.String(80), nullable=True)
     password = db.Column(db.Binary(128))
     active = db.Column(db.Boolean, default=True)

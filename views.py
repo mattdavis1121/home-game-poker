@@ -8,8 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from app import app, db
 from sse import sse
 from models import (Table, User, Hand, Holding, Action, ActionType,
-                    BettingRound, Player, SSEChannel)
-from forms import RegisterForm, LoginForm
+                    BettingRound, Player, SSEChannel, Group)
+from forms import RegisterGroupForm, RegisterUserForm, LoginForm
 from extensions import login_manager, scheduler
 from poker import TexasHoldemHand
 
@@ -35,7 +35,7 @@ def heartbeat():
 @app.route("/")
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for("tables"))
+        return redirect(url_for("groups"))
     else:
         return redirect(url_for("login"))
 
@@ -45,7 +45,7 @@ def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
         login_user(form.user)
-        redirect_url = request.args.get('next') or url_for("tables")
+        redirect_url = request.args.get('next') or url_for("groups")
         return redirect(redirect_url)
     return render_template("login.html", form=form)
 
@@ -70,19 +70,44 @@ def disconnect():
 
 @app.route("/register/", methods=["POST", "GET"])
 def register():
-    form = RegisterForm()
+    form = RegisterUserForm()
     if form.validate_on_submit():
         new_user = User.create(
             email=form.email.data,
             password=form.password.data,
             active=True,
-            role_id=1,
-            group_id=1
+            role_id=1
         )
         login_user(new_user)
-        redirect_url = request.args.get('next') or url_for("tables")
+        redirect_url = request.args.get('next') or url_for("groups")
         return redirect(redirect_url)
     return render_template("register.html", form=form)
+
+
+@app.route("/groups/", methods=["POST", "GET"])
+@login_required
+def groups():
+    form = RegisterGroupForm()
+    records = current_user.groups
+    if request.method == "POST":
+        if form.validate_on_submit():
+            new_group = Group.create(name=form.name.data,
+                                     creator_id=current_user.id)
+            current_user.groups.append(new_group)
+            current_user.save()
+            return redirect(url_for("group", id=new_group.id))
+    return render_template("groups.html", form=form, groups=records)
+
+
+@app.route("/groups/<id>", methods=["POST", "GET"])
+@login_required
+def group(id):
+    record = Group.query.get(id)
+    if request.method == "POST":
+        table = Table.create(group_id=record.id)
+        return redirect(url_for("show_table", table_name=table.name))
+    return render_template("group.html", group=record, tables=record.tables,
+                           current_table=current_user.current_table)
 
 
 @app.route("/tables/", methods=["POST", "GET"])
