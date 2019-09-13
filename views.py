@@ -1,6 +1,6 @@
 import json
 
-from flask import render_template, redirect, url_for, request, jsonify
+from flask import render_template, redirect, url_for, request, jsonify, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_sse import ServerSentEventsBlueprint, Message
 from sqlalchemy.exc import IntegrityError
@@ -16,6 +16,11 @@ from poker import TexasHoldemHand
 
 login_manager.login_view = "login"
 HEARTBEAT_FREQ = 14  # Allows for two attempts within 30s Heroku window
+
+
+def members_only(user, group):
+    if not user.belongs_to(group):
+        abort(403)
 
 
 @login_manager.user_loader
@@ -103,6 +108,7 @@ def groups():
 @login_required
 def group(id):
     record = Group.query.get(id)
+    members_only(current_user, record)
     if request.method == "POST":
         table = Table.create(group_id=record.id)
         return redirect(url_for("show_table", table_name=table.name))
@@ -114,6 +120,7 @@ def group(id):
 @login_required
 def show_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
+    members_only(current_user, table.group)
     players = [player.serialize() for player in table.active_players]
     for player in players:
         player["name"] = User.query.get(player["userId"]).name
@@ -125,6 +132,7 @@ def join_table(table_name):
     data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
     user = User.query.get(data.get("userId", -1))
+    members_only(user, table.group)
     position = data.get("position")
 
     if not user:

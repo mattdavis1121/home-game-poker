@@ -146,6 +146,10 @@ class User(UserMixin, BaseModel):
             return self.display_name
         return self.email
 
+    def belongs_to(self, group):
+        """Is user a member of group?"""
+        return self in group.users
+
 
 class SSEChannel(BaseModel):
     """Map users to SSE channels for easy removal."""
