@@ -9,8 +9,8 @@ from deuces import Card as PokerCard
 
 
 class TestGroup:
-    def test_create(self, db):
-        group = Group.create(id=1, name="test_group", active=True,
+    def test_create(self, db, user):
+        group = Group.create(id=1, creator_id=user.id, name="test_group", active=True,
                              paid_through=datetime.date(2020, 7, 31),
                              created_utc=datetime.datetime(2019, 7, 31))
 
@@ -19,6 +19,7 @@ class TestGroup:
         assert group.active
         assert group.paid_through >= datetime.date(2020, 7, 31)
         assert group.created_utc >= datetime.datetime(2019, 7, 31)
+        assert group.creator is user
 
     def test_tables_relationship(self, group, make_table):
         assert len(group.tables) == 0
@@ -111,7 +112,7 @@ class TestTable:
         users = []
         for i in range(3):
             users.append(make_user(email="test{}@example.com".format(i),
-                                   password="test", group_id=group.id,
+                                   password="test",
                                    role_id=role.id))
 
         assert users[0].active_player is None
@@ -147,7 +148,7 @@ class TestTable:
         users = []
         for i in range(3):
             users.append(make_user(email="test{}@example.com".format(i),
-                                   password="test", group_id=group.id,
+                                   password="test",
                                    role_id=role.id))
 
         for user in users[:-1]:
@@ -162,7 +163,7 @@ class TestTable:
 
         for i in range(num_players):
             user = make_user(email="test{}@example.com".format(i),
-                                   password="test", group_id=group.id,
+                                   password="test",
                                    role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i)
             user.active_player = player
@@ -214,7 +215,7 @@ class TestPlayer:
         players = []
         for i in range(2):
             user = make_user(email="test{}@example.com".format(i),
-                             password="test", group_id=group.id,
+                             password="test",
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i)
             user.active_player = player
@@ -365,7 +366,7 @@ class TestHand:
         players = []
         for i in range(2):
             user = make_user(email="test{}@example.com".format(i),
-                             password="test", group_id=group.id,
+                             password="test",
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i)
             user.active_player = player
@@ -388,7 +389,7 @@ class TestHand:
         players = []
         for i in range(3):
             user = make_user(email="test{}@example.com".format(i),
-                             password="test", group_id=group.id,
+                             password="test",
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i,
                                  balance=2000)
@@ -547,7 +548,7 @@ class TestHand:
         players = []
         for i in range(3):
             user = make_user(email="test{}@example.com".format(i),
-                             password="test", group_id=group.id,
+                             password="test",
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i)
             user.active_player = player
@@ -578,7 +579,7 @@ class TestHand:
         players = []
         for i in range(2):
             user = make_user(email="test{}@example.com".format(i),
-                             password="test", group_id=group.id,
+                             password="test",
                              role_id=role.id)
             player = make_player(user_id=user.id, table_id=table.id, seat=i)
             user.active_player = player

@@ -31,8 +31,8 @@ def make_group():
 
 
 @pytest.fixture
-def group(db):
-    return Group.create(id=1, name="test_group", active=True,
+def group(user):
+    return Group.create(id=1, creator_id = user.id, name="test_group", active=True,
                         paid_through=datetime.date(2020, 7, 31),
                         created_utc=datetime.datetime(2019, 7, 31))
 
@@ -57,8 +57,8 @@ def make_user():
 
 
 @pytest.fixture
-def user(group, role):
-    return User.create(id=1, group_id=group.id, role_id=role.id,
+def user(role):
+    return User.create(id=1, role_id=role.id,
                        email="test@example.com", display_name=None,
                        password="test", active=True,
                        created_utc=datetime.datetime(2019, 7, 31))
@@ -131,7 +131,7 @@ def hand(table, group, role, make_user, make_player):
     players = []
     for i in range(2):
         user = make_user(email="test{}@example.com".format(i),
-                         password="test", group_id=group.id,
+                         password="test",
                          role_id=role.id)
         player = make_player(user_id=user.id, table_id=table.id, seat=i,
                              balance=2000)
