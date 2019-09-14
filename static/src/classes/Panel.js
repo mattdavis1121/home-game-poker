@@ -12,6 +12,7 @@ class Panel {
         this.betClicked = new Phaser.Signal();
         this.checkClicked = new Phaser.Signal();
         this.foldClicked = new Phaser.Signal();
+        this.joinClicked = new Phaser.Signal();
     }
 
     initialize() {
@@ -20,6 +21,7 @@ class Panel {
         this.display.fold = this.makeBtn(0, 0, "FOLD", this.game.textures.whiteSquare, () => this.foldClicked.dispatch());
         this.display.betUp = this.makeBtn(0, 0, "+$0.10", this.game.textures.whiteSquare, this.betUpClicked);
         this.display.betDown = this.makeBtn(0, 0, "-$0.10", this.game.textures.whiteSquare, this.betDownClicked);
+        this.display.join = this.makeBtn(0, 0, "JOIN", this.game.textures.whiteSquare, () => this.joinClicked.dispatch());
 
         this.updateDisplay();
 

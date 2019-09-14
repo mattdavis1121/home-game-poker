@@ -84,9 +84,9 @@ class Controller {
         navigator.sendBeacon(url, data);
     }
 
-    joinTable() {
+    join() {
         const data = {"userId": this.game.initialData.userId};
-        const url = "/join/";
+        const url = this.buildUrl("join");
         this.sendRequest(url, data);
     }
 

@@ -18,7 +18,6 @@ class Main extends Phaser.State {
         this.background = this.game.add.image(0, 0, "background");
         this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteSquare, this.deal);
         this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteSquare, this.btnClicked);
-        this.joinBtn = this.makeBtn(100, 300, "join", this.game.textures.whiteSquare, this.joinTable);
 
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
@@ -97,6 +96,7 @@ class Main extends Phaser.State {
         this.game.panel.betClicked.add(betAmt => this.game.controller.bet(betAmt));
         this.game.panel.checkClicked.add(this.game.controller.check, this.game.controller);
         this.game.panel.foldClicked.add(this.game.controller.fold, this.game.controller);
+        this.game.panel.joinClicked.add(this.game.controller.join, this.game.controller);
     }
 
     update() {
@@ -130,16 +130,6 @@ class Main extends Phaser.State {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
-        }));
-    }
-
-    joinTable() {
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/join/');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify({
-            tableName: initialData.tableName,
-            userId: initialData.userId
         }));
     }
 
