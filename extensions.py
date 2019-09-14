@@ -5,9 +5,6 @@ from flask_bcrypt import Bcrypt
 from flask_apscheduler import APScheduler
 from flask_jwt_extended import JWTManager
 
-
-
-
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()

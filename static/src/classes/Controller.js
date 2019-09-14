@@ -28,8 +28,8 @@ class Controller {
         xhr.open(method, endpoint);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200) {
-                // Invalid request error
                 let resp = JSON.parse(xhr.responseText);
+                // Invalid request error
                 if (resp.success === false) {
                     console.warn(resp);
                 }
