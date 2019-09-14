@@ -72,6 +72,10 @@ class Main extends Phaser.State {
                 this.game.players.getById(winner.id).update({balance: winner.balance});
             }
         });
+        this.table_sse.addListener("newPlayer", (event) => {
+            let data = JSON.parse(event.data);
+            console.log("newPlayer: ", data);
+        }, this);
 
         this.user_sse.addListener("newHand", (event) => {
             let data = JSON.parse(event.data);
@@ -81,6 +85,11 @@ class Main extends Phaser.State {
                     this.game.players.players[i].cards.setCardNames(data.holdings);
                 }
             }
+        }, this);
+        this.user_sse.addListener("newPlayer", (event) => {
+            let data = JSON.parse(event.data);
+            console.log("newPlayer: ", data);
+            this.game.controller.setToken(data.token);
         }, this);
     }
 

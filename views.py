@@ -2,6 +2,8 @@ import json
 
 from flask import render_template, redirect, url_for, request, jsonify, abort
 from flask_login import login_required, login_user, logout_user, current_user
+from flask_jwt_extended import (create_access_token, jwt_required,
+                                get_jwt_identity)
 from flask_sse import ServerSentEventsBlueprint, Message
 from sqlalchemy.exc import IntegrityError
 
@@ -141,7 +143,14 @@ def join_table(table_name):
     try:
         player = table.join(user, position)
         player.update(balance=5000)
-        return jsonify({"success": True, "playerId": player.id})
+        token = create_access_token(identity=player.id)
+
+        player_data = player.serialize()
+        player_data["name"] = user.name
+        sse.publish(player_data, type="newPlayer", channel=table.name)
+        sse.publish({"token": token}, type="newPlayer", channel=user.id)
+
+        return jsonify({"success": True, "token": token})
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 

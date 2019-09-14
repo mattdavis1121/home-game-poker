@@ -1,7 +1,16 @@
 class Controller {
-    constructor(game, playerId) {
+    constructor(game, playerId, token) {
         this.game = game;
-        this.playerId = playerId
+        this.playerId = playerId;
+        this.token = token;
+    }
+
+    /**
+     * @summary Set the access token used to authenticate on API calls
+     * @param {string} token - The Flask-JWT-Extended access token
+     */
+    setToken(token) {
+        this.token = token;
     }
 
     /**
@@ -30,6 +39,7 @@ class Controller {
             }
         };
         xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + this.token);
         xhr.send(JSON.stringify(data));
     }
 
@@ -72,6 +82,12 @@ class Controller {
         const data = {};
         const url = "/disconnect/";
         navigator.sendBeacon(url, data);
+    }
+
+    joinTable() {
+        const data = {"userId": this.game.initialData.userId};
+        const url = "/join/";
+        this.sendRequest(url, data);
     }
 
     buildPayload(actionType, betAmt = 0) {
