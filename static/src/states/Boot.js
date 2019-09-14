@@ -8,7 +8,7 @@ class Boot extends Phaser.State {
         this.game.scale.pageAlignHorizontally = true;
         this.game.scale.pageAlignVertically = true;
 
-        this.game.controller = new Controller(this.game, this.game.initialData.playerId);
+        this.game.controller = new Controller(this.game, this.game.initialData.playerId, this.game.initialData.token);
     }
 
     create() {

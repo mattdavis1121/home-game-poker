@@ -15,7 +15,8 @@
             tableSSEUrl: "{{ url_for('sse.stream', channel=table.name) }}",
             userSSEUrl: "{{ url_for('sse.stream', channel=current_user.id) }}",
             tableUrl: "{{ url_for('show_table', table_name=table.name) }}",
-            players: {{ players|safe }}
+            players: {{ players|safe }},
+            token: "{{ token }}"
         };
     </script>
 

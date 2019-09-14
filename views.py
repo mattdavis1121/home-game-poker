@@ -126,7 +126,11 @@ def show_table(table_name):
     players = [player.serialize() for player in table.active_players]
     for player in players:
         player["name"] = User.query.get(player["userId"]).name
-    return render_template("game.html", table=table, players=json.dumps(players))
+    token = None
+    if current_user.active_player and current_user.active_player in table.active_players:
+        token = create_access_token(identity=current_user.active_player.id)
+    return render_template("game.html", table=table,
+                           players=json.dumps(players), token=token)
 
 
 @app.route("/tables/<table_name>/join/", methods=["POST"])
