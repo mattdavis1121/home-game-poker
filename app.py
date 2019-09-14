@@ -2,7 +2,7 @@ import pytest
 import click
 from flask import Flask
 
-from extensions import db, migrate, login_manager, bcrypt, scheduler
+from extensions import db, migrate, login_manager, bcrypt, scheduler, jwt
 
 
 def create_app(config_object="settings"):
@@ -24,6 +24,7 @@ def register_extensions(app):
     if not scheduler.running:
         scheduler.init_app(app)
         scheduler.start()
+    jwt.init_app(app)
 
 
 app = create_app()

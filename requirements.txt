@@ -18,6 +18,7 @@ redis==3.2.1
 # Auth
 Flask-Login==0.4.1
 Flask-Bcrypt==0.7.1
+Flask-JWT-Extended==3.23.0
 
 # Forms
 Flask-WTF==0.14.2
