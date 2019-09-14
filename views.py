@@ -183,7 +183,13 @@ def deal(table_name):
 
 
 @app.route("/tables/<table_name>/action/", methods=["POST"])
+@jwt_required
 def action(table_name):
+    player = Player.query.get(get_jwt_identity())
+    if not player:
+        # TODO - Handle no found user state (send non-200 resp?)
+        return jsonify({"success": False, "msg": "No player found"})
+
     data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
 
@@ -192,11 +198,7 @@ def action(table_name):
         # TODO - Handle no current hand state
         return jsonify({"success": False, "msg": "No current hand"})
 
-    player = Player.query.get(data.get("playerId", -1))
-    if not player:
-        # TODO - Handle no found user state
-        return jsonify({"success": False, "msg": "No player found"})
-    elif player != hand.next_to_act:
+    if player != hand.next_to_act:
         # TODO - Handle action by wrong user state
         return jsonify({"success": False, "msg": "Player acting out of turn"})
 
