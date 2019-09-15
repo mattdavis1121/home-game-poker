@@ -17,7 +17,6 @@ class Main extends Phaser.State {
     create() {
         this.background = this.game.add.image(0, 0, "background");
         this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteSquare, this.deal);
-        this.otherBtn = this.makeBtn(100, 200, "other", this.game.textures.whiteSquare, this.btnClicked);
 
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
@@ -40,7 +39,6 @@ class Main extends Phaser.State {
         this.game.panel.displayGroup.bottom = this.game.height - 20;
         this.registerListeners();
 
-        this.table_sse.addListener("event", this.updateBtn, this, this.otherBtn);
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);
             console.log("newHand: ", data);
@@ -115,15 +113,6 @@ class Main extends Phaser.State {
         return btn;
     }
 
-    btnClicked(btn) {
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/button_clicked');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify({
-            tableName: initialData.tableName,
-        }));
-    }
-
     deal() {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/deal/');
@@ -131,10 +120,6 @@ class Main extends Phaser.State {
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
         }));
-    }
-
-    updateBtn(btn) {
-        btn.tint = btn.tint === 0xffffff ? 0xff0000 : 0xffffff;
     }
 }
 

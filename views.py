@@ -265,12 +265,3 @@ def action(table_name):
         }, type="handComplete", channel=table.name)
 
     return jsonify({"success": True})
-
-
-@app.route("/button_clicked", methods=["POST"])
-@login_required
-def button_clicked():
-    data = request.get_json()
-    table = Table.query.filter_by(name=data["tableName"]).first()
-    sse.publish({"clicked": True}, type="event", channel=table.name)
-    return "Message sent!"
