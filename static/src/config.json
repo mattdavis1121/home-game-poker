@@ -1,0 +1,13 @@
+{
+  "panel": {
+    "padding": 10,
+    "textStyle": {
+      "font": "bold 22pt Arial",
+      "fill": "white"
+    },
+    "pos": {
+      "x": 1480,
+      "y": 790
+    }
+  }
+}

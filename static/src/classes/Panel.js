@@ -1,4 +1,6 @@
 import Util from "../Util";
+import Button from "./Button";
+import Slider from "./Slider";
 
 class Panel {
     constructor(game) {
@@ -13,49 +15,34 @@ class Panel {
         this.checkClicked = new Phaser.Signal();
         this.foldClicked = new Phaser.Signal();
         this.joinClicked = new Phaser.Signal();
+
+        this.slider = new Slider(this.game, "panel");
     }
 
     initialize() {
-        this.display.bet = this.makeBtn(0, 0, "", this.game.textures.whiteSquare, () => this.betClicked.dispatch(this.betAmt));
-        this.display.check = this.makeBtn(0, 0, "CHECK", this.game.textures.whiteSquare, () => this.checkClicked.dispatch());
-        this.display.fold = this.makeBtn(0, 0, "FOLD", this.game.textures.whiteSquare, () => this.foldClicked.dispatch());
-        this.display.betUp = this.makeBtn(0, 0, "+$0.10", this.game.textures.whiteSquare, this.betUpClicked);
-        this.display.betDown = this.makeBtn(0, 0, "-$0.10", this.game.textures.whiteSquare, this.betDownClicked);
-        this.display.join = this.makeBtn(0, 0, "JOIN", this.game.textures.whiteSquare, () => this.joinClicked.dispatch());
+        const style = this.game.config.panel.textStyle;
+        const padding = this.game.config.panel.padding;
 
-        this.updateDisplay();
+        this.display.primary = new Button(this.game, 0, 0, "panel", () => console.log("primary clicked"), this, "btn_lg_over", "btn_lg_out", "btn_lg_down", "btn_lg_up", "BET $0.00", style, padding);
+        this.display.secondary = new Button(this.game, 270, 0, "panel", () => console.log("secondary clicked"), this, "btn_sml_over", "btn_sml_out", "btn_sml_down", "btn_sml_up", "Check", style, padding);
 
-        this.displayGroup.align(-1, 1, this.displayGroup.children[0].width * 1.2, 0);
+        this.slider.initializeDisplay();
+        this.minDenom = 25;
+        this.slider.indexChanged.add((index) => {
+            this.betAmt = this.minDenom * index;
+            this.updateDisplay();
+        }, this);
+        this.display.slider = this.slider.bar;
+        this.display.slider.y = 70;
+        this.slider.setLength(20);
+
+        this.displayGroup.add(this.display.primary);
+        this.displayGroup.add(this.display.secondary);
+        this.displayGroup.add(this.display.slider);
     }
 
     updateDisplay() {
-        this.display.bet.text.text = "BET\n" + Util.parseCurrency(this.betAmt);
-    }
-
-    makeBtn(x, y, text, texture, callback, callbackContext = this) {
-        let btn = this.game.add.button(x, y, texture, callback, callbackContext);
-        btn.anchor.setTo(0.5);
-
-        let btnText = this.game.add.text(0, 0, text);
-        btnText.anchor.setTo(0.5);
-        btn.addChild(btnText);
-        btn.text = btnText;
-
-        this.displayGroup.add(btn);
-
-        return btn;
-    }
-
-    betUpClicked() {
-        this.betAmt += 10;
-        this.updateDisplay();
-    }
-
-    betDownClicked() {
-        if (this.betAmt > 10) {
-            this.betAmt -= 10;
-            this.updateDisplay();
-        }
+        this.display.primary.setText("BET " + Util.parseCurrency(this.betAmt));
     }
 }
 

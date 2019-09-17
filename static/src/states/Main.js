@@ -35,8 +35,8 @@ class Main extends Phaser.State {
 
         this.game.panel = new Panel(this.game);
         this.game.panel.initialize();
-        this.game.panel.displayGroup.centerX = this.game.world.centerX;
-        this.game.panel.displayGroup.bottom = this.game.height - 20;
+        this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
+        this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.registerListeners();
 
         this.table_sse.addListener("newHand", event => {

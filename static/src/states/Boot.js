@@ -1,8 +1,10 @@
+import config from "../config";
 import Controller from "../classes/Controller";
 
 class Boot extends Phaser.State {
     init() {
         this.game.initialData = initialData;
+        this.game.config = config;
 
         this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         this.game.scale.pageAlignHorizontally = true;
