@@ -6,24 +6,19 @@ class Panel {
     constructor(game, key) {
         this.game = game;
         this.key = key;
-
-        this.display = {};
-        this.displayGroup = this.game.add.group();
-
         this.betAmt = 0;
         this.minDenom = 1;
-
         this.primaryClicked = new Phaser.Signal();
         this.secondaryClicked = new Phaser.Signal();
-
         this.slider = new Slider(this.game, "panel");
+        this.display = {};
+        this.displayGroup = this.game.add.group();
     }
 
     initialize() {
         this.display.primary = this.makeButton(0, 0, "lg", this.primaryClicked);
         this.display.secondary = this.makeButton(270, 0, "sml", this.secondaryClicked);
 
-        // TODO - Should be this.display.slider, panel is agnostic to what UI elements it contains
         this.slider.initializeDisplay();
         this.slider.indexChanged.add((index) => {
             this.betAmt = this.minDenom * index;
@@ -31,7 +26,6 @@ class Panel {
         }, this);
         this.display.slider = this.slider.bar;
         this.display.slider.y = 70;
-        this.slider.setLength(20);
 
         this.displayGroup.add(this.display.primary);
         this.displayGroup.add(this.display.secondary);

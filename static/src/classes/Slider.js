@@ -45,7 +45,7 @@ class Slider {
             this.bar.width + this.marker.width,
             this.marker.height
         );
-        this.marker.input.enableSnap(20, 1);
+        this.marker.input.enableSnap(this.bar.width / this.length, 1);
         this.marker.events.onDragUpdate.add(this.markerDragged, this);
         this.display.marker = this.marker;
         this.bar.addChild(this.marker);
@@ -57,7 +57,10 @@ class Slider {
     }
 
     setLength(length) {
-        if (length > this.bar.width) {
+        if (length <= 0) {
+            console.error("Cannot set slider length less than 1");
+            return;
+        } else if (length > this.bar.width) {
             console.warn("Warning: Setting slider stops greater than length may result in unexpected behavior");
         }
         this.length = length;
@@ -86,6 +89,24 @@ class Slider {
         this.marker.input.updateDrag(pointer, true);
     }
 
+    /**
+     * @summary Callback for marker. Dispatch signal on snap.
+     *
+     * The onDragUpdate callback is called very frequently by Phaser, but
+     * not all of that information is helpful. This filters out most of those
+     * calls so all we see are the updates for snaps to new locations on
+     * the bar.
+     *
+     * NOTE: The params passed to this function are defined by Phaser
+     * internals. All that's being used here is the snap param, which is how
+     * we know if the marker has snapped to a new location.
+     *
+     * @param {Phaser.Sprite} marker - The dragged marker, unused
+     * @param {Phaser.Pointer} pointer - The pointer initiating the drag, unused
+     * @param {number} x - The new X coordinate of the sprite, unused
+     * @param {number} y - The new Y coordinate of the sprite, unused
+     * @param {Phaser.Point} snap - The Point to which the marker snapped
+     */
     markerDragged(marker, pointer, x, y, snap) {
         if (snap.x !== this.prevX) {
             this.prevX = snap.x;
