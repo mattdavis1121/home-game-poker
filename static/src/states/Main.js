@@ -33,7 +33,7 @@ class Main extends Phaser.State {
         this.game.pot.sprite.centerX = this.game.world.centerX;
         this.game.pot.sprite.centerY = this.game.world.centerY - 140;
 
-        this.game.panel = new Panel(this.game);
+        this.game.panel = new Panel(this.game, "panel");
         this.game.panel.initialize();
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
@@ -91,10 +91,13 @@ class Main extends Phaser.State {
     }
 
     registerListeners() {
-        this.game.panel.betClicked.add(betAmt => this.game.controller.bet(betAmt));
-        this.game.panel.checkClicked.add(this.game.controller.check, this.game.controller);
-        this.game.panel.foldClicked.add(this.game.controller.fold, this.game.controller);
-        this.game.panel.joinClicked.add(this.game.controller.join, this.game.controller);
+        // this.game.panel.betClicked.add(betAmt => this.game.controller.bet(betAmt));
+        // this.game.panel.checkClicked.add(this.game.controller.check, this.game.controller);
+        // this.game.panel.foldClicked.add(this.game.controller.fold, this.game.controller);
+        // this.game.panel.joinClicked.add(this.game.controller.join, this.game.controller);
+
+        this.game.panel.primaryClicked.add(() => console.log("primaryClicked"));
+        this.game.panel.secondaryClicked.add(() => console.log("secondaryClicked"));
     }
 
     update() {
