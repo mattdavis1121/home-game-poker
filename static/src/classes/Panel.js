@@ -20,10 +20,7 @@ class Panel {
         this.display.secondary = this.makeButton(270, 0, "sml", this.secondaryClicked);
 
         this.slider.initializeDisplay();
-        this.slider.indexChanged.add((index) => {
-            this.betAmt = this.minDenom * index;
-            this.updateDisplay();
-        }, this);
+        this.slider.indexChanged.add((index) => this.setBetAmt(this.minDenom * index), this);
         this.display.slider = this.slider.bar;
         this.display.slider.y = 70;
 
@@ -47,6 +44,11 @@ class Panel {
 
     updateDisplay() {
         this.display.primary.setText("BET " + Util.parseCurrency(this.betAmt));
+    }
+
+    setBetAmt(bet) {
+        this.betAmt = bet;
+        this.updateDisplay();
     }
 }
 
