@@ -47,7 +47,10 @@ class Panel {
     }
 
     updateDisplay() {
-        this.display.primary.setText("BET " + Util.parseCurrency(this.betAmt));
+        let p = "BET " + Util.parseCurrency(this.betAmt);
+        let s = this.secondaryAction === Action.CHECK ? "CHECK" : "FOLD";
+        this.display.primary.setText(p);
+        this.display.secondary.setText(s);
     }
 
     setBetAmt(bet) {
@@ -57,6 +60,16 @@ class Panel {
 
     setMinDenom(denom) {
         this.minDenom = denom;
+        this.updateDisplay();
+    }
+
+    setPrimaryAction(action) {
+        this.primaryAction = action;
+        this.updateDisplay();
+    }
+
+    setSecondaryAction(action) {
+        this.secondaryAction = action;
         this.updateDisplay();
     }
 
