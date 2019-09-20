@@ -6,6 +6,15 @@ class Boot extends Phaser.State {
         this.game.initialData = initialData;
         this.game.config = config;
 
+        // TODO - This should come from somehwere dynamic
+        this.game.rules = {
+            minDenom: 25,
+            blinds: {
+                small: 25,
+                big: 50
+            },
+        };
+
         this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         this.game.scale.pageAlignHorizontally = true;
         this.game.scale.pageAlignVertically = true;

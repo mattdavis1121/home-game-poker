@@ -35,6 +35,8 @@ class Main extends Phaser.State {
 
         this.game.panel = new Panel(this.game, "panel");
         this.game.panel.initialize();
+        this.game.panel.setMinDenom(this.game.rules.minDenom);
+        this.game.panel.slider.setLength(this.game.players.userPlayer.balance / this.game.rules.minDenom);
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.registerListeners();

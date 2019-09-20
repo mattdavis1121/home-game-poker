@@ -50,6 +50,11 @@ class Panel {
         this.betAmt = bet;
         this.updateDisplay();
     }
+
+    setMinDenom(denom) {
+        this.minDenom = denom;
+        this.updateDisplay();
+    }
 }
 
 export default Panel;
