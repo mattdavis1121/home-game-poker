@@ -20,7 +20,7 @@ class Panel {
 
     initialize() {
         this.display.primary = this.makeButton(0, 0, "lg", () => this.primaryClicked.dispatch(this.primaryAction));
-        this.display.secondary = this.makeButton(270, 0, "sml", () => this.secondaryClicked.dispatch(this.secondaryAction));
+        this.display.secondary = this.makeButton(270, 0, "med", () => this.secondaryClicked.dispatch(this.secondaryAction));
 
         this.slider.initializeDisplay();
         this.slider.indexChanged.add((index) => this.setBetAmt(this.minDenom * index), this);
@@ -33,9 +33,9 @@ class Panel {
         this.displayGroup.add(this.display.slider);
     }
 
-    makeButton(x, y, size, signal) {
+    makeButton(x, y, size, callback) {
         let button = new Button(this.game, x, y, this.key);
-        button.onInputUp.add(signal);
+        button.onInputUp.add(callback);
         button.setFrames(
             "btn_" + size + "_over",
             "btn_" + size + "_out",
