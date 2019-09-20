@@ -4,8 +4,8 @@ class PlayerManager {
     constructor(game) {
         this.game = game;
 
-        // Direct access to the Player objects themselves
-        this.players = [];
+        this.players = [];  // Direct access to the Player objects
+        this.userPlayer = null;  // The user's player object, if available
 
         // Contains all display elements for all players in the game
         this.displayGroup = this.game.add.group();
@@ -19,6 +19,10 @@ class PlayerManager {
 
             this.players.push(player);
             this.displayGroup.add(player.displayGroup);
+
+            if (playerData[i].isUser === true) {
+                this.userPlayer = player;
+            }
         }
 
         if (this.players.length) {

@@ -15,6 +15,7 @@ class Player {
 
         this.isDealer = false;
         this.isNext = false;
+        this.isUser = false;
 
         this.display = {};
         this.displayGroup = this.game.add.group();
@@ -29,6 +30,7 @@ class Player {
         this.sittingOut = data.sittingOut;
         this.seat = data.seat;
         this.name = data.name;
+        this.isUser = data.isUser;
 
         this.cards.initialize(2);
     }
