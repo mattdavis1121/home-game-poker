@@ -66,7 +66,6 @@ class Panel {
         if (index >= 0 && index <= this.slider.length) {
             this.slider.setIndex(index, true);
         }
-        // this.setBetAmt(this.betAmt + this.minDenom * modifier);
     }
 }
 
