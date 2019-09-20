@@ -18,12 +18,15 @@ class Slider {
         this.prevX = 0;  // Needed to know when marker snaps to new pos
         this.display = {};
         this.indexChanged = new Phaser.Signal();
+        this.sliderWheel = new Phaser.Signal();
     }
 
     initializeDisplay() {
         this.bar = this.game.add.image(0, 0, this.key, "slider_bar_extended");
         this.bar.inputEnabled = true;
         this.bar.events.onInputDown.add(this.barClicked, this);
+        this.bar.events.onInputOver.add(() => this.enableSliderWheel(true));
+        this.bar.events.onInputOut.add(() => this.enableSliderWheel(false));
         this.display.bar = this.bar;
 
         this.display.leftEnd = this.game.add.image(0, this.bar.height / 2, this.key, "slider_end");
@@ -51,9 +54,13 @@ class Slider {
         this.bar.addChild(this.marker);
     }
 
-    setIndex(index) {
+    setIndex(index, updatePos = false) {
         this.index = index;
         this.indexChanged.dispatch(index);
+
+        if (updatePos) {
+            this.marker.x = this.bar.width / this.length * this.index;
+        }
     }
 
     setLength(length) {
@@ -111,6 +118,20 @@ class Slider {
         if (snap.x !== this.prevX) {
             this.prevX = snap.x;
             this.setIndex(this.prevX / this.marker.input.snapX);
+        }
+    }
+
+    /**
+     * @summary Enable or disable dispatch of signal on wheel scroll
+     * @param {boolean} enabled - Is the callback enabled or disabled?
+     */
+    enableSliderWheel(enabled) {
+        if (enabled) {
+            this.game.input.mouse.mouseWheelCallback = () => {
+                this.sliderWheel.dispatch(this.game.input.mouse.wheelDelta);
+            };
+        } else {
+            this.game.input.mouse.mouseWheelCallback = null;
         }
     }
 }

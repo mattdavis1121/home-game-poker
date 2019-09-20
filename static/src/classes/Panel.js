@@ -21,6 +21,7 @@ class Panel {
 
         this.slider.initializeDisplay();
         this.slider.indexChanged.add((index) => this.setBetAmt(this.minDenom * index), this);
+        this.slider.sliderWheel.add(this.singleStepBet, this);
         this.display.slider = this.slider.bar;
         this.display.slider.y = 70;
 
@@ -54,6 +55,18 @@ class Panel {
     setMinDenom(denom) {
         this.minDenom = denom;
         this.updateDisplay();
+    }
+
+    /**
+     * @summary Increment or decrement this.betAmt
+     * @param {Phaser.Mouse.wheelDelta} modifier - +1 or -1
+     */
+    singleStepBet(modifier) {
+        let index = this.slider.index + modifier;
+        if (index >= 0 && index <= this.slider.length) {
+            this.slider.setIndex(index, true);
+        }
+        // this.setBetAmt(this.betAmt + this.minDenom * modifier);
     }
 }
 
