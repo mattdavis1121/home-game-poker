@@ -60,6 +60,12 @@ class Panel {
         this.updateDisplay();
     }
 
+    setEnabled(enabled) {
+        this.display.primary.setEnabled(enabled);
+        this.display.secondary.setEnabled(enabled);
+        this.slider.setEnabled(enabled);
+    }
+
     /**
      * @summary Increment or decrement this.betAmt
      * @param {Phaser.Mouse.wheelDelta} modifier - +1 or -1

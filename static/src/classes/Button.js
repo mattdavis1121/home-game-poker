@@ -36,6 +36,13 @@ class Button extends Phaser.Button {
         this.rePosLabel();
     }
 
+    setEnabled(enabled) {
+        this.inputEnabled = enabled;
+        let tint = enabled ? 0xFFFFFF : 0x808080;
+        this.tint = tint;
+        this.label.tint = tint;
+    }
+
     rePosLabel() {
         this.label.scale.setTo(1);
         let textArea = this.width - this.padding * 2;

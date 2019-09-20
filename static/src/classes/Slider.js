@@ -74,6 +74,17 @@ class Slider {
         this.marker.input.enableSnap(this.bar.width / length, 1);
     }
 
+    setEnabled(enabled) {
+        this.bar.inputEnabled = enabled;
+        this.marker.inputEnabled = enabled;
+
+        let tint = enabled ? 0xFFFFFF : 0x808080;
+        this.display.bar.tint = tint;
+        this.display.leftEnd.tint = tint;
+        this.display.rightEnd.tint = tint;
+        this.display.marker.tint = tint;
+    }
+
     /**
      * @summary Callback for input directly on the slider bar
      *
