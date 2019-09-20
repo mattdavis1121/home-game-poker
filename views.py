@@ -226,6 +226,8 @@ def action(table_name):
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Check for illegal raise here (enforce raise minimum)
 
+    prev_num_rounds = len(hand.betting_rounds)
+
     try:
         act = Action.create(holding_id=player.active_holding.id,
                             type=data.get("actionType"))
@@ -254,6 +256,12 @@ def action(table_name):
         "next": hand.next_to_act.id,
         "board": up_cards
     }, type="action", channel=table.name)
+
+    if prev_num_rounds < len(hand.betting_rounds):
+        sse.publish({
+            "id": hand.id,
+            "roundNum": hand.active_betting_round.round_num,
+        }, type="newRound", channel=table.name)
 
     if hand.complete:
         sse.publish({

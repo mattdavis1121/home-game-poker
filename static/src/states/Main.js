@@ -56,6 +56,11 @@ class Main extends Phaser.State {
             }
             this.game.pot.setAmount(0);
         });
+        this.table_sse.addListener("newRound", event => {
+            let data = JSON.parse(event.data);
+            console.log("newRound: ", data);
+            this.game.panel.setSecondaryAction(Action.CHECK);
+        });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
@@ -63,6 +68,12 @@ class Main extends Phaser.State {
             this.game.players.getById(data.playerId).update({balance: data.playerBalance, isNext: false});
             this.game.players.getById(data.next).update({isNext: true});
             this.game.pot.setAmount(data.pot);
+
+            let userPlayerNext = data.next === this.game.players.userPlayer.id;
+            this.game.panel.setEnabled(userPlayerNext);
+            if (data.actionType === Action.BET) {
+                this.game.panel.setSecondaryAction(Action.FOLD);
+            }
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
