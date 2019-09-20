@@ -1,3 +1,4 @@
+import Action from "../classes/Action.js";
 import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
@@ -93,13 +94,29 @@ class Main extends Phaser.State {
     }
 
     registerListeners() {
-        // this.game.panel.betClicked.add(betAmt => this.game.controller.bet(betAmt));
-        // this.game.panel.checkClicked.add(this.game.controller.check, this.game.controller);
-        // this.game.panel.foldClicked.add(this.game.controller.fold, this.game.controller);
-        // this.game.panel.joinClicked.add(this.game.controller.join, this.game.controller);
+        this.game.panel.primaryClicked.add(this.handleAction, this);
+        this.game.panel.secondaryClicked.add(this.handleAction, this);
+    }
 
-        this.game.panel.primaryClicked.add(() => console.log("primaryClicked"));
-        this.game.panel.secondaryClicked.add(() => console.log("secondaryClicked"));
+
+    /**
+     * @summary Route actions to controller requests
+     * @param {number} action - The action to be requested, defined in Action.js
+     */
+    handleAction(action) {
+        switch (action) {
+            case Action.FOLD:
+                this.game.controller.fold();
+                break;
+            case Action.CHECK:
+                this.game.controller.check();
+                break;
+            case Action.BET:
+                this.game.controller.bet(this.game.panel.betAmt);
+                break;
+            default:
+                console.warn("Invalid Action Type: " + action);
+        }
     }
 
     update() {

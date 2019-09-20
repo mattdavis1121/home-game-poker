@@ -1,6 +1,7 @@
 import Util from "../Util";
 import Button from "./Button";
 import Slider from "./Slider";
+import Action from "./Action";
 
 class Panel {
     constructor(game, key) {
@@ -9,15 +10,17 @@ class Panel {
         this.betAmt = 0;
         this.minDenom = 1;
         this.primaryClicked = new Phaser.Signal();
+        this.primaryAction = Action.BET;
         this.secondaryClicked = new Phaser.Signal();
+        this.secondaryAction = Action.CHECK;
         this.slider = new Slider(this.game, "panel");
         this.display = {};
         this.displayGroup = this.game.add.group();
     }
 
     initialize() {
-        this.display.primary = this.makeButton(0, 0, "lg", this.primaryClicked);
-        this.display.secondary = this.makeButton(270, 0, "sml", this.secondaryClicked);
+        this.display.primary = this.makeButton(0, 0, "lg", () => this.primaryClicked.dispatch(this.primaryAction));
+        this.display.secondary = this.makeButton(270, 0, "sml", () => this.secondaryClicked.dispatch(this.secondaryAction));
 
         this.slider.initializeDisplay();
         this.slider.indexChanged.add((index) => this.setBetAmt(this.minDenom * index), this);
@@ -32,7 +35,7 @@ class Panel {
 
     makeButton(x, y, size, signal) {
         let button = new Button(this.game, x, y, this.key);
-        button.onInputUp.add(signal.dispatch, signal);
+        button.onInputUp.add(signal);
         button.setFrames(
             "btn_" + size + "_over",
             "btn_" + size + "_out",
