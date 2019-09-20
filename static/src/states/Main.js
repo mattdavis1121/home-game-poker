@@ -54,6 +54,9 @@ class Main extends Phaser.State {
                     isNext: player.id === data.next
                 });
             }
+            // TODO - userPlayer.id will fail for watchers
+            let userPlayerNext = data.next === this.game.players.userPlayer.id;
+            this.game.panel.setEnabled(userPlayerNext);
             this.game.pot.setAmount(0);
         });
         this.table_sse.addListener("newRound", event => {
