@@ -12,6 +12,7 @@ class Player {
         this.sittingOut = null;
         this.seat = null;
         this.name = null;
+        this.roundBet = 0;  // Sum bets by player in current betting round
 
         this.isDealer = false;
         this.isNext = false;
@@ -77,6 +78,7 @@ class Player {
         this.balance = data.balance === undefined ? this.balance : data.balance;
         this.isDealer = data.isDealer === undefined ? this.isDealer : data.isDealer;
         this.isNext = data.isNext === undefined ? this.isNext : data.isNext;
+        this.roundBet = data.roundBet === undefined ? this.roundBet : data.roundBet;
         this.updateDisplay();
     }
 }

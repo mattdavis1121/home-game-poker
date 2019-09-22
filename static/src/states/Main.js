@@ -34,6 +34,9 @@ class Main extends Phaser.State {
         this.game.pot.sprite.centerX = this.game.world.centerX;
         this.game.pot.sprite.centerY = this.game.world.centerY - 140;
 
+        // TODO - This should go somewhere else. Maybe in Pot?
+        this.game.roundBet = 0;
+
         this.game.panel = new Panel(this.game, "panel");
         this.game.panel.initialize();
         this.game.panel.setMinDenom(this.game.rules.minDenom);
@@ -51,26 +54,37 @@ class Main extends Phaser.State {
                 player.cards.reset();
                 player.update({
                     isDealer: player.id === data.dealer,
-                    isNext: player.id === data.next
+                    isNext: player.id === data.next,
+                    roundBet: 0
                 });
             }
             // TODO - userPlayer.id will fail for watchers
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
             this.game.panel.setEnabled(userPlayerNext);
             this.game.pot.setAmount(0);
+            this.game.roundBet = 0;
         });
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
             console.log("newRound: ", data);
             this.game.panel.setSecondaryAction(Action.CHECK);
+            for (let i = 0; i < this.game.players.players.length; i++) {
+                this.game.players.players[i].update({roundBet: 0});
+            }
+            this.game.roundBet = 0;
         });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
-            this.game.players.getById(data.playerId).update({balance: data.playerBalance, isNext: false});
+            this.game.players.getById(data.playerId).update({
+                balance: data.playerBalance,
+                isNext: false,
+                roundBet: data.roundBet
+            });
             this.game.players.getById(data.next).update({isNext: true});
             this.game.pot.setAmount(data.pot);
+            this.game.roundBet = data.roundBet;
 
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
             this.game.panel.setEnabled(userPlayerNext);
