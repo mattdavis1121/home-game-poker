@@ -7,6 +7,7 @@ class Panel {
     constructor(game, key) {
         this.game = game;
         this.key = key;
+        this.bets = [0];
         this.betAmt = 0;
         this.minDenom = 1;
         this.primaryClicked = new Phaser.Signal();
@@ -23,7 +24,7 @@ class Panel {
         this.display.secondary = this.makeButton(270, 0, "med", () => this.secondaryClicked.dispatch(this.secondaryAction));
 
         this.slider.initializeDisplay();
-        this.slider.indexChanged.add((index) => this.setBetAmt(this.minDenom * index), this);
+        this.slider.indexChanged.add((index) => this.setBetAmt(this.bets[index]), this);
         this.slider.sliderWheel.add(this.singleStepBet, this);
         this.display.slider = this.slider.bar;
         this.display.slider.y = 70;
@@ -51,6 +52,13 @@ class Panel {
         let s = this.secondaryAction === Action.CHECK ? "CHECK" : "FOLD";
         this.display.primary.setText(p);
         this.display.secondary.setText(s);
+        this.slider.setLength(this.bets.length - 1);
+    }
+
+    setBets(bets) {
+        this.bets = bets;
+        this.betAmt = bets[0];
+        this.updateDisplay();
     }
 
     setBetAmt(bet) {

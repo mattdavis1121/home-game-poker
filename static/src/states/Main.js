@@ -3,6 +3,7 @@ import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
+import Poker from "../Poker";
 import SSE from "../SSE";
 
 class Main extends Phaser.State {
@@ -34,13 +35,15 @@ class Main extends Phaser.State {
         this.game.pot.sprite.centerX = this.game.world.centerX;
         this.game.pot.sprite.centerY = this.game.world.centerY - 140;
 
-        // TODO - This should go somewhere else. Maybe in Pot?
+        // TODO - These should go somewhere else. Maybe in Pot?
         this.game.roundBet = 0;
+        this.game.roundRaise = 0;
 
         this.game.panel = new Panel(this.game, "panel");
         this.game.panel.initialize();
+        this.game.panel.setBets([25, 50, 75, 100]);
+        this.game.panel.setBetAmt(this.game.panel.bets[0]);
         this.game.panel.setMinDenom(this.game.rules.minDenom);
-        this.game.panel.slider.setLength(this.game.players.userPlayer.balance / this.game.rules.minDenom);
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.registerListeners();
@@ -60,6 +63,10 @@ class Main extends Phaser.State {
             }
             // TODO - userPlayer.id will fail for watchers
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
+            if (userPlayerNext) {
+                let bets = this.generateBets(this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance);
+                this.game.panel.setBets(bets);
+            }
             this.game.panel.setEnabled(userPlayerNext);
             this.game.pot.setAmount(0);
             this.game.roundBet = 0;
@@ -80,17 +87,22 @@ class Main extends Phaser.State {
             this.game.players.getById(data.playerId).update({
                 balance: data.playerBalance,
                 isNext: false,
-                roundBet: data.roundBet
+                roundBet: data.playerRoundBet
             });
             this.game.players.getById(data.next).update({isNext: true});
             this.game.pot.setAmount(data.pot);
             this.game.roundBet = data.roundBet;
+            this.game.roundRaise = data.roundRaise;
 
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            this.game.panel.setEnabled(userPlayerNext);
+            if (userPlayerNext) {
+                let bets = this.generateBets(this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance);
+                this.game.panel.setBets(bets);
+            }
             if (data.actionType === Action.BET) {
                 this.game.panel.setSecondaryAction(Action.FOLD);
             }
+            this.game.panel.setEnabled(userPlayerNext);
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
@@ -170,6 +182,11 @@ class Main extends Phaser.State {
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
         }));
+    }
+
+    generateBets(playerRoundBet, playerBalance) {
+        console.log(playerRoundBet, playerBalance, this.game.roundBet, this.game.roundRaise);
+        return Poker.generateBets(25, 50, this.game.roundBet, playerRoundBet, this.game.roundRaise, playerBalance);
     }
 }
 

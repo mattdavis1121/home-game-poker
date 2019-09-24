@@ -256,7 +256,9 @@ def action(table_name):
         "next": hand.next_to_act.id,
         "board": up_cards,
         "bet": current_bet,
-        "roundBet": total_bet  # Sum of player's bets for this betting round (THIS WILL FAIL ON ALL-IN SIDE POTS)
+        "roundBet": hand.active_betting_round.bet if hand.active_betting_round else 0,
+        "roundRaise": hand.active_betting_round.raise_amt if hand.active_betting_round else 0,
+        "playerRoundBet": total_bet  # Sum of player's bets for this betting round (THIS WILL FAIL ON ALL-IN SIDE POTS)
     }, type="action", channel=table.name)
 
     if prev_num_rounds < len(hand.betting_rounds):

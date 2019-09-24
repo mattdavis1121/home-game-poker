@@ -417,6 +417,9 @@ class Hand(BaseModel):
             self.active_pot.amount += current_bet
             if self.active_betting_round.bettor is None or (
                     total_bet > self.active_betting_round.bet):
+                self.active_betting_round.raise_amt = total_bet
+                if self.active_betting_round.bet is not None:
+                    self.active_betting_round.raise_amt = total_bet - self.active_betting_round.bet
                 self.active_betting_round.bet = total_bet
                 self.active_betting_round.bettor = action.player
 
@@ -529,9 +532,10 @@ class BettingRound(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     hand_id = db.Column(db.Integer, db.ForeignKey("hands.id"), nullable=False)
+    bettor_id = db.Column(db.Integer, db.ForeignKey("players.id"))
     round_num = db.Column(db.Integer, nullable=False)
     bet = db.Column(db.Integer)  # The highest current bet for round
-    bettor_id = db.Column(db.Integer, db.ForeignKey("players.id"))
+    raise_amt = db.Column(db.Integer)
     state = db.Column(db.Enum(State), nullable=False, default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
