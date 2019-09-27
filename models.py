@@ -334,7 +334,7 @@ class Hand(BaseModel):
     state = db.Column(db.Enum(State), default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
-    betting_rounds = db.relationship("BettingRound", backref="hand", lazy=True)
+    betting_rounds = db.relationship("BettingRound", backref="hand", lazy=True, order_by="BettingRound.id")
     active_betting_round = db.relationship("BettingRound",
                                            secondary=betting_rounds_active,
                                            lazy="subquery", uselist=False)
