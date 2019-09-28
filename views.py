@@ -248,7 +248,8 @@ def action(table_name):
         up_cards = []
 
     sse.publish({
-        "id": hand.id,
+        "id": act.id,
+        "handId": hand.id,
         "playerId": act.player.id,
         "playerBalance": act.player.balance,
         "actionType": act.type,
@@ -263,7 +264,8 @@ def action(table_name):
 
     if prev_num_rounds < len(hand.betting_rounds):
         sse.publish({
-            "id": hand.id,
+            "id": hand.active_betting_round.id,
+            "handId": hand.id,
             "roundNum": hand.active_betting_round.round_num,
         }, type="newRound", channel=table.name)
 

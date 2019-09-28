@@ -6,9 +6,8 @@ class Boot extends Phaser.State {
         this.game.initialData = initialData;
         this.game.config = config;
 
-        // TODO - This should come from somehwere dynamic
+        // TODO - This should come from somewhere dynamic
         this.game.rules = {
-            minDenom: 25,
             blinds: {
                 small: 25,
                 big: 50

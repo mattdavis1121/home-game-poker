@@ -41,9 +41,6 @@ class Main extends Phaser.State {
 
         this.game.panel = new Panel(this.game, "panel");
         this.game.panel.initialize();
-        this.game.panel.setBets([25, 50, 75, 100]);
-        this.game.panel.setBetAmt(this.game.panel.bets[0]);
-        this.game.panel.setMinDenom(this.game.rules.minDenom);
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.registerListeners();
@@ -52,6 +49,9 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("newHand: ", data);
             this.game.board.reset();
+            this.game.roundBet = 0;
+            this.game.roundRaise = 0;
+            this.game.pot.setAmount(0);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
                 player.cards.reset();
@@ -64,21 +64,21 @@ class Main extends Phaser.State {
             // TODO - userPlayer.id will fail for watchers
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
             if (userPlayerNext) {
-                let bets = this.generateBets(this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance);
-                this.game.panel.setBets(bets);
+                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
+                this.game.panel.setSecondaryBet(0);
             }
-            this.game.panel.setEnabled(userPlayerNext);
-            this.game.pot.setAmount(0);
-            this.game.roundBet = 0;
+            this.game.panel.setVisible(userPlayerNext);
         });
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
             console.log("newRound: ", data);
-            this.game.panel.setSecondaryAction(Action.CHECK);
+            this.game.roundBet = 0;
+            this.game.roundRaise = 0;
             for (let i = 0; i < this.game.players.players.length; i++) {
                 this.game.players.players[i].update({roundBet: 0});
             }
-            this.game.roundBet = 0;
+            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
+            this.game.panel.setSecondaryBet(0);
         });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
@@ -96,13 +96,10 @@ class Main extends Phaser.State {
 
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
             if (userPlayerNext) {
-                let bets = this.generateBets(this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance);
-                this.game.panel.setBets(bets);
+                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
+                this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance));
             }
-            if (data.actionType === Action.BET) {
-                this.game.panel.setSecondaryAction(Action.FOLD);
-            }
-            this.game.panel.setEnabled(userPlayerNext);
+            this.game.panel.setVisible(userPlayerNext);
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
@@ -136,14 +133,16 @@ class Main extends Phaser.State {
     registerListeners() {
         this.game.panel.primaryClicked.add(this.handleAction, this);
         this.game.panel.secondaryClicked.add(this.handleAction, this);
+        this.game.panel.tertiaryClicked.add(this.handleAction, this);
     }
 
 
     /**
      * @summary Route actions to controller requests
      * @param {number} action - The action to be requested, defined in Action.js
+     * @param {number} bet - The bet (if any) to be sent to the controller
      */
-    handleAction(action) {
+    handleAction(action, bet) {
         switch (action) {
             case Action.FOLD:
                 this.game.controller.fold();
@@ -152,7 +151,7 @@ class Main extends Phaser.State {
                 this.game.controller.check();
                 break;
             case Action.BET:
-                this.game.controller.bet(this.game.panel.betAmt);
+                this.game.controller.bet(bet);
                 break;
             default:
                 console.warn("Invalid Action Type: " + action);
@@ -185,7 +184,6 @@ class Main extends Phaser.State {
     }
 
     generateBets(playerRoundBet, playerBalance) {
-        console.log(playerRoundBet, playerBalance, this.game.roundBet, this.game.roundRaise);
         return Poker.generateBets(25, 50, this.game.roundBet, playerRoundBet, this.game.roundRaise, playerBalance);
     }
 }

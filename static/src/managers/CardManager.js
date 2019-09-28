@@ -21,7 +21,6 @@ class CardManager {
     }
 
     setCardNames(names) {
-        console.log(names);
         for (let i = 0; i < names.length; i++) {
             this.cards[i].name = names[i];
             this.cards[i].updateDisplay();

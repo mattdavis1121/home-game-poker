@@ -14,7 +14,7 @@ class Button extends Phaser.Button {
         super(game, x, y, key, callback, callbackcontext, overFrame, outFrame, downFrame, upFrame);
 
         this.enabled = true;
-        this.labelPadding = 0;
+        this.labelPadding = 10;
         this.labelText = "";
         this.labelStyle = {};
         this.label = new Phaser.Text(this.game, 0, 0, this.labelText);
