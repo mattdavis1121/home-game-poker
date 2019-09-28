@@ -1,3 +1,10 @@
+/**
+ * A slider UI element
+ *
+ * Represented by a bar sprite and a marker sprite. Despite how it may
+ * look, all input occurs on the bar and updates are made to the
+ * marker's position based on those inputs.
+ */
 class Slider {
     constructor(game, key) {
         this.game = game;
@@ -26,16 +33,30 @@ class Slider {
         this.bar.addChild(this.marker);
     }
 
+    /**
+     * @summary Enable slider dragging and initiate first drag event
+     * @param {Phaser.Sprite} bar - The bar sprite that was clicked
+     * @param {Phaser.Pointer} pointer - The pointer which initiated the click
+     */
     startDrag(bar, pointer) {
         // Initial call to updateDrag allows changing bet with click on bar
         this.updateDrag(pointer, pointer.x, pointer.y);
         this.game.input.addMoveCallback(this.updateDrag, this);
     }
 
+    /**
+     * @summary Disable slider dragging
+     */
     stopDrag() {
         this.game.input.deleteMoveCallback(this.updateDrag, this);
     }
 
+    /**
+     * @summary Calculate slider index based on drag input
+     * @param {Phaser.Pointer} pointer - The sliding pointer
+     * @param {number} x - The x coordinate of pointer
+     * @param {number} y - The y coordinate of pointer
+     */
     updateDrag(pointer, x, y) {
         let localX = x - this.bar.world.x;
 
@@ -50,6 +71,14 @@ class Slider {
         this.setIndex(index, true);
     }
 
+    /**
+     * @summary Set the index of the slider and report the new value
+     *
+     * Optionally update the visual position of the marker on the slider.
+     *
+     * @param {number} index - New index to set on slider
+     * @param {boolean} [updatePos=false] - Update the position of marker?
+     */
     setIndex(index, updatePos = false) {
         this.index = index;
         this.indexChanged.dispatch(index);
@@ -59,6 +88,16 @@ class Slider {
         }
     }
 
+    /**
+     * @summary Update the length property
+     *
+     * The length property describes how many discrete bets the slider bar
+     * must represent. The slider does not care about what the specific bet
+     * it represents is, only that it has some number of indices along its
+     * length and that it must report its index to listeners.
+     *
+     * @param {number} length - The new length to set
+     */
     setLength(length) {
         if (length <= 0) {
             console.error("Cannot set slider length less than 1");
@@ -69,6 +108,10 @@ class Slider {
         this.length = length;
     }
 
+    /**
+     * @summary Enable or disable the slider
+     * @param {boolean} enabled - Is the slider enabled?
+     */
     setEnabled(enabled) {
         this.bar.inputEnabled = enabled;
 
