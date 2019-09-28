@@ -29,14 +29,6 @@ class Slider {
         this.bar.events.onInputOut.add(() => this.enableSliderWheel(false));
         this.display.bar = this.bar;
 
-        this.display.leftEnd = this.game.add.image(0, this.bar.height / 2, this.key, "slider_end");
-        this.display.leftEnd.anchor.setTo(0.5);
-        this.bar.addChild(this.display.leftEnd);
-
-        this.display.rightEnd = this.game.add.image(400, this.bar.height / 2, this.key, "slider_end");
-        this.display.rightEnd.anchor.setTo(0.5);
-        this.bar.addChild(this.display.rightEnd);
-
         this.marker = this.game.add.sprite(0, 22, this.key, "slider_marker");
         this.marker.anchor.setTo(0.5, 0);
         this.marker.inputEnabled = true;
@@ -80,8 +72,6 @@ class Slider {
 
         let tint = enabled ? 0xFFFFFF : 0x808080;
         this.display.bar.tint = tint;
-        this.display.leftEnd.tint = tint;
-        this.display.rightEnd.tint = tint;
         this.display.marker.tint = tint;
     }
 

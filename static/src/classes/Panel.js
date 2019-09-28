@@ -37,6 +37,8 @@ class Panel {
         this.displayGroup.add(this.display.secondary);
         this.displayGroup.add(this.display.tertiary);
         this.displayGroup.add(this.display.slider);
+
+        this.updateDisplay();
     }
 
     makeButton(x, y, size, callback) {
