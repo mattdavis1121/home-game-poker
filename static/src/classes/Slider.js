@@ -58,7 +58,7 @@ class Slider {
      * @param {number} y - The y coordinate of pointer
      */
     updateDrag(pointer, x, y) {
-        let localX = x - this.bar.world.x;
+        let localX = x - this.bar.world.x;  // Click pos in relation to bar
 
         // Prevent dragging past bar bounds
         if (localX < 0) {
@@ -68,7 +68,7 @@ class Slider {
         }
 
         const index = Math.round(localX / this.bar.width * this.length);
-        this.setIndex(index, true);
+        this.setIndex(index);
     }
 
     /**
@@ -77,14 +77,19 @@ class Slider {
      * Optionally update the visual position of the marker on the slider.
      *
      * @param {number} index - New index to set on slider
-     * @param {boolean} [updatePos=false] - Update the position of marker?
+     * @param {boolean} [updatePos=true] - Update the position of marker?
      */
-    setIndex(index, updatePos = false) {
+    setIndex(index, updatePos = true) {
         this.index = index;
         this.indexChanged.dispatch(index);
 
         if (updatePos) {
-            this.marker.x = this.bar.width / this.length * this.index;
+            if (this.length === 1) {
+                // When only one bet available, it's a max bet
+                this.marker.x = this.bar.width;
+            } else {
+                this.marker.x = this.bar.width / this.length * this.index;
+            }
         }
     }
 

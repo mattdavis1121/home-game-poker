@@ -65,13 +65,19 @@ class Panel {
         this.display.secondary.setText(secondaryText);
 
         this.display.tertiary.setText("FOLD");
-        this.slider.setLength(this.bets.length - 1);
         this.displayGroup.visible = this.visible;
     }
 
     setBets(bets) {
+        if (bets.length < 1) {
+            console.error("Invalid bets. Panel must always have at least one valid bet.");
+            return;
+        }
+
         this.bets = bets;
         this.primaryBet = bets[0];
+        this.slider.setLength(bets.length);
+        this.slider.setIndex(0);
         this.updateDisplay();
     }
 
@@ -102,7 +108,7 @@ class Panel {
     singleStepBet(modifier) {
         let index = this.slider.index + modifier;
         if (index >= 0 && index <= this.slider.length) {
-            this.slider.setIndex(index, true);
+            this.slider.setIndex(index);
         }
     }
 }
