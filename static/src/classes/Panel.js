@@ -78,6 +78,7 @@ class Panel {
         this.primaryBet = bets[0];
         this.slider.setLength(bets.length);
         this.slider.setIndex(0);
+        this.slider.setEnabled(bets.length > 1);
         this.updateDisplay();
     }
 
