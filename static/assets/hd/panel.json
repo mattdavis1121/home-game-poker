@@ -2,7 +2,7 @@
 
 "btn_lg_down":
 {
-	"frame": {"x":1056,"y":0,"w":260,"h":60},
+	"frame": {"x":0,"y":88,"w":260,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":260,"h":60},
@@ -10,7 +10,7 @@
 },
 "btn_lg_out":
 {
-	"frame": {"x":796,"y":0,"w":260,"h":60},
+	"frame": {"x":0,"y":148,"w":260,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":260,"h":60},
@@ -18,7 +18,7 @@
 },
 "btn_lg_over":
 {
-	"frame": {"x":1316,"y":0,"w":260,"h":60},
+	"frame": {"x":0,"y":208,"w":260,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":260,"h":60},
@@ -26,7 +26,7 @@
 },
 "btn_lg_up":
 {
-	"frame": {"x":1576,"y":0,"w":260,"h":60},
+	"frame": {"x":130,"y":268,"w":260,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":260,"h":60},
@@ -34,7 +34,7 @@
 },
 "btn_med_down":
 {
-	"frame": {"x":276,"y":0,"w":130,"h":60},
+	"frame": {"x":260,"y":208,"w":130,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":130,"h":60},
@@ -42,7 +42,7 @@
 },
 "btn_med_out":
 {
-	"frame": {"x":406,"y":0,"w":130,"h":60},
+	"frame": {"x":0,"y":268,"w":130,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":130,"h":60},
@@ -50,7 +50,7 @@
 },
 "btn_med_over":
 {
-	"frame": {"x":666,"y":0,"w":130,"h":60},
+	"frame": {"x":260,"y":148,"w":130,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":130,"h":60},
@@ -58,7 +58,7 @@
 },
 "btn_med_up":
 {
-	"frame": {"x":536,"y":0,"w":130,"h":60},
+	"frame": {"x":260,"y":88,"w":130,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":130,"h":60},
@@ -66,7 +66,7 @@
 },
 "btn_sml_down":
 {
-	"frame": {"x":156,"y":0,"w":60,"h":28},
+	"frame": {"x":20,"y":0,"w":60,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":28},
@@ -74,7 +74,7 @@
 },
 "btn_sml_out":
 {
-	"frame": {"x":216,"y":0,"w":60,"h":28},
+	"frame": {"x":80,"y":0,"w":60,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":28},
@@ -82,7 +82,7 @@
 },
 "btn_sml_over":
 {
-	"frame": {"x":36,"y":0,"w":60,"h":28},
+	"frame": {"x":140,"y":0,"w":60,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":28},
@@ -90,7 +90,7 @@
 },
 "btn_sml_up":
 {
-	"frame": {"x":96,"y":0,"w":60,"h":28},
+	"frame": {"x":200,"y":0,"w":60,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":28},
@@ -98,59 +98,27 @@
 },
 "slider_bar":
 {
-	"frame": {"x":0,"y":60,"w":400,"h":4},
+	"frame": {"x":0,"y":28,"w":400,"h":60},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":4},
-	"sourceSize": {"w":400,"h":4}
-},
-"slider_bar_combined":
-{
-	"frame": {"x":800,"y":60,"w":400,"h":10},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":10},
-	"sourceSize": {"w":400,"h":10}
-},
-"slider_bar_combined_extended":
-{
-	"frame": {"x":1200,"y":60,"w":400,"h":30},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":30},
-	"sourceSize": {"w":400,"h":30}
-},
-"slider_bar_extended":
-{
-	"frame": {"x":400,"y":60,"w":400,"h":30},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":30},
-	"sourceSize": {"w":400,"h":30}
-},
-"slider_end":
-{
-	"frame": {"x":0,"y":0,"w":8,"h":10},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":10},
-	"sourceSize": {"w":8,"h":10}
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":60},
+	"sourceSize": {"w":400,"h":60}
 },
 "slider_marker":
 {
-	"frame": {"x":8,"y":0,"w":28,"h":42},
+	"frame": {"x":0,"y":0,"w":20,"h":24},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":42},
-	"sourceSize": {"w":28,"h":42}
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":24},
+	"sourceSize": {"w":20,"h":24}
 }},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "panel.png",
 	"format": "RGBA8888",
-	"size": {"w":1836,"h":90},
+	"size": {"w":400,"h":328},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:5ceaab7c73c61c37ea098f74c93fa683:8596d18b07c46429dee8964bde6a7380:9b0fba02c9e23dc0952272093e9c0527$"
+	"smartupdate": "$TexturePacker:SmartUpdate:07354424f6b3c6a444fdceabcbf5fc88:de2d7e3b8672a2e9fb375d768817c4b9:9b0fba02c9e23dc0952272093e9c0527$"
 }
 }

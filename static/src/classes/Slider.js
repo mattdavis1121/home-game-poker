@@ -19,7 +19,7 @@ class Slider {
     }
 
     initializeDisplay() {
-        this.bar = this.game.add.image(0, 0, this.key, "slider_bar_extended");
+        this.bar = this.game.add.image(0, 0, this.key, "slider_bar");
         this.bar.inputEnabled = true;
         this.bar.events.onInputDown.add(this.startDrag, this);
         this.bar.events.onInputUp.add(this.stopDrag, this);
@@ -27,8 +27,9 @@ class Slider {
         this.bar.events.onInputOut.add(() => this.enableSliderWheel(false));
         this.display.bar = this.bar;
 
-        this.marker = this.game.add.sprite(0, 22, this.key, "slider_marker");
+        this.marker = this.game.add.sprite(0, 0, this.key, "slider_marker");
         this.marker.anchor.setTo(0.5, 0);
+        this.marker.bottom = this.bar.bottom;
         this.display.marker = this.marker;
         this.bar.addChild(this.marker);
     }

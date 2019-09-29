@@ -31,7 +31,7 @@ class Panel {
         this.slider.indexChanged.add((index) => this.setPrimaryBet(this.bets[index]), this);
         this.slider.sliderWheel.add(this.singleStepBet, this);
         this.display.slider = this.slider.bar;
-        this.display.slider.y = 70;
+        this.display.slider.y = 60;
 
         this.displayGroup.add(this.display.primary);
         this.displayGroup.add(this.display.secondary);
