@@ -81,15 +81,17 @@ class Slider {
      * @param {boolean} [updatePos=true] - Update the position of marker?
      */
     setIndex(index, updatePos = true) {
-        this.index = index;
-        this.indexChanged.dispatch(index);
+        if (index !== this.index) {
+            this.index = index;
+            this.indexChanged.dispatch(index);
 
-        if (updatePos) {
-            if (this.length === 1) {
-                // When only one bet available, it's a max bet
-                this.marker.x = this.bar.width;
-            } else {
-                this.marker.x = this.bar.width / this.length * this.index;
+            if (updatePos) {
+                if (this.length === 1) {
+                    // When only one bet available, it's a max bet
+                    this.marker.x = this.bar.width;
+                } else {
+                    this.marker.x = this.bar.width / this.length * this.index;
+                }
             }
         }
     }
