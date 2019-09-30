@@ -55,7 +55,8 @@ class Panel {
     }
 
     updateDisplay() {
-        let primaryText = "BET " + Util.parseCurrency(this.primaryBet);
+        let actionText = this.game.roundBet === 0 ? "BET " : "RAISE TO\n";
+        let primaryText = actionText + Util.parseCurrency(this.primaryBet + this.game.players.userPlayer.roundBet);
         this.display.primary.setText(primaryText);
 
         let secondaryText = "CHECK";

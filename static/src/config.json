@@ -3,7 +3,8 @@
     "padding": 10,
     "textStyle": {
       "font": "bold 22pt Arial",
-      "fill": "white"
+      "fill": "white",
+      "align": "center"
     },
     "pos": {
       "x": 1480,
