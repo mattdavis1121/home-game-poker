@@ -68,7 +68,8 @@ class Slider {
             localX = this.bar.width;
         }
 
-        const index = Math.round(localX / this.bar.width * this.length);
+        // Subtract 1 from length because length is 1-indexed, indices are 0-indexed
+        const index = Math.round(localX / this.bar.width * (this.length - 1));
         this.setIndex(index);
     }
 
@@ -90,7 +91,8 @@ class Slider {
                     // When only one bet available, it's a max bet
                     this.marker.x = this.bar.width;
                 } else {
-                    this.marker.x = this.bar.width / this.length * this.index;
+                    // Subtract 1 from length because length is 1-indexed, indices are 0-indexed
+                    this.marker.x = this.bar.width / (this.length - 1) * this.index;
                 }
             }
         }
