@@ -94,10 +94,12 @@ class Button extends Phaser.Button {
      */
     rePosLabel() {
         this.label.scale.setTo(1);
-        let textArea = this.width - this.labelPadding * 2;
-        if (this.label.width > textArea) {
-            let reducedScale = textArea / this.label.width;
-            this.label.scale.setTo(reducedScale);
+        const textAreaH = this.width - this.labelPadding * 2;
+        const textAreaV = this.height - this.labelPadding * 2;
+        if (this.label.width > textAreaH || this.label.height > textAreaV) {
+            const reducedScaleH = textAreaH / this.label.width;
+            const reducedScaleV = textAreaV / this.label.height;
+            this.label.scale.setTo(Math.min(reducedScaleH, reducedScaleV));
         }
         this.label.centerX = this.width / 2;
         this.label.centerY = this.height / 2;
