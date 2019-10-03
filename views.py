@@ -13,7 +13,7 @@ from models import (Table, User, Hand, Holding, Action, ActionType,
                     BettingRound, Player, SSEChannel, Group)
 from forms import RegisterGroupForm, RegisterUserForm, LoginForm
 from extensions import login_manager, scheduler
-from poker import TexasHoldemHand
+from poker import TexasHoldemHand, determine_min_raise
 
 
 login_manager.login_view = "login"
@@ -224,7 +224,10 @@ def action(table_name):
             return jsonify({"success": False, "msg": "Bet > balance"})
         elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Bet < current bet"})
-        # TODO - Check for illegal raise here (enforce raise minimum)
+        # TODO - Make big blind dynamic
+        elif total_bet < determine_min_raise(50, hand.active_betting_round.bet, prev_bet, hand.active_betting_round.raise_amt, player.balance):
+            # TODO - Check for illegal raise here (enforce raise minimum)
+            return jsonify({"success": False, "msg": "Bet < minimum bet"})
 
     prev_num_rounds = len(hand.betting_rounds)
 

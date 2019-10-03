@@ -33,6 +33,13 @@ def determine_winners(players_and_cards, board):
     return winners
 
 
+def determine_min_raise(big_blind, round_bet, player_round_bet, prev_raise, player_balance):
+    min_raise = big_blind
+    if round_bet != 0:
+        min_raise = round_bet - player_round_bet + prev_raise
+    return min(min_raise, player_balance)
+
+
 class PokerHand:
     def __init__(self, num_players=0, players=None, deal=True):
         self.num_players = num_players

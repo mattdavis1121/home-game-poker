@@ -37,6 +37,18 @@ def test_determine_winners():
     assert determine_winners([no_kicker1, no_kicker2], board) == [7, 8]
 
 
+def test_determine_min_raise():
+    assert determine_min_raise(50, 0, 0, 0, 500) == 50
+    assert determine_min_raise(50, 0, 0, 0, 600) == 50
+    assert determine_min_raise(100, 0, 0, 0, 500) == 100
+    assert determine_min_raise(50, 100, 0, 100, 500) == 200
+    assert determine_min_raise(50, 300, 100, 200, 500) == 400
+    assert determine_min_raise(50, 200, 0, 150, 500) == 350
+    assert determine_min_raise(50, 600, 0, 600, 500) == 500
+    assert determine_min_raise(50, 600, 200, 400, 500) == 500
+    assert determine_min_raise(50, 1000, 100, 700, 2000) == 1600
+
+
 class TestPokerHand:
     def test_deal_fails(self, base_hand):
         with pytest.raises(NotImplementedError):
