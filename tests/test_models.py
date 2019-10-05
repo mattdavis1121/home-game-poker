@@ -354,6 +354,7 @@ class TestHand:
         pot1 = hand.new_pot()
         assert len(hand.pots) == 1
         assert pot1 in hand.pots
+        assert pot1.eligible_players == hand.live_players
 
         pot2 = hand.new_pot()
         assert len(hand.pots) == 2

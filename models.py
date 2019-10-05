@@ -406,7 +406,10 @@ class Hand(BaseModel):
         return new_round
 
     def new_pot(self):
-        return Pot.create(hand_id=self.id, amount=0)
+        pot = Pot(hand_id=self.id, amount=0)
+        pot.eligible_players = self.live_players
+        pot.save()
+        return pot
 
     def new_holding(self, player=None, cards=None, **kwargs):
         kwargs["player_id"] = None if player is None else player.id
