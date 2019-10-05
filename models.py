@@ -532,6 +532,10 @@ class Pot(BaseModel):
             Pot.create(hand_id=self.hand.id, parent_id=self.id, amount=amount)
         return self.children
 
+    def remove_player(self, player):
+        self.eligible_players.remove(player)
+        self.save()
+
 
 class BettingRound(BaseModel):
     __tablename__= "betting_rounds"

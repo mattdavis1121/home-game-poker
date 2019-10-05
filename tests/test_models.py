@@ -667,6 +667,17 @@ class TestPot:
         pot.eligible_players.append(hand.next_to_act)
         assert len(pot.eligible_players) == 2
 
+    def test_remove_player(self, hand, make_pot):
+        pot = make_pot(hand_id=hand.id, amount=100)
+        pot.eligible_players.append(hand.dealer)
+        pot.eligible_players.append(hand.next_to_act)
+        assert len(pot.eligible_players) == 2
+        assert hand.dealer in pot.eligible_players
+
+        pot.remove_player(hand.dealer)
+        assert len(pot.eligible_players) == 1
+        assert hand.dealer not in pot.eligible_players
+
 
 class TestBettingRound:
     def test_bets_relationship(self, betting_round, make_bet):
