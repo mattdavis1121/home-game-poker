@@ -278,7 +278,7 @@ class Table(BaseModel):
 
         hand.save()
         hand.new_betting_round()
-        hand.new_pot()
+        hand.new_pot(self.ready_players)
 
         hand.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):
@@ -405,9 +405,11 @@ class Hand(BaseModel):
 
         return new_round
 
-    def new_pot(self):
+    def new_pot(self, players=None):
+        if players is None:
+            players = self.players
         pot = Pot(hand_id=self.id, amount=0)
-        pot.eligible_players = self.live_players
+        pot.eligible_players = players
         pot.save()
         return pot
 
@@ -419,6 +421,7 @@ class Hand(BaseModel):
     def resolve_action(self, action, current_bet, total_bet):
         if action.type == ActionType.FOLD:
             action.holding.fold()
+            self.remove_player_from_pots(action.player)
         else:
             self.active_betting_round.new_bet(action.player, current_bet)
 
@@ -488,6 +491,10 @@ class Hand(BaseModel):
         self.state = State.CLOSED
         self.table.active_hand = None
         self.save()
+
+    def remove_player_from_pots(self, player):
+        for pot in self.pots:
+            pot.remove_player(player)
 
 
 class PotState(IntEnum):
