@@ -50,6 +50,11 @@ groups_users = db.Table("groups_users",
     db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True, nullable=False)
 )
 
+pots_players = db.Table("pots_players",
+    db.Column("pot_id", db.Integer, db.ForeignKey("pots.id"), primary_key=True, nullable=False),
+    db.Column("player_id", db.Integer, db.ForeignKey("players.id"), primary_key=True, nullable=False)
+)
+
 
 class Group(BaseModel):
     __tablename__ = "groups"
@@ -511,6 +516,7 @@ class Pot(BaseModel):
 
     parent = db.relationship("Pot", backref="children", remote_side=[id], lazy=True)
     winner = db.relationship("Player", lazy=True)
+    eligible_players = db.relationship("Player", secondary=pots_players, lazy=True)
 
     @property
     def closed(self):

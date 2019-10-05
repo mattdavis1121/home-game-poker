@@ -660,6 +660,13 @@ class TestPot:
         assert children3[1].amount == 33
         assert children3[2].amount == 33
 
+    def test_eligible_players(self, hand, make_pot):
+        pot = make_pot(hand_id=hand.id, amount=100)
+        assert len(pot.eligible_players) == 0
+        pot.eligible_players.append(hand.dealer)
+        pot.eligible_players.append(hand.next_to_act)
+        assert len(pot.eligible_players) == 2
+
 
 class TestBettingRound:
     def test_bets_relationship(self, betting_round, make_bet):
