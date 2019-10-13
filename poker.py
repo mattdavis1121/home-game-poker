@@ -34,6 +34,10 @@ def determine_winners(players_and_cards, board):
 
 
 def determine_min_raise(big_blind, round_bet, player_round_bet, prev_raise, player_balance):
+    round_bet = round_bet if round_bet is not None else 0
+    player_round_bet = player_round_bet if player_round_bet is not None else 0
+    prev_raise = prev_raise if prev_raise is not None else 0
+
     min_raise = big_blind
     if round_bet != 0:
         min_raise = round_bet - player_round_bet + prev_raise
