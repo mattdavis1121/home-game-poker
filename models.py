@@ -424,10 +424,7 @@ class Hand(BaseModel):
             self.remove_player_from_pots(action.player)
         else:
             self.active_betting_round.new_bet(action.player, current_bet)
-
-            self.active_pot.amount += current_bet
-            if self.active_betting_round.bettor is None or (
-                    total_bet > self.active_betting_round.bet):
+            if self.active_betting_round.bettor is None or (total_bet > self.active_betting_round.bet):
                 self.active_betting_round.raise_amt = total_bet
                 if self.active_betting_round.bet is not None:
                     self.active_betting_round.raise_amt = total_bet - self.active_betting_round.bet
@@ -439,6 +436,7 @@ class Hand(BaseModel):
 
         # Bet has gone around table. Betting round complete.
         if self.next_to_act == self.active_betting_round.bettor:
+            self.determine_side_pots()   # TODO - Rename method?
             self.active_betting_round.close()
 
             if not hand_complete:
@@ -452,28 +450,31 @@ class Hand(BaseModel):
                     hand_complete = True
 
         if hand_complete:
-            winners = self.determine_winners()
-            pots = [self.active_pot]
-            if len(winners) > 1:
-                pots = self.active_pot.split(children=len(winners))
-
-            # Pay all winners and set pot(s) to CLOSED
-            for winner, pot in zip(winners, pots):
-                winner.update(balance=winner.balance + pot.amount)
-                pot.update(state=PotState.CLOSED, winner_id=winner.id)
-
+            # Copy list so changes to list in loop don't cause problems
+            for pot in list(self.pots):
+                winners = self.determine_winners(players=pot.eligible_players)
+                pots = [pot]
+                if len(winners) > 1:
+                    pots = pot.split(children=len(winners))
+                for winner, won_pot in zip(winners, pots):
+                    winner.update(balance=winner.balance + won_pot.amount)
+                    won_pot.update(state=PotState.CLOSED, winner=winner)
             self.close()
 
         self.save()
 
-    def determine_winners(self):
+    def determine_winners(self, players=None):
         """
         Find the player(s) with the most valuable five-card hand, using
         two hole cards and five community cards.
 
+        :param players: List of players to be evaluated
         :return: List of Player objects
         """
         players_and_cards = [(holding.player.id, holding.codes) for holding in self.live_holdings]
+        if players:
+            player_ids = [p.id for p in players]
+            players_and_cards = [d for d in players_and_cards if d[0] in player_ids]
         winners = determine_winners(players_and_cards, self.board.codes)
         return [Player.query.get(winner) for winner in winners]
 
@@ -495,6 +496,50 @@ class Hand(BaseModel):
     def remove_player_from_pots(self, player):
         for pot in self.pots:
             pot.remove_player(player)
+
+    def determine_side_pots(self):
+        # TODO - Move poker-specific stuff into poker file
+        folded_bets = []
+        live_bets = []
+        for holding in self.player_holdings:
+            # Build separate lists of bets for live and folded hands
+            player = holding.player
+            data = {
+                'player': player,
+                'bet': self.active_betting_round.sum_player_bets(player)
+            }
+            if holding.active:
+                live_bets.append(data)
+            else:
+                folded_bets.append(data)
+        live_bets.sort(key=lambda x: x['bet'])  # Sort bet ascending
+
+        while live_bets:
+            bet = live_bets[0]["bet"]
+            live_bets = live_bets[1:]
+            self.active_pot.amount += bet
+
+            # Take amount of smallest round bet from every player's bets
+            for i in range(len(live_bets)):
+                live_bets[i]["bet"] -= bet
+                self.active_pot.amount += bet
+
+            # Take either the smallest round bet or the amount folded from folded bets
+            for i in range(len(folded_bets)):
+                folded_bet = min(bet, folded_bets[i]["bet"])
+                folded_bets[i]["bet"] -= folded_bet
+                self.active_pot.amount += folded_bet
+
+            # Remove zeroed out bets from lists
+            live_bets = [d for d in live_bets if d["bet"] > 0]
+            folded_bets = [d for d in folded_bets if d["bet"] > 0]
+
+            if len(live_bets) == 1:
+                # Record negative bet to refund player for overbet
+                self.active_betting_round.new_bet(live_bets[0]["player"], -live_bets[0]["bet"])
+                live_bets = []
+            elif len(live_bets) > 1:
+                self.new_pot([d["player"] for d in live_bets])
 
 
 class PotState(IntEnum):
@@ -582,7 +627,7 @@ class BettingRound(BaseModel):
         if amount > player.balance:
             raise InsufficientBalanceError
 
-        if amount > 0:
+        if amount != 0:
             player.update(balance=player.balance - amount)
 
         return Bet.create(player_id=player.id, betting_round_id=self.id,

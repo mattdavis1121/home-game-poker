@@ -222,11 +222,10 @@ def action(table_name):
     elif action_type == ActionType.BET:
         if current_bet > player.balance:
             return jsonify({"success": False, "msg": "Bet > balance"})
-        elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet:
+        elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet and total_bet != player.balance:
             return jsonify({"success": False, "msg": "Bet < current bet"})
         # TODO - Make big blind dynamic
-        elif total_bet < determine_min_raise(50, hand.active_betting_round.bet, prev_bet, hand.active_betting_round.raise_amt, player.balance):
-            # TODO - Check for illegal raise here (enforce raise minimum)
+        elif total_bet < determine_min_raise(50, hand.active_betting_round.bet, prev_bet, hand.active_betting_round.raise_amt, player.balance) and total_bet != hand.active_betting_round.bet:
             return jsonify({"success": False, "msg": "Bet < minimum bet"})
 
     prev_num_rounds = len(hand.betting_rounds)

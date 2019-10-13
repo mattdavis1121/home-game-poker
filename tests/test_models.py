@@ -361,7 +361,7 @@ class TestHand:
         assert pot1 in hand.pots
         assert pot2 in hand.pots
 
-    def test_dealer_and_next_to_act_relationships(self, group, role, table,
+    def test_dealer_and_next_to_act_relationships(self, role, table,
                                                   make_hand, make_player,
                                                   make_user):
         players = []
@@ -384,7 +384,7 @@ class TestHand:
         assert hand.next_to_act is players[1]
         assert type(hand.next_to_act) is Player
 
-    def test_resolve_action(self, group, role, table, make_user, make_player,
+    def test_resolve_action(self, role, table, make_user, make_player,
                             make_hand, make_holding, make_action, make_pot,
                             make_betting_round):
         players = []
@@ -405,6 +405,7 @@ class TestHand:
         hand.active_betting_round = betting_round
 
         make_pot(hand_id=hand.id, amount=0)
+        hand.active_pot.eligible_players = players
 
         for player in players:
             make_holding(player_id=player.id, hand_id=hand.id, cards=[PokerCard.new('As'), PokerCard.new('Ac')])
@@ -443,7 +444,7 @@ class TestHand:
         total_bet = 100
         hand.resolve_action(act2, current_bet, total_bet)
         assert hand.next_to_act is players[0]
-        assert hand.active_pot.amount == 100
+        assert hand.active_pot.amount == 0
         assert hand.active_betting_round.bet == 100
         assert hand.active_betting_round.bettor is players[2]
         assert len(hand.live_players) == 3
@@ -456,7 +457,7 @@ class TestHand:
         total_bet = 100
         hand.resolve_action(act3, current_bet, total_bet)
         assert hand.next_to_act is players[1]
-        assert hand.active_pot.amount == 200
+        assert hand.active_pot.amount == 0
         assert hand.active_betting_round.bet == 100
         assert hand.active_betting_round.bettor is players[2]
         assert len(hand.live_players) == 3
@@ -469,7 +470,7 @@ class TestHand:
         total_bet = 200
         hand.resolve_action(act4, current_bet, total_bet)
         assert hand.next_to_act is players[2]
-        assert hand.active_pot.amount == 400
+        assert hand.active_pot.amount == 0
         assert hand.active_betting_round.bet == 200
         assert hand.active_betting_round.bettor is players[1]
         assert len(hand.live_players) == 3
@@ -482,7 +483,7 @@ class TestHand:
         total_bet = 100
         hand.resolve_action(act5, current_bet, total_bet)
         assert hand.next_to_act is players[0]
-        assert hand.active_pot.amount == 400
+        assert hand.active_pot.amount == 0
         assert hand.active_betting_round.bet == 200
         assert hand.active_betting_round.bettor is players[1]
         assert len(hand.live_players) == 2
@@ -495,7 +496,7 @@ class TestHand:
         total_bet = 400
         hand.resolve_action(act6, current_bet, total_bet)
         assert hand.next_to_act is players[1]
-        assert hand.active_pot.amount == 700
+        assert hand.active_pot.amount == 0
         assert hand.active_betting_round.bet == 400
         assert hand.active_betting_round.bettor is players[0]
         assert len(hand.live_players) == 2
@@ -522,7 +523,7 @@ class TestHand:
         total_bet = 1000
         hand.resolve_action(act8, current_bet, total_bet)
         assert hand.next_to_act is players[0]
-        assert hand.active_pot.amount == 1900
+        assert hand.active_pot.amount == 900
         assert hand.active_betting_round.bet == 1000
         assert hand.active_betting_round.bettor is players[1]
         assert len(hand.live_players) == 2
@@ -544,7 +545,7 @@ class TestHand:
         assert hand.active_pot.state is PotState.CLOSED
         assert players[1].balance == 2500
 
-    def test_update_next_to_act(self, group, role, table, make_user,
+    def test_update_next_to_act(self, role, table, make_user,
                                 make_player, make_hand, make_holding):
         players = []
         for i in range(3):
@@ -575,7 +576,7 @@ class TestHand:
         hand.update_next_to_act()
         assert hand.next_to_act is players[2]
 
-    def test_determine_winners(self, group, role, table, make_hand,
+    def test_determine_winners(self, role, table, make_hand,
                               make_holding, make_player, make_user):
         players = []
         for i in range(2):
