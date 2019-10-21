@@ -255,15 +255,14 @@ class Table(BaseModel):
 
         return player
 
-    def new_hand(self, hand_type):
+    def new_hand(self):
         if self.active_hand:
             raise DuplicateActiveRecordError("Table already has active hand")
 
         if len(self.ready_players) < 2:
             raise InsufficientPlayersError
 
-        poker_hand = hand_type(num_players=len(self.ready_players))
-        hand = Hand(table_id=self.id, rounds=poker_hand.rounds)
+        hand = Hand(table_id=self.id, rounds=0)
 
         ready_player_seats = [player.seat for player in self.ready_players]
         if self.previous_hand:
@@ -279,10 +278,6 @@ class Table(BaseModel):
         hand.save()
         hand.new_betting_round()
         hand.new_pot(self.ready_players)
-
-        hand.new_holding(cards=poker_hand.board)
-        for i, poker_holding in enumerate(poker_hand.holdings):
-            hand.new_holding(player=self.ready_players[i], cards=poker_holding)
 
         self.active_hand = hand
         self.save()
@@ -540,6 +535,12 @@ class Hand(BaseModel):
                 live_bets = []
             elif len(live_bets) > 1:
                 self.new_pot([d["player"] for d in live_bets])
+
+    def deal(self, hand_type, players):
+        poker_hand = hand_type(num_players=len(players))
+        self.new_holding(cards=poker_hand.board)
+        for i, poker_holding in enumerate(poker_hand.holdings):
+            self.new_holding(player=players[i], cards=poker_holding)
 
 
 class PotState(IntEnum):

@@ -160,25 +160,44 @@ def join_table(table_name):
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 
 
-@app.route("/tables/<table_name>/deal/", methods=["POST"])
-def deal(table_name):
+@app.route("/tables/<table_name>/new-hand/", methods=["POST"])
+def new_hand(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    hand = table.new_hand(hand_type=TexasHoldemHand)    # TODO - get hand type from json
+    hand = table.new_hand()
 
     sse.publish({
         "id": hand.id,
         "next": hand.next_to_act.id,
         "dealer": hand.dealer.id,
-        "numPlayers": len(hand.players),
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
+
+    return jsonify({"success": True, "hand": hand.id})
+
+
+@app.route("/tables/<table_name>/deal/", methods=["POST"])
+def deal(table_name):
+    table = Table.query.filter_by(name=table_name).first()
+
+    if not table.active_hand:
+        return jsonify({"success": False, "msg": "No active hand to deal"})
+
+    hand = table.active_hand
+    hand.deal(TexasHoldemHand, table.ready_players)  # TODO - get hand type from json
+
+    sse.publish({
+        "id": hand.id,
+        "next": hand.next_to_act.id,
+        "dealer": hand.dealer.id,
+        "numPlayers": len(hand.players)
+    }, type="deal", channel=table.name)
 
     for holding in hand.player_holdings:
         sse.publish({
             "id": hand.id,
             "player_id": holding.player_id,
             "holdings": [card.name for card in holding.cards]
-        }, type="newHand", channel=holding.player.user_id)
+        }, type="deal", channel=holding.player.user_id)
 
     return jsonify({"success": True, "hand": hand.id})
 

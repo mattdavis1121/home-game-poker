@@ -18,7 +18,8 @@ class Main extends Phaser.State {
 
     create() {
         this.background = this.game.add.image(0, 0, "background");
-        this.dealBtn = this.makeBtn(100, 100, "deal", this.game.textures.whiteSquare, this.deal);
+        this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHand);
+        this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
 
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
@@ -62,6 +63,16 @@ class Main extends Phaser.State {
                 });
             }
             // TODO - userPlayer.id will fail for watchers
+            let userPlayerNext = data.next === this.game.players.userPlayer.id;
+            if (userPlayerNext) {
+                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
+                this.game.panel.setSecondaryBet(0);
+            }
+            this.game.panel.setVisible(userPlayerNext);
+        });
+        this.table_sse.addListener("deal", event => {
+            let data = JSON.parse(event.data);
+            console.log("deal: ", data);
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
             if (userPlayerNext) {
                 this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
@@ -114,14 +125,10 @@ class Main extends Phaser.State {
             console.log("newPlayer: ", data);
         }, this);
 
-        this.user_sse.addListener("newHand", (event) => {
+        this.user_sse.addListener("deal", (event) => {
             let data = JSON.parse(event.data);
-            console.log("newHand: ", data);
-            for (let i = 0; i < this.game.players.players.length; i++) {
-                if (this.game.players.players[i].id === this.game.initialData.playerId) {
-                    this.game.players.players[i].cards.setCardNames(data.holdings);
-                }
-            }
+            console.log("deal: ", data);
+            this.game.players.userPlayer.cards.setCardNames(data.holdings);
         }, this);
         this.user_sse.addListener("newPlayer", (event) => {
             let data = JSON.parse(event.data);
@@ -182,6 +189,15 @@ class Main extends Phaser.State {
             tableName: initialData.tableName,
         }));
     }
+
+    newHand() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/new-hand/');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({
+            tableName: initialData.tableName,
+        }));
+    };
 
     generateBets(playerRoundBet, playerBalance) {
         return Poker.generateBets(25, 50, this.game.roundBet, playerRoundBet, this.game.roundRaise, playerBalance);
