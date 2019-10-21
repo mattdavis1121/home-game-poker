@@ -181,6 +181,7 @@ class Table(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
+    stakes_id = db.Column(db.Integer, db.ForeignKey("stakes.id"), nullable=False)
     name = db.Column(db.String(80), default=make_random_name)
     seats = db.Column(db.Integer, default=9)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
@@ -262,7 +263,7 @@ class Table(BaseModel):
         if len(self.ready_players) < 2:
             raise InsufficientPlayersError
 
-        hand = Hand(table_id=self.id, rounds=0)
+        hand = Hand(table_id=self.id, stakes_id=self.stakes_id, rounds=0)
 
         ready_player_seats = [player.seat for player in self.ready_players]
         if self.previous_hand:
@@ -328,6 +329,7 @@ class Hand(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
+    stakes_id = db.Column(db.Integer, db.ForeignKey("stakes.id"), nullable=False)
     dealer_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     next_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     rounds = db.Column(db.Integer, nullable=False)  # Number of betting rounds per hand
@@ -740,3 +742,16 @@ class Action(BaseModel):
     @property
     def player(self):
         return self.holding.player
+
+
+class Stakes(BaseModel):
+    __tablename__ = "stakes"
+    __table_args__ = (
+        db.CheckConstraint("big >= small"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    small = db.Column(db.Integer, nullable=False)
+    big = db.Column(db.Integer, nullable=False)
+    ante = db.Column(db.Integer, nullable=False)
+    created_utc = db.Column(db.DateTime, default=dt.utcnow)
