@@ -83,14 +83,16 @@ class Main extends Phaser.State {
             }
             this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
         });
-        this.table_sse.addListener("emulateDeal", event => {
-            let data = JSON.parse(event.data);
-            console.log("emulateDeal: ", data);
-            for (let i = 0; i < data.length; i++) {
-                let playerData = data[i];
-                this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
-            }
-        });
+        if (this.game.initialData.emulatorEnabled) {
+            this.table_sse.addListener("emulateDeal", event => {
+                let data = JSON.parse(event.data);
+                console.log("emulateDeal: ", data);
+                for (let i = 0; i < data.length; i++) {
+                    let playerData = data[i];
+                    this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                }
+            });
+        }
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
             console.log("newRound: ", data);
