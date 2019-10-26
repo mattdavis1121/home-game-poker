@@ -20,6 +20,9 @@ class Main extends Phaser.State {
         this.background = this.game.add.image(0, 0, "background");
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHand);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
+        this.joinBtn = this.makeBtn(100, 340, "join", this.game.textures.whiteSquare, this.joinTable);
+        this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
+        this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
         this.game.players = new PlayerManager(this.game);
         this.game.players.initialize(this.game.initialData.players);
@@ -205,6 +208,18 @@ class Main extends Phaser.State {
         xhr.send(JSON.stringify({
             tableName: initialData.tableName,
         }));
+    };
+
+    joinTable() {
+        this.game.controller.join();
+    }
+
+    bb() {
+        this.game.controller.bb();
+    };
+
+    sb() {
+        this.game.controller.sb();
     };
 
     generateBets(playerRoundBet, playerBalance) {

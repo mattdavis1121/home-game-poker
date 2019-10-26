@@ -256,14 +256,14 @@ class Table(BaseModel):
 
         return player
 
-    def new_hand(self):
+    def new_hand(self, hand_type):
         if self.active_hand:
             raise DuplicateActiveRecordError("Table already has active hand")
 
         if len(self.ready_players) < 2:
             raise InsufficientPlayersError
 
-        hand = Hand(table_id=self.id, stakes_id=self.stakes_id, rounds=0)
+        hand = Hand(table_id=self.id, stakes_id=self.stakes_id, rounds=hand_type.rounds)
 
         ready_player_seats = [player.seat for player in self.ready_players]
         if self.previous_hand:
@@ -278,7 +278,14 @@ class Table(BaseModel):
 
         hand.save()
         hand.new_betting_round()
+        if hand.stakes.ante:
+            hand.active_betting_round.update(round_num=-1)
         hand.new_pot(self.ready_players)
+
+        # Create Holding for each player but don't deal cards. Required
+        # to support blinds and other pre-deal actions
+        for player in self.ready_players:
+            hand.new_holding(player=player, cards=None)
 
         self.active_hand = hand
         self.save()
@@ -344,6 +351,7 @@ class Hand(BaseModel):
     holdings = db.relationship("Holding", backref="hand", lazy="dynamic")
     dealer = db.relationship("Player", lazy=True, foreign_keys="[Hand.dealer_id]")
     next_to_act = db.relationship("Player", backref="hand", lazy=True, foreign_keys="[Hand.next_id]")
+    stakes = db.relationship("Stakes", lazy=True)
 
     @property
     def player_holdings(self):
@@ -385,6 +393,18 @@ class Hand(BaseModel):
     @property
     def winners(self):
         return [pot.winner for pot in self.pots_paid]
+
+    @property
+    def blinds_owed(self):
+        if self.stakes.sum_blinds == 0:
+            return False
+        elif self.active_betting_round.round_num != 0:
+            return False
+        return self.active_betting_round.sum < self.stakes.sum_blinds
+
+    @property
+    def antes_owed(self):
+        return self.active_betting_round.round_num == -1
 
     def new_betting_round(self):
         """Start a new betting round for the hand."""
@@ -542,7 +562,7 @@ class Hand(BaseModel):
         poker_hand = hand_type(num_players=len(players))
         self.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):
-            self.new_holding(player=players[i], cards=poker_holding)
+            self.holdings[i].add_cards(poker_holding)
 
 
 class PotState(IntEnum):
@@ -755,3 +775,7 @@ class Stakes(BaseModel):
     big = db.Column(db.Integer, nullable=False)
     ante = db.Column(db.Integer, nullable=False)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
+
+    @property
+    def sum_blinds(self):
+        return self.small + self.big

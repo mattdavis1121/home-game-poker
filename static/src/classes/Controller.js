@@ -71,6 +71,16 @@ class Controller {
         this.action(data);
     }
 
+    bb() {
+        const data = this.buildPayload("BLIND", 50);
+        this.action(data);
+    }
+
+    sb() {
+        const data = this.buildPayload("BLIND", 25);
+        this.action(data);
+    }
+
     /**
      * @summary Send a beacon to the server on disconnect
      *

@@ -55,6 +55,13 @@ class Panel {
     }
 
     updateDisplay() {
+        // Panel updates require players' current bets, so if
+        // there is no player (if the user is a watcher) we
+        // shouldn't update the display
+        if (!this.game.players.userPlayer) {
+            return;
+        }
+
         let actionText = this.game.roundBet === 0 ? "BET " : "RAISE TO\n";
         let primaryText = actionText + Util.parseCurrency(this.primaryBet + this.game.players.userPlayer.roundBet);
         this.display.primary.setText(primaryText);

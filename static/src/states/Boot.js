@@ -8,6 +8,7 @@ class Boot extends Phaser.State {
 
         // TODO - This should come from somewhere dynamic
         this.game.rules = {
+            ante: 0,
             blinds: {
                 small: 25,
                 big: 50

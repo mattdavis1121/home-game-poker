@@ -165,7 +165,7 @@ def join_table(table_name):
 @app.route("/tables/<table_name>/new-hand/", methods=["POST"])
 def new_hand(table_name):
     table = Table.query.filter_by(name=table_name).first()
-    hand = table.new_hand()
+    hand = table.new_hand(TexasHoldemHand)
 
     sse.publish({
         "id": hand.id,
@@ -240,21 +240,38 @@ def action(table_name):
     prev_bet = hand.active_betting_round.sum_player_bets(player)
     total_bet = prev_bet + current_bet
 
-    if action_type == ActionType.BLIND:
-        if hand.board:
-            return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
-    elif action_type == ActionType.CHECK:
-        current_bet = 0
-        if hand.active_betting_round.bet:
-            return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
-    elif action_type == ActionType.BET:
-        if current_bet > player.balance:
-            return jsonify({"success": False, "msg": "Bet > balance"})
-        elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet and total_bet != player.balance:
-            return jsonify({"success": False, "msg": "Bet < current bet"})
-        # TODO - Make big blind dynamic
-        elif total_bet < determine_min_raise(50, hand.active_betting_round.bet, prev_bet, hand.active_betting_round.raise_amt, player.balance) and total_bet != hand.active_betting_round.bet:
-            return jsonify({"success": False, "msg": "Bet < minimum bet"})
+    if hand.antes_owed:
+        if action_type != ActionType.BLIND:  # TODO - Create ANTE type?
+            return jsonify({"success": False, "msg": "Expected ante"})
+        elif current_bet != hand.stakes.ante and current_bet != player.balance:
+            return jsonify({"success": False, "msg": "Incorrect ante amount"})
+    elif hand.blinds_owed:
+        if action_type != ActionType.BLIND:
+            return jsonify({"success": False, "msg": "Expected blind"})
+
+        expected_blind = hand.stakes.small if hand.active_betting_round.sum == 0 else hand.stakes.big
+        if current_bet != expected_blind and current_bet != player.balance:
+            # TODO - Solve for all-in on big blind
+            #  This should allow players to bet amounts other than SB or BB
+            #  but it will fail to set the expected bet to the BB if the player
+            #  who should have paid the full BB went all-in for less.
+            return jsonify({"success": False, "msg": "Incorrect blind amount"})
+    else:
+        if action_type == ActionType.BLIND:
+            if hand.board:
+                return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
+        elif action_type == ActionType.CHECK:
+            current_bet = 0
+            if hand.active_betting_round.bet:
+                return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
+        elif action_type == ActionType.BET:
+            if current_bet > player.balance:
+                return jsonify({"success": False, "msg": "Bet > balance"})
+            elif hand.active_betting_round.bet and total_bet < hand.active_betting_round.bet and total_bet != player.balance:
+                return jsonify({"success": False, "msg": "Bet < current bet"})
+            # TODO - Make big blind dynamic
+            elif total_bet < determine_min_raise(50, hand.active_betting_round.bet, prev_bet, hand.active_betting_round.raise_amt, player.balance) and total_bet != hand.active_betting_round.bet:
+                return jsonify({"success": False, "msg": "Bet < minimum bet"})
 
     prev_num_rounds = len(hand.betting_rounds)
 

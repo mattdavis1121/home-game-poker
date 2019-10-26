@@ -61,9 +61,10 @@ class PokerHand:
 
 
 class TexasHoldemHand(PokerHand):
+    rounds = 4 # preflop, flop, turn, river
+
     def __init__(self, num_players=0, deal=True):
         super().__init__(num_players, deal)
-        self.rounds = 4 # preflop, flop, turn, river
 
     def deal(self):
         deck = Deck()
@@ -77,7 +78,6 @@ class TexasHoldemHand(PokerHand):
         hand.holdings = record.holdings
         hand.board = record.board
         return hand
-
 
 # TODO - Remove test code
 if __name__ == "__main__":
