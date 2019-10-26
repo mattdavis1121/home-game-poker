@@ -64,21 +64,29 @@ class Main extends Phaser.State {
             }
             // TODO - userPlayer.id will fail for watchers
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext) {
+            if (userPlayerNext || this.game.initialData.emulatorEnabled) {
                 this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
                 this.game.panel.setSecondaryBet(0);
             }
-            this.game.panel.setVisible(userPlayerNext);
+            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
         });
         this.table_sse.addListener("deal", event => {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext) {
+            if (userPlayerNext  || this.game.initialData.emulatorEnabled) {
                 this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
                 this.game.panel.setSecondaryBet(0);
             }
-            this.game.panel.setVisible(userPlayerNext);
+            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
+        });
+        this.table_sse.addListener("emulateDeal", event => {
+            let data = JSON.parse(event.data);
+            console.log("emulateDeal: ", data);
+            for (let i = 0; i < data.length; i++) {
+                let playerData = data[i];
+                this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+            }
         });
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
@@ -106,11 +114,11 @@ class Main extends Phaser.State {
             this.game.roundRaise = data.roundRaise;
 
             let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext) {
+            if (userPlayerNext || this.game.initialData.emulatorEnabled) {
                 this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
                 this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance));
             }
-            this.game.panel.setVisible(userPlayerNext);
+            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);

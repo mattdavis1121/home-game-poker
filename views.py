@@ -18,6 +18,7 @@ from poker import TexasHoldemHand, determine_min_raise
 
 login_manager.login_view = "login"
 HEARTBEAT_FREQ = 14  # Allows for two attempts within 30s Heroku window
+EMULATOR_ENABLED = app.config['EMULATOR']
 
 
 def members_only(user, group):
@@ -131,7 +132,8 @@ def show_table(table_name):
     if current_user.active_player and current_user.active_player in table.active_players:
         token = create_access_token(identity=current_user.active_player.id)
     return render_template("game.html", table=table,
-                           players=json.dumps(players), token=token)
+                           players=json.dumps(players), token=token,
+                           emulate=EMULATOR_ENABLED)
 
 
 @app.route("/tables/<table_name>/join/", methods=["POST"])
@@ -192,10 +194,16 @@ def deal(table_name):
         "numPlayers": len(hand.players)
     }, type="deal", channel=table.name)
 
+    if EMULATOR_ENABLED:
+        sse.publish([{
+            "playerId": holding.player_id,
+            "holdings": [card.name for card in holding.cards]
+        } for holding in hand.player_holdings], type="emulateDeal", channel=table.name)
+
     for holding in hand.player_holdings:
         sse.publish({
             "id": hand.id,
-            "player_id": holding.player_id,
+            "playerId": holding.player_id,
             "holdings": [card.name for card in holding.cards]
         }, type="deal", channel=holding.player.user_id)
 
@@ -205,18 +213,19 @@ def deal(table_name):
 @app.route("/tables/<table_name>/action/", methods=["POST"])
 @jwt_required
 def action(table_name):
-    player = Player.query.get(get_jwt_identity())
-    if not player:
-        # TODO - Handle no found user state (send non-200 resp?)
-        return jsonify({"success": False, "msg": "No player found"})
-
-    data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
-
     hand = table.active_hand
     if not hand:
         # TODO - Handle no current hand state
         return jsonify({"success": False, "msg": "No current hand"})
+
+    data = request.get_json()
+    player = Player.query.get(get_jwt_identity())
+    if EMULATOR_ENABLED:
+        player = hand.next_to_act
+    if not player:
+        # TODO - Handle no found user state (send non-200 resp?)
+        return jsonify({"success": False, "msg": "No player found"})
 
     if player != hand.next_to_act:
         # TODO - Handle action by wrong user state
