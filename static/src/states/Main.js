@@ -47,6 +47,7 @@ class Main extends Phaser.State {
         this.game.panel.initialize();
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
+        this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
         this.registerListeners();
 
         this.table_sse.addListener("newHand", event => {
@@ -56,6 +57,7 @@ class Main extends Phaser.State {
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             this.game.pot.setAmount(0);
+            this.game.players.nextPlayer = this.game.players.getById(data.next);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
                 player.cards.reset();
@@ -65,23 +67,17 @@ class Main extends Phaser.State {
                     roundBet: 0
                 });
             }
-            // TODO - userPlayer.id will fail for watchers
-            let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext || this.game.initialData.emulatorEnabled) {
-                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
-                this.game.panel.setSecondaryBet(0);
-            }
-            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
+            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
+            this.game.panel.setSecondaryBet(0);
+            this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
         });
         this.table_sse.addListener("deal", event => {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
-            let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext  || this.game.initialData.emulatorEnabled) {
-                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
-                this.game.panel.setSecondaryBet(0);
-            }
-            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
+            this.game.players.nextPlayer = this.game.players.getById(data.next);
+            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
+            this.game.panel.setSecondaryBet(this.game.roundBet);
+            this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
         });
         if (this.game.initialData.emulatorEnabled) {
             this.table_sse.addListener("emulateDeal", event => {
@@ -101,13 +97,14 @@ class Main extends Phaser.State {
             for (let i = 0; i < this.game.players.players.length; i++) {
                 this.game.players.players[i].update({roundBet: 0});
             }
-            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
+            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(0);
         });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
             this.game.board.setCardNames(data.board);
+            this.game.players.nextPlayer = this.game.players.getById(data.next);
             this.game.players.getById(data.playerId).update({
                 balance: data.playerBalance,
                 isNext: false,
@@ -118,12 +115,9 @@ class Main extends Phaser.State {
             this.game.roundBet = data.roundBet;
             this.game.roundRaise = data.roundRaise;
 
-            let userPlayerNext = data.next === this.game.players.userPlayer.id;
-            if (userPlayerNext || this.game.initialData.emulatorEnabled) {
-                this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.roundRaise, this.game.players.userPlayer.balance));
-                this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.userPlayer.roundBet, this.game.players.userPlayer.balance));
-            }
-            this.game.panel.setVisible(userPlayerNext || this.game.initialData.emulatorEnabled);
+            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
+            this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
+            this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);

@@ -6,6 +6,7 @@ class PlayerManager {
 
         this.players = [];  // Direct access to the Player objects
         this.userPlayer = null;  // The user's player object, if available
+        this.nextPlayer = null;  // The player that the game expects to act next
 
         // Contains all display elements for all players in the game
         this.displayGroup = this.game.add.group();

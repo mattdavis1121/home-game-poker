@@ -20,6 +20,7 @@ class Panel {
         this.display = {};
         this.displayGroup = this.game.add.group();
         this.visible = false;
+        this.alwaysVisible = false;
     }
 
     initialize() {
@@ -56,14 +57,13 @@ class Panel {
 
     updateDisplay() {
         // Panel updates require players' current bets, so if
-        // there is no player (if the user is a watcher) we
-        // shouldn't update the display
-        if (!this.game.players.userPlayer) {
+        // there is no next player we shouldn't update the display
+        if (!this.game.players.nextPlayer) {
             return;
         }
 
         let actionText = this.game.roundBet === 0 ? "BET " : "RAISE TO\n";
-        let primaryText = actionText + Util.parseCurrency(this.primaryBet + this.game.players.userPlayer.roundBet);
+        let primaryText = actionText + Util.parseCurrency(this.primaryBet + this.game.players.nextPlayer.roundBet);
         this.display.primary.setText(primaryText);
 
         let secondaryText = "CHECK";
@@ -106,7 +106,7 @@ class Panel {
      * @param {boolean} visible
      */
     setVisible(visible) {
-        this.visible = visible;
+        this.visible = visible || this.alwaysVisible;
         this.updateDisplay();
     }
 
