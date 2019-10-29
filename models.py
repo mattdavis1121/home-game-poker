@@ -671,6 +671,8 @@ class Bet(BaseModel):
     amount = db.Column(db.Integer)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
+    player = db.relationship("Player", lazy=True)
+
 
 class Holding(BaseModel):
     __tablename__= "holdings"
