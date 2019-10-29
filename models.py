@@ -441,12 +441,19 @@ class Hand(BaseModel):
             self.remove_player_from_pots(action.player)
         else:
             self.active_betting_round.new_bet(action.player, current_bet)
-            if self.active_betting_round.bettor is None or (total_bet > self.active_betting_round.bet):
+            if action.type == ActionType.BLIND:
+                # Do not register bettor here to allow for BB option
+                # and correct bet/raise amounts after blinds
+                self.active_betting_round.bet = total_bet
                 self.active_betting_round.raise_amt = total_bet
-                if self.active_betting_round.bet is not None:
+                self.active_betting_round.blind_leading = True
+            elif self.active_betting_round.bettor is None or (total_bet > self.active_betting_round.bet):
+                self.active_betting_round.raise_amt = total_bet
+                if self.active_betting_round.bet is not None and not self.active_betting_round.blind_leading:
                     self.active_betting_round.raise_amt = total_bet - self.active_betting_round.bet
                 self.active_betting_round.bet = total_bet
                 self.active_betting_round.bettor = action.player
+                self.active_betting_round.blind_leading = False
 
         self.update_next_to_act()
         hand_complete = len(self.live_holdings) == 1
@@ -624,6 +631,7 @@ class BettingRound(BaseModel):
     round_num = db.Column(db.Integer, nullable=False)
     bet = db.Column(db.Integer)  # The highest current bet for round
     raise_amt = db.Column(db.Integer)
+    blind_leading = db.Column(db.Boolean, nullable=False, default=False)    # Is the leading bet a blind?
     state = db.Column(db.Enum(State), nullable=False, default=State.OPEN)
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
