@@ -287,6 +287,10 @@ class Table(BaseModel):
         for player in self.ready_players:
             hand.new_holding(player=player, cards=None)
 
+        # If heads-up, set dealer to first to act to allow dealer small blind
+        if len(ready_player_seats) == 2:
+            hand.update_next_to_act()
+
         self.active_hand = hand
         self.save()
 

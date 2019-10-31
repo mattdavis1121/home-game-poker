@@ -76,7 +76,7 @@ class Main extends Phaser.State {
             console.log("deal: ", data);
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
-            this.game.panel.setSecondaryBet(this.game.roundBet);
+            this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
         });
         if (this.game.initialData.emulatorEnabled) {
