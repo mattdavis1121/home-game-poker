@@ -315,6 +315,17 @@ class Player(BaseModel):
             return None
         return self.holdings.filter_by(hand_id=self.table.active_hand.id).first()
 
+    @property
+    def actions(self):
+        actions = []
+        for holding in self.holdings:
+            for action in holding.actions:
+                actions.append(action)
+        return actions
+
+    def prev_action(self):
+        return self.holdings.all()[-1].actions[-1]
+
     def serialize(self):
         return {
             "id": self.id,

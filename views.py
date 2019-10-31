@@ -262,7 +262,7 @@ def action(table_name):
                 return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
         elif action_type == ActionType.CHECK:
             current_bet = 0
-            if hand.active_betting_round.bet:
+            if hand.active_betting_round.bet and not prev_bet == hand.active_betting_round.bet:
                 return jsonify({"success": False, "msg": "Cannot check if bet > 0"})
         elif action_type == ActionType.BET:
             if current_bet > player.balance:
