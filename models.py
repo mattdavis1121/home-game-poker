@@ -417,6 +417,10 @@ class Hand(BaseModel):
     def antes_owed(self):
         return self.active_betting_round.round_num == -1
 
+    @property
+    def dealt(self):
+        return self.board is not None
+
     def new_betting_round(self):
         """Start a new betting round for the hand."""
         round_num = 0

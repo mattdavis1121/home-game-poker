@@ -183,6 +183,8 @@ def deal(table_name):
 
     if not table.active_hand:
         return jsonify({"success": False, "msg": "No active hand to deal"})
+    elif table.active_hand.antes_owed or table.active_hand.blinds_owed:
+        return jsonify({"success": False, "msg": "Can't deal before pre-hand bets complete"})
 
     hand = table.active_hand
     hand.deal(TexasHoldemHand, table.ready_players)  # TODO - get hand type from json
@@ -257,9 +259,10 @@ def action(table_name):
             #  who should have paid the full BB went all-in for less.
             return jsonify({"success": False, "msg": "Incorrect blind amount"})
     else:
+        if not hand.dealt:
+            return jsonify({"success": False, "msg": "Can't take action before hand dealt"})
         if action_type == ActionType.BLIND:
-            if hand.board:
-                return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
+            return jsonify({"success": False, "msg": "Cannot post blind after hand dealt"})
         elif action_type == ActionType.CHECK:
             current_bet = 0
             if hand.active_betting_round.bet and not prev_bet == hand.active_betting_round.bet:
