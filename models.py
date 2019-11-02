@@ -589,6 +589,7 @@ class Hand(BaseModel):
         self.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):
             self.player_holdings[i].add_cards(poker_holding)
+        self.save()
 
 
 class PotState(IntEnum):
