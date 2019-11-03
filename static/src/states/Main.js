@@ -26,9 +26,8 @@ class Main extends Phaser.State {
         this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
         this.game.players = new PlayerManager(this.game);
-        this.game.players.initialize(this.game.initialData.players);
-        this.game.players.displayGroup.centerX = this.game.world.centerX;
-        this.game.players.displayGroup.centerY = this.game.world.centerX / 6;
+        const numSeats = 10;    // TODO - Make dynamic
+        this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
 
         this.game.board = new CardManager(this.game);
         this.game.board.initialize(5);
@@ -51,7 +50,6 @@ class Main extends Phaser.State {
         this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
 
         this.game.buyIn = new BuyInManager(this.game, "buyIn");
-        const numSeats = 10;    // TODO - Make dynamic
         this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats());
 
         this.registerListeners();

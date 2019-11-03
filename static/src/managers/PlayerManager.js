@@ -12,22 +12,25 @@ class PlayerManager {
         this.displayGroup = this.game.add.group();
     }
 
-    initialize(playerData) {
+    initialize(playerData, seatConfig) {
         for (let i = 0; i < playerData.length; i++) {
-            let player = new Player(this.game, this);
-            player.initialize(playerData[i]);
-            player.initializeDisplay();
-
-            this.players.push(player);
-            this.displayGroup.add(player.displayGroup);
-
-            if (playerData[i].isUser === true) {
-                this.userPlayer = player;
-            }
+            this.newPlayer(playerData[i], seatConfig[playerData[i].seat]);
         }
+    }
 
-        if (this.players.length) {
-            this.displayGroup.align(-1, 1, this.players[0].displayGroup.width * 1.2, 0);
+    newPlayer(playerData, seatConfig) {
+        let player = new Player(this.game, this);
+        player.initialize(playerData);
+        player.initializeDisplay();
+
+        player.displayGroup.x = seatConfig.x;
+        player.displayGroup.y = seatConfig.y;
+
+        this.players.push(player);
+        this.displayGroup.add(player.displayGroup);
+
+        if (playerData.isUser === true) {
+            this.userPlayer = player;
         }
     }
 
