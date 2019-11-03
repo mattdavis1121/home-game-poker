@@ -129,36 +129,34 @@ def show_table(table_name):
     for player in players:
         player["name"] = User.query.get(player["userId"]).name
         player["isUser"] = player["userId"] == current_user.id
-    token = None
-    if current_user.active_player and current_user.active_player in table.active_players:
-        token = create_access_token(identity=current_user.active_player.id)
+    token = create_access_token(identity=current_user.id)
     return render_template("game.html", table=table,
                            players=json.dumps(players), token=token,
                            emulate=EMULATOR_ENABLED)
 
 
 @app.route("/tables/<table_name>/join/", methods=["POST"])
+@jwt_required
 def join_table(table_name):
     data = request.get_json()
     table = Table.query.filter_by(name=table_name).first()
-    user = User.query.get(data.get("userId", -1))
-    members_only(user, table.group)
+    user = User.query.get(get_jwt_identity())
     position = data.get("position")
 
     if not user:
-        return jsonify({"success": False, "msg": "No user found"})
+        return jsonify({"success": False, "msg": "No user found"}), 401
+    if user.active_player:
+        return jsonify({"success": False, "msg": "Can only occupy one seat at a time"})
 
     try:
         player = table.join(user, position)
-        player.update(balance=5000)
-        token = create_access_token(identity=player.id)
+        player.update(balance=5000)  # TODO - get buy in from front end
 
         player_data = player.serialize()
         player_data["name"] = user.name
         sse.publish(player_data, type="newPlayer", channel=table.name)
-        sse.publish({"token": token}, type="newPlayer", channel=user.id)
 
-        return jsonify({"success": True, "token": token})
+        return jsonify({"success": True})
     except SeatOccupiedError:
         return jsonify({"success": False, "msg": "Seat {} is occupied".format(position)})
     except TableFullError:
@@ -227,12 +225,19 @@ def action(table_name):
         return jsonify({"success": False, "msg": "No current hand"})
 
     data = request.get_json()
-    player = Player.query.get(get_jwt_identity())
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return jsonify({"success": False, "msg": "No user found"}), 401
+
+    player = user.active_player
     if EMULATOR_ENABLED:
         player = hand.next_to_act
     if not player:
-        # TODO - Handle no found user state (send non-200 resp?)
         return jsonify({"success": False, "msg": "No player found"})
+    elif player not in table.active_players:
+        return jsonify({"success": False, "msg": "Can't act while sitting at a different table"})
+    elif player not in table.ready_players:
+        return jsonify({"success": False, "msg": "Can't act while sitting out"})
 
     if player != hand.next_to_act:
         # TODO - Handle action by wrong user state
