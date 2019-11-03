@@ -12,6 +12,7 @@ from sse import sse
 from models import (Table, User, Hand, Holding, Action, ActionType,
                     BettingRound, Player, SSEChannel, Group)
 from forms import RegisterGroupForm, RegisterUserForm, LoginForm
+from exceptions import TableFullError, SeatOccupiedError
 from extensions import login_manager, scheduler
 from poker import TexasHoldemHand, determine_min_raise
 
@@ -158,6 +159,10 @@ def join_table(table_name):
         sse.publish({"token": token}, type="newPlayer", channel=user.id)
 
         return jsonify({"success": True, "token": token})
+    except SeatOccupiedError:
+        return jsonify({"success": False, "msg": "Seat {} is occupied".format(position)})
+    except TableFullError:
+        return jsonify({"success": False, "msg": "Table {} is full".format(table.id)})
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 
