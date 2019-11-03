@@ -238,9 +238,8 @@ class Table(BaseModel):
         # TODO: Check for player already at a seat
 
         taken_seats = [ap.seat for ap in self.active_players]
-        if seat and (seat in taken_seats):
-            raise SeatOccupiedError
-        else:
+        if not seat:
+            # TODO - Remove? We might not need first-open-seat functionality
             # Search for open seat
             for i in range(self.seats):
                 if i not in taken_seats:
@@ -249,6 +248,8 @@ class Table(BaseModel):
 
             if seat is None:
                 raise TableFullError
+        elif seat in taken_seats:
+            raise SeatOccupiedError
 
         player = Player.create(user_id=user.id, table_id=self.id, seat=seat)
         user.active_player = player
