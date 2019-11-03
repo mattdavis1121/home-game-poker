@@ -183,7 +183,7 @@ class Table(BaseModel):
     group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
     stakes_id = db.Column(db.Integer, db.ForeignKey("stakes.id"), nullable=False)
     name = db.Column(db.String(80), default=make_random_name)
-    seats = db.Column(db.Integer, default=9)    # Max players allowed at table
+    seats = db.Column(db.Integer, default=10)    # Max players allowed at table
     created_utc = db.Column(db.DateTime, default=dt.utcnow)
 
     players = db.relationship("Player", backref="table", lazy="dynamic",
