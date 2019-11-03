@@ -1,4 +1,5 @@
 import Action from "../classes/Action.js";
+import BuyInManager from "../managers/BuyInManager";
 import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
@@ -49,6 +50,10 @@ class Main extends Phaser.State {
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
         this.registerListeners();
+
+        this.game.buyin = new BuyInManager(this.game, "buyIn");
+        const numSeats = 10;    // TODO - Make dynamic
+        this.game.buyin.initialize(this.game.config.seats[numSeats]);
 
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);

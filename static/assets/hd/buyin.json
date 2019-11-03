@@ -1,0 +1,44 @@
+{"frames": {
+
+"btn_buyin_down":
+{
+	"frame": {"x":0,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"btn_buyin_out":
+{
+	"frame": {"x":100,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"btn_buyin_over":
+{
+	"frame": {"x":200,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"btn_buyin_up":
+{
+	"frame": {"x":300,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "buyin.png",
+	"format": "RGBA8888",
+	"size": {"w":400,"h":100},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:6cea47de43a3911d52bd7f8693771752:cb2134d22f5f47c2341518e37ec78631:7113a09f8e0983153cae1596ab2f28b1$"
+}
+}

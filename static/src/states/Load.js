@@ -5,6 +5,7 @@ class Load extends Phaser.State {
         this.game.load.image("redCircle", "/static/assets/hd/redcircle.png");
         this.game.load.atlasJSONHash("cards", "/static/assets/hd/cards.png", "/static/assets/hd/cards.json");
         this.game.load.atlasJSONHash("panel", "/static/assets/hd/panel.png", "/static/assets/hd/panel.json");
+        this.game.load.atlasJSONHash("buyIn", "/static/assets/hd/buyin.png", "/static/assets/hd/buyin.json");
 
         this.game.textures = this.createCustomTextures();
     }
