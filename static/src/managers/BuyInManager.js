@@ -13,7 +13,8 @@ class BuyInManager {
 
     initialize(seatConfig, occupiedSeats) {
         for (let i = 0; i < seatConfig.length; i++) {
-            let button = new Button(this.game, seatConfig[i].x, seatConfig[i].y, this.key, () => {console.log("Buy in pressed: " + i)});
+            let button = new Button(this.game, seatConfig[i].x, seatConfig[i].y, this.key, this.buttonClicked, this);
+            button.seatNum = i; // Store for use on click
             button.setFrames(
                 "btn_buyin_over",
                 "btn_buyin_out",
@@ -36,6 +37,10 @@ class BuyInManager {
             seat.button.visible = !seat.occupied;
         }
         this.displayGroup.visible = this.groupVisible;
+    }
+
+    buttonClicked(button) {
+        this.buyInRequested.dispatch(button.seatNum);
     }
 }
 

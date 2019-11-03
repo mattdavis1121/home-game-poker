@@ -49,11 +49,12 @@ class Main extends Phaser.State {
         this.game.panel.displayGroup.x = this.game.config.panel.pos.x;
         this.game.panel.displayGroup.y = this.game.config.panel.pos.y;
         this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
-        this.registerListeners();
 
-        this.game.buyin = new BuyInManager(this.game, "buyIn");
+        this.game.buyIn = new BuyInManager(this.game, "buyIn");
         const numSeats = 10;    // TODO - Make dynamic
-        this.game.buyin.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats());
+        this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats());
+
+        this.registerListeners();
 
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);
@@ -153,6 +154,7 @@ class Main extends Phaser.State {
         this.game.panel.primaryClicked.add(this.handleAction, this);
         this.game.panel.secondaryClicked.add(this.handleAction, this);
         this.game.panel.tertiaryClicked.add(this.handleAction, this);
+        this.game.buyIn.buyInRequested.add(this.game.controller.join, this.game.controller);
     }
 
 

@@ -94,8 +94,8 @@ class Controller {
         navigator.sendBeacon(url, data);
     }
 
-    join() {
-        const data = {"userId": this.game.initialData.userId};
+    join(seatNum) {
+        const data = {"position": seatNum};
         const url = this.buildUrl("join");
         this.sendRequest(url, data);
     }
