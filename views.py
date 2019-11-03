@@ -9,8 +9,9 @@ from sqlalchemy.exc import IntegrityError
 
 from app import app, db
 from sse import sse
+# TODO - Clean up imports
 from models import (Table, User, Hand, Holding, Action, ActionType,
-                    BettingRound, Player, SSEChannel, Group)
+                    BettingRound, Player, SSEChannel, Group, Transaction)
 from forms import RegisterGroupForm, RegisterUserForm, LoginForm
 from exceptions import TableFullError, SeatOccupiedError
 from extensions import login_manager, scheduler
@@ -149,8 +150,10 @@ def join_table(table_name):
         return jsonify({"success": False, "msg": "Can only occupy one seat at a time"})
 
     try:
+        buy_in_amt = 5000  # TODO - get buy in from front end
         player = table.join(user, position)
-        player.update(balance=5000)  # TODO - get buy in from front end
+        player.update(balance=buy_in_amt)
+        user.new_transaction(-buy_in_amt)
 
         player_data = player.serialize()
         player_data["name"] = user.name

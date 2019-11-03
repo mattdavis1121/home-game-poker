@@ -155,6 +155,9 @@ class User(UserMixin, BaseModel):
         """Is user a member of group?"""
         return self in group.users
 
+    def new_transaction(self, amount):
+        return Transaction.create(user_id=self.id, amount=amount)
+
 
 class SSEChannel(BaseModel):
     """Map users to SSE channels for easy removal."""
@@ -167,7 +170,15 @@ class SSEChannel(BaseModel):
 
 
 class Transaction(BaseModel):
-    """Buy-ins and cash-outs."""
+    """
+    Buy-ins and cash-outs
+
+    All transactions are from the point-of-view of the user. Buy-ins are
+    represented as negative amount transactions as money is flowing out
+    of their wallet into the game. Cash-outs are the inverse.
+
+    # TODO - Might have to include table_id here
+    """
     __tablename__ = "transactions"
 
     id = db.Column(db.Integer, primary_key=True)
