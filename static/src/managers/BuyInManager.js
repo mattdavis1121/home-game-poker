@@ -8,7 +8,6 @@ class BuyInManager {
         this.displayGroup = this.game.add.group();
         this.buyInRequested = new Phaser.Signal();
         this.groupVisible = true;
-        this.takenSeats = [];
     }
 
     initialize(seatConfig, occupiedSeats) {
@@ -28,6 +27,11 @@ class BuyInManager {
             };
             this.displayGroup.add(button);
         }
+        this.updateDisplay();
+    }
+
+    newPlayer(playerData) {
+        this.seats[playerData.seat].occupied = true;
         this.updateDisplay();
     }
 

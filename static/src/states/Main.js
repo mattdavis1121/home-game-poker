@@ -25,8 +25,8 @@ class Main extends Phaser.State {
         this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
         this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
-        this.game.players = new PlayerManager(this.game);
         const numSeats = 10;    // TODO - Make dynamic
+        this.game.players = new PlayerManager(this.game, this.game.config.seats[numSeats]);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
 
         this.game.board = new CardManager(this.game);
@@ -134,17 +134,14 @@ class Main extends Phaser.State {
         this.table_sse.addListener("newPlayer", (event) => {
             let data = JSON.parse(event.data);
             console.log("newPlayer: ", data);
+            this.game.players.newPlayer(data);
+            this.game.buyIn.newPlayer(data);
         }, this);
 
         this.user_sse.addListener("deal", (event) => {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
             this.game.players.userPlayer.cards.setCardNames(data.holdings);
-        }, this);
-        this.user_sse.addListener("newPlayer", (event) => {
-            let data = JSON.parse(event.data);
-            console.log("newPlayer: ", data);
-            this.game.controller.setToken(data.token);
         }, this);
     }
 

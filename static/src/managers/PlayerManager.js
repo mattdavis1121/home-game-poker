@@ -1,8 +1,9 @@
 import Player from "../classes/Player";
 
 class PlayerManager {
-    constructor(game) {
+    constructor(game, seatConfig) {
         this.game = game;
+        this.seatConfig = seatConfig;
 
         this.players = [];  // Direct access to the Player objects
         this.userPlayer = null;  // The user's player object, if available
@@ -12,19 +13,19 @@ class PlayerManager {
         this.displayGroup = this.game.add.group();
     }
 
-    initialize(playerData, seatConfig) {
+    initialize(playerData) {
         for (let i = 0; i < playerData.length; i++) {
-            this.newPlayer(playerData[i], seatConfig[playerData[i].seat]);
+            this.newPlayer(playerData[i]);
         }
     }
 
-    newPlayer(playerData, seatConfig) {
+    newPlayer(playerData) {
         let player = new Player(this.game, this);
         player.initialize(playerData);
         player.initializeDisplay();
 
-        player.displayGroup.x = seatConfig.x;
-        player.displayGroup.y = seatConfig.y;
+        player.displayGroup.x = this.seatConfig[playerData.seat].x;
+        player.displayGroup.y = this.seatConfig[playerData.seat].y;
 
         this.players.push(player);
         this.displayGroup.add(player.displayGroup);
