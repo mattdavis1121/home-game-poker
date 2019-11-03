@@ -53,7 +53,7 @@ class Main extends Phaser.State {
 
         this.game.buyin = new BuyInManager(this.game, "buyIn");
         const numSeats = 10;    // TODO - Make dynamic
-        this.game.buyin.initialize(this.game.config.seats[numSeats]);
+        this.game.buyin.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats());
 
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);

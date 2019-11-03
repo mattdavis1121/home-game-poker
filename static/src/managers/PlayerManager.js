@@ -41,6 +41,18 @@ class PlayerManager {
         }
         return null;
     }
+
+    /**
+     * @summary Get a list of all occupied seats at the table
+     * @returns {number[]} - The IDs of occupied seats
+     */
+    getOccupiedSeats() {
+        let occupiedSeats = [];
+        for (let i = 0; i < this.players.length; i++) {
+            occupiedSeats.push(this.players[i].seat);
+        }
+        return occupiedSeats;
+    }
 }
 
 export default PlayerManager;

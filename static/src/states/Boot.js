@@ -3,7 +3,7 @@ import Controller from "../classes/Controller";
 
 class Boot extends Phaser.State {
     init() {
-        this.game.initialData = initialData;
+        this.game.initialData = this.augmentInitialData(initialData);
         this.game.config = config;
 
         // TODO - This should come from somewhere dynamic
@@ -24,6 +24,22 @@ class Boot extends Phaser.State {
 
     create() {
         this.game.state.start("load");
+    }
+
+    /**
+     * @Summary Calculate additional values to store on game.initialData
+     *
+     * To save on server-side processing and data-transfer load, this
+     * method is a place to generate additional data needed by the game
+     * which may be derived from the data sent from the back end.
+     */
+    augmentInitialData(initialData) {
+        initialData.occupiedSeats = [];
+        for (let i = 0; i < initialData.players.length; i++) {
+            initialData.occupiedSeats.push(initialData.players[i].seat);
+        }
+
+        return initialData;
     }
 }
 
