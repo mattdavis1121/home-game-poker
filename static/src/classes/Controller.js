@@ -81,6 +81,18 @@ class Controller {
         this.action(data);
     }
 
+    join(seatNum) {
+        const data = {"position": seatNum};
+        const url = this.buildUrl("join");
+        this.sendRequest(url, data);
+    }
+
+    leave() {
+        const data = {};
+        const url = this.buildUrl("leave");
+        this.sendRequest(url, data);
+    }
+
     /**
      * @summary Send a beacon to the server on disconnect
      *
@@ -92,12 +104,6 @@ class Controller {
         const data = {};
         const url = "/disconnect/";
         navigator.sendBeacon(url, data);
-    }
-
-    join(seatNum) {
-        const data = {"position": seatNum};
-        const url = this.buildUrl("join");
-        this.sendRequest(url, data);
     }
 
     buildPayload(actionType, betAmt = 0) {

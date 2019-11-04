@@ -35,6 +35,11 @@ class BuyInManager {
         this.updateDisplay();
     }
 
+    playerLeft(playerData) {
+        this.seats[playerData.seat].occupied = false;
+        this.updateDisplay();
+    }
+
     updateDisplay() {
         for (let seatNum in this.seats) {
             let seat = this.seats[seatNum];

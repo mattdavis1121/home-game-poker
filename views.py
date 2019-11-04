@@ -13,7 +13,7 @@ from sse import sse
 from models import (Table, User, Hand, Holding, Action, ActionType,
                     BettingRound, Player, SSEChannel, Group, Transaction)
 from forms import RegisterGroupForm, RegisterUserForm, LoginForm
-from exceptions import TableFullError, SeatOccupiedError
+from exceptions import TableFullError, SeatOccupiedError, PlayerNotAtTableError
 from extensions import login_manager, scheduler
 from poker import TexasHoldemHand, determine_min_raise
 
@@ -164,6 +164,30 @@ def join_table(table_name):
         return jsonify({"success": False, "msg": "Seat {} is occupied".format(position)})
     except TableFullError:
         return jsonify({"success": False, "msg": "Table {} is full".format(table.id)})
+    except Exception as e:
+        return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
+
+
+@app.route("/tables/<table_name>/leave/", methods=["POST"])
+@jwt_required
+def leave_table(table_name):
+    data = request.get_json()
+    table = Table.query.filter_by(name=table_name).first()
+    user = User.query.get(get_jwt_identity())
+
+    if not user:
+        return jsonify({"success": False, "msg": "No user found"}), 401
+    if not user.active_player:
+        return jsonify({"success": False, "msg": "No active player"})
+
+    try:
+        user.new_transaction(user.active_player.balance)
+        player_data = user.active_player.serialize()
+        table.leave(user.active_player)
+        sse.publish(player_data, type="playerLeft", channel=table.name)
+        return jsonify({"success": True})
+    except PlayerNotAtTableError:
+        return jsonify({"success": False, "msg": "Player is not at table {}".format(table.id)})
     except Exception as e:
         return jsonify({"success": False, "msg": "Unknown exception", "exception": e})
 

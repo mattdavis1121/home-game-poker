@@ -34,6 +34,27 @@ class PlayerManager {
         if (player.userId === this.userId) {
             this.userPlayer = player;
         }
+
+        return player;
+    }
+
+    playerLeft(playerData) {
+        let player = this.getById(playerData.id);
+
+        if (!player) {
+            console.warn("Could not find player at table");
+            return;
+        }
+
+        player.displayGroup.destroy();
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i] === player) {
+                this.players.splice(i, 1);
+                break;
+            }
+        }
+
+        return player;
     }
 
     getById(id) {

@@ -36,3 +36,8 @@ class InvalidRoundNumberError(Error):
 class InsufficientBalanceError(Error):
     """Player attempting to make bet greater than available balance"""
     pass
+
+
+class PlayerNotAtTableError(Error):
+    """Player attempting action on table they're not sitting at"""
+    pass

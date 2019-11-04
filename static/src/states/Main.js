@@ -137,7 +137,12 @@ class Main extends Phaser.State {
             this.game.players.newPlayer(data);
             this.game.buyIn.newPlayer(data);
         }, this);
-
+        this.table_sse.addListener("playerLeft", (event) => {
+            let data = JSON.parse(event.data);
+            console.log("playerLeft: ", data);
+            this.game.players.playerLeft(data);
+            this.game.buyIn.playerLeft(data);
+        }, this);
         this.user_sse.addListener("deal", (event) => {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);

@@ -12,7 +12,7 @@ from extensions import bcrypt
 from exceptions import (TableFullError, SeatOccupiedError,
                         DuplicateActiveRecordError, InsufficientPlayersError,
                         InvalidCardError, InvalidRoundNumberError,
-                        InsufficientBalanceError)
+                        InsufficientBalanceError, PlayerNotAtTableError)
 
 
 def make_random_name():
@@ -158,6 +158,12 @@ class User(UserMixin, BaseModel):
     def new_transaction(self, amount):
         return Transaction.create(user_id=self.id, amount=amount)
 
+    def remove_active_player(self):
+        player = self.active_player
+        self.active_player = None
+        self.save()
+        return player
+
 
 class SSEChannel(BaseModel):
     """Map users to SSE channels for easy removal."""
@@ -267,6 +273,11 @@ class Table(BaseModel):
         self.save()
 
         return player
+
+    def leave(self, player):
+        if player.table != self:
+            raise PlayerNotAtTableError
+        return player.user.remove_active_player()
 
     def new_hand(self, hand_type):
         if self.active_hand:
