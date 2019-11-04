@@ -1,8 +1,9 @@
 import Player from "../classes/Player";
 
 class PlayerManager {
-    constructor(game, seatConfig) {
+    constructor(game, userId, seatConfig) {
         this.game = game;
+        this.userId = userId;
         this.seatConfig = seatConfig;
 
         this.players = [];  // Direct access to the Player objects
@@ -30,7 +31,7 @@ class PlayerManager {
         this.players.push(player);
         this.displayGroup.add(player.displayGroup);
 
-        if (playerData.isUser === true) {
+        if (player.userId === this.userId) {
             this.userPlayer = player;
         }
     }

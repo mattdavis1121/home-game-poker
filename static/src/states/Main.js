@@ -21,12 +21,12 @@ class Main extends Phaser.State {
         this.background = this.game.add.image(0, 0, "background");
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHand);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
-        this.joinBtn = this.makeBtn(100, 340, "join", this.game.textures.whiteSquare, this.joinTable);
+        this.leaveBtn = this.makeBtn(100, 340, "leave", this.game.textures.whiteSquare, this.leaveTable);
         this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
         this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
         const numSeats = 10;    // TODO - Make dynamic
-        this.game.players = new PlayerManager(this.game, this.game.config.seats[numSeats]);
+        this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats]);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
 
         this.game.board = new CardManager(this.game);
@@ -208,8 +208,8 @@ class Main extends Phaser.State {
         }));
     };
 
-    joinTable() {
-        this.game.controller.join();
+    leaveTable() {
+        this.game.controller.leave();
     }
 
     bb() {
