@@ -44,9 +44,13 @@ class BuyInManager {
         }
         this.buttonsGroup.visible = this.buttonsVisible;
 
+        this.display.modalBackground = this.game.add.image(0, 0, this.game.textures.modalBackground);
+        this.display.modalBackground.visible = this.modalVisible;
+        this.displayGroup.addChild(this.display.modalBackground);
+
         this.display.modal = this.game.add.image(modalConfig.x, modalConfig.y, this.key, "modal");
-        this.displayGroup.addChild(this.display.modal);
         this.display.modal.visible = this.modalVisible;
+        this.displayGroup.addChild(this.display.modal);
 
         this.display.inputBox = this.game.add.image(modalConfig.inputBox.x, modalConfig.inputBox.y, this.key, "input_box");
         this.display.modal.addChild(this.display.inputBox);
@@ -111,6 +115,7 @@ class BuyInManager {
         }
         this.buttonsGroup.visible = this.buttonsVisible;
         this.display.modal.visible = this.modalVisible;
+        this.display.modalBackground.visible = this.modalVisible;
     }
 
     buttonClicked(button) {

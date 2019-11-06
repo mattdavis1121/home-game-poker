@@ -30,9 +30,14 @@ class Load extends Phaser.State {
         graphics.lineStyle(4, 0x000000);
         graphics.beginFill(0xFFFFFF);
         graphics.drawRect(0, 0, 300, 100);
-
         textures["whiteRect"] = graphics.generateTexture();
+        graphics.destroy();
 
+        graphics = this.game.add.graphics();
+        graphics.lineStyle(4, 0x000000);
+        graphics.beginFill(0x000000, 0.5);
+        graphics.drawRect(0, 0, this.game.width, this.game.height);
+        textures["modalBackground"] = graphics.generateTexture();
         graphics.destroy();
 
         return textures;
