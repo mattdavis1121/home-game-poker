@@ -180,7 +180,7 @@ class Main extends Phaser.State {
     }
 
     update() {
-
+        this.game.buyIn.update();
     }
 
     makeBtn(x, y, text, texture, callback) {

@@ -81,8 +81,8 @@ class Controller {
         this.action(data);
     }
 
-    join(seatNum) {
-        const data = {"position": seatNum};
+    join(seatNum, buyIn) {
+        const data = {"position": seatNum, "amount": buyIn};
         const url = this.buildUrl("join");
         this.sendRequest(url, data);
     }

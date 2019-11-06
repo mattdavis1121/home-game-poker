@@ -143,17 +143,23 @@ def join_table(table_name):
     table = Table.query.filter_by(name=table_name).first()
     user = User.query.get(get_jwt_identity())
     position = data.get("position")
+    raw_amount = data.get("amount", "0")
 
     if not user:
         return jsonify({"success": False, "msg": "No user found"}), 401
     if user.active_player:
         return jsonify({"success": False, "msg": "Can only occupy one seat at a time"})
 
+    # TODO - This converts the decimal input to an int and rounds down to the
+    #  nearest small blind buy in. Is that what I should be doing? Will
+    #  probably need some way to tell the players what happened.
+    pennies = int(float(raw_amount) * 100)
+    rounded_amount = (pennies // table.stakes.small) * table.stakes.small
+
     try:
-        buy_in_amt = 5000  # TODO - get buy in from front end
         player = table.join(user, position)
-        player.update(balance=buy_in_amt)
-        user.new_transaction(-buy_in_amt)
+        player.update(balance=rounded_amount)
+        user.new_transaction(-rounded_amount)
 
         player_data = player.serialize()
         player_data["name"] = user.name

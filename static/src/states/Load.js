@@ -8,6 +8,8 @@ class Load extends Phaser.State {
         this.game.load.atlasJSONHash("buyIn", "/static/assets/hd/buyin.png", "/static/assets/hd/buyin.json");
 
         this.game.textures = this.createCustomTextures();
+
+        this.loadPlugins();
     }
 
     create() {
@@ -34,6 +36,10 @@ class Load extends Phaser.State {
         graphics.destroy();
 
         return textures;
+    }
+
+    loadPlugins() {
+        this.game.add.plugin(PhaserInput.Plugin);
     }
 }
 

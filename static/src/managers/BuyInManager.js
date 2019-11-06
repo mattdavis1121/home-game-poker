@@ -4,10 +4,24 @@ class BuyInManager {
     constructor(game, key) {
         this.game = game;
         this.key = key;
-        this.seats = {};
-        this.displayGroup = this.game.add.group();
         this.buyInRequested = new Phaser.Signal();
-        this.groupVisible = true;
+        this.seats = {};
+
+        this.display = {"buttons": [], "modal": null, "inputBox": null};
+        this.buttonsGroup = this.game.add.group();
+        this.displayGroup = this.game.add.group();
+        this.displayGroup.addChild(this.buttonsGroup);
+
+        this.buttonsVisible = true;
+        this.modalVisible = false;
+
+        this.data = {"seatNum": null, "buyIn": null};
+    }
+
+    update() {
+        if (this.display.inputField && this.display.inputField.visible) {
+            this.display.inputField.update();
+        }
     }
 
     initialize(seatConfig, occupiedSeats) {
@@ -25,8 +39,66 @@ class BuyInManager {
                 "button": button,
                 "occupied": occupiedSeats.indexOf(i) !== -1
             };
-            this.displayGroup.add(button);
+            this.display.buttons.push(button);
+            this.buttonsGroup.add(button);
         }
+        this.buttonsGroup.visible = this.buttonsVisible;
+
+        this.display.modal = this.game.add.image(this.game.world.centerX, this.game.world.centerY, this.key, "modal");
+        this.displayGroup.addChild(this.display.modal);
+        this.display.modal.visible = this.modalVisible;
+
+        this.display.inputBox = this.game.add.image(15, 86, this.key, "input_box");
+        this.display.modal.addChild(this.display.inputBox);
+
+        this.display.inputField = this.game.add.inputField(30, -2, {
+            font: '32px Arial',
+            fill: '#333333',
+            width: 250,
+            padding: 8,
+            borderWidth: 0,
+            placeHolder: '20.00',
+            type: PhaserInput.InputType.number,
+            fillAlpha: 0
+        });
+        this.display.inputBox.addChild(this.display.inputField);
+
+        const btnTextStyle = {
+            "font": "bold 22pt Arial",
+            "fill": "white",
+            "align": "center"
+        };
+
+        this.display.cancel = new Button(this.game, 15, 145, this.key, this.cancel, this);
+        this.display.cancel.setFrames(
+            "btn_secondary_over",
+            "btn_secondary_out",
+            "btn_secondary_down",
+            "btn_secondary_up"
+        );
+        this.display.cancel.setTextStyle(btnTextStyle);
+        this.display.cancel.setText("CANCEL");
+        this.display.modal.addChild(this.display.cancel);
+
+        this.display.submit = new Button(this.game, 155, 145, this.key, this.submit, this);
+        this.display.submit.setFrames(
+            "btn_primary_over",
+            "btn_primary_out",
+            "btn_primary_down",
+            "btn_primary_up"
+        );
+        this.display.submit.setTextStyle(btnTextStyle);
+        this.display.submit.setText("OKAY");
+        this.display.modal.addChild(this.display.submit);
+
+
+        // TODO - Remove
+        this.display.modal.inputEnabled = true;
+        this.display.modal.input.enableDrag();
+        console.log(this.display.inputField);
+        this.display.inputField.focusIn.add(() => console.log("focus in"));
+        this.display.inputField.focusOut.add(() => console.log("focus out"));
+
         this.updateDisplay();
     }
 
@@ -45,11 +117,31 @@ class BuyInManager {
             let seat = this.seats[seatNum];
             seat.button.visible = !seat.occupied;
         }
-        this.displayGroup.visible = this.groupVisible;
+        this.buttonsGroup.visible = this.buttonsVisible;
+        this.display.modal.visible = this.modalVisible;
     }
 
     buttonClicked(button) {
-        this.buyInRequested.dispatch(button.seatNum);
+        this.data.seatNum = button.seatNum;
+        this.buttonsVisible = false;
+        this.modalVisible = true;
+        this.updateDisplay();
+    }
+
+    cancel() {
+        this.data = {"seatNum": null, "buyIn": null};
+        this.buttonsVisible = true;
+        this.modalVisible = false;
+        this.updateDisplay();
+    }
+
+    submit() {
+        this.data.buyIn = this.display.inputField.value;
+        this.buyInRequested.dispatch(this.data.seatNum, this.data.buyIn);
+        this.data = {"seatNum": null, "buyIn": null};
+        this.modalVisible = false;
+        this.buttonsVisible = false;
+        this.updateDisplay();
     }
 }
 

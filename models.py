@@ -210,6 +210,7 @@ class Table(BaseModel):
     active_hand = db.relationship("Hand", secondary=hands_active,
                                   lazy="subquery",
                                   uselist=False)
+    stakes = db.relationship("Stakes", lazy=True)
 
     @property
     def active_players(self):
