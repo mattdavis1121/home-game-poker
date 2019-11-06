@@ -91,14 +91,6 @@ class BuyInManager {
         this.display.submit.setText("BUY IN");
         this.display.modal.addChild(this.display.submit);
 
-
-        // TODO - Remove
-        this.display.modal.inputEnabled = true;
-        this.display.modal.input.enableDrag();
-        console.log(this.display.inputField);
-        this.display.inputField.focusIn.add(() => console.log("focus in"));
-        this.display.inputField.focusOut.add(() => console.log("focus out"));
-
         this.updateDisplay();
     }
 
