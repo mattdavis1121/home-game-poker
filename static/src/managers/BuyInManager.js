@@ -24,7 +24,7 @@ class BuyInManager {
         }
     }
 
-    initialize(seatConfig, occupiedSeats) {
+    initialize(seatConfig, occupiedSeats, modalConfig) {
         for (let i = 0; i < seatConfig.length; i++) {
             let button = new Button(this.game, seatConfig[i].x, seatConfig[i].y, this.key, this.buttonClicked, this);
             button.seatNum = i; // Store for use on click
@@ -44,17 +44,17 @@ class BuyInManager {
         }
         this.buttonsGroup.visible = this.buttonsVisible;
 
-        this.display.modal = this.game.add.image(this.game.world.centerX, this.game.world.centerY, this.key, "modal");
+        this.display.modal = this.game.add.image(modalConfig.x, modalConfig.y, this.key, "modal");
         this.displayGroup.addChild(this.display.modal);
         this.display.modal.visible = this.modalVisible;
 
-        this.display.inputBox = this.game.add.image(15, 86, this.key, "input_box");
+        this.display.inputBox = this.game.add.image(modalConfig.inputBox.x, modalConfig.inputBox.y, this.key, "input_box");
         this.display.modal.addChild(this.display.inputBox);
 
-        this.display.inputField = this.game.add.inputField(30, -2, {
+        this.display.inputField = this.game.add.inputField(modalConfig.inputField.x, modalConfig.inputField.y, {
             font: '32px Arial',
             fill: '#333333',
-            width: 250,
+            width: 220,
             padding: 8,
             borderWidth: 0,
             placeHolder: '20.00',
@@ -69,7 +69,7 @@ class BuyInManager {
             "align": "center"
         };
 
-        this.display.cancel = new Button(this.game, 15, 145, this.key, this.cancel, this);
+        this.display.cancel = new Button(this.game, modalConfig.cancelButton.x, modalConfig.cancelButton.y, this.key, this.cancel, this);
         this.display.cancel.setFrames(
             "btn_secondary_over",
             "btn_secondary_out",
@@ -80,7 +80,7 @@ class BuyInManager {
         this.display.cancel.setText("CANCEL");
         this.display.modal.addChild(this.display.cancel);
 
-        this.display.submit = new Button(this.game, 155, 145, this.key, this.submit, this);
+        this.display.submit = new Button(this.game, modalConfig.submitButton.x, modalConfig.submitButton.y, this.key, this.submit, this);
         this.display.submit.setFrames(
             "btn_primary_over",
             "btn_primary_out",
@@ -88,7 +88,7 @@ class BuyInManager {
             "btn_primary_up"
         );
         this.display.submit.setTextStyle(btnTextStyle);
-        this.display.submit.setText("OKAY");
+        this.display.submit.setText("BUY IN");
         this.display.modal.addChild(this.display.submit);
 
 

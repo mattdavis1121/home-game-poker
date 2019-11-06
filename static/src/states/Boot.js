@@ -20,6 +20,11 @@ class Boot extends Phaser.State {
         this.game.scale.pageAlignVertically = true;
 
         this.game.controller = new Controller(this.game, this.game.initialData.playerId, this.game.initialData.token);
+
+        if (this.game.initialData.emulatorEnabled) {
+            console.log('test');
+            window.game = this.game;
+        }
     }
 
     create() {

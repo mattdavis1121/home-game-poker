@@ -50,7 +50,7 @@ class Main extends Phaser.State {
         this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
 
         this.game.buyIn = new BuyInManager(this.game, "buyIn");
-        this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats());
+        this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
 
         this.registerListeners();
 

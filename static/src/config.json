@@ -28,5 +28,25 @@
     // TODO
     "8": [],
     "9": []
+  },
+  "buyInModal": {
+    "x": 810,
+    "y": 430,
+    "inputBox": {
+      "x": 15,
+      "y": 86
+    },
+    "inputField": {
+      "x": 30,
+      "y": -2
+    },
+    "cancelButton": {
+      "x": 15,
+      "y": 145
+    },
+    "submitButton": {
+      "x": 155,
+      "y": 145
+    }
   }
 }
