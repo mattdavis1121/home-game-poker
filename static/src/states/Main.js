@@ -51,6 +51,7 @@ class Main extends Phaser.State {
 
         this.game.buyIn = new BuyInManager(this.game, "buyIn");
         this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
+        this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
 
         this.registerListeners();
 
@@ -136,12 +137,14 @@ class Main extends Phaser.State {
             console.log("newPlayer: ", data);
             this.game.players.newPlayer(data);
             this.game.buyIn.newPlayer(data);
+            this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
         }, this);
         this.table_sse.addListener("playerLeft", (event) => {
             let data = JSON.parse(event.data);
             console.log("playerLeft: ", data);
             this.game.players.playerLeft(data);
             this.game.buyIn.playerLeft(data);
+            this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
         }, this);
         this.user_sse.addListener("deal", (event) => {
             let data = JSON.parse(event.data);

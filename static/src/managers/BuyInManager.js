@@ -140,6 +140,11 @@ class BuyInManager {
         this.buttonsVisible = false;
         this.updateDisplay();
     }
+
+    setButtonsVisible(visible) {
+        this.buttonsVisible = visible;
+        this.updateDisplay();
+    }
 }
 
 export default BuyInManager;

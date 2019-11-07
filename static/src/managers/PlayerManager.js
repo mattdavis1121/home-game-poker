@@ -54,6 +54,10 @@ class PlayerManager {
             }
         }
 
+        if (player === this.userPlayer) {
+            this.userPlayer = null;
+        }
+
         return player;
     }
 
