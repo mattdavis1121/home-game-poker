@@ -26,7 +26,7 @@ class Main extends Phaser.State {
         this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
         const numSeats = 10;    // TODO - Make dynamic
-        this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats]);
+        this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats], this.game.config.chips[numSeats]);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
 
         this.game.board = new CardManager(this.game);

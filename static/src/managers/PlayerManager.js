@@ -1,10 +1,11 @@
 import Player from "../classes/Player";
 
 class PlayerManager {
-    constructor(game, userId, seatConfig) {
+    constructor(game, userId, seatConfig, chipConfig) {
         this.game = game;
         this.userId = userId;
         this.seatConfig = seatConfig;
+        this.chipConfig = chipConfig;
 
         this.players = [];  // Direct access to the Player objects
         this.userPlayer = null;  // The user's player object, if available
@@ -21,7 +22,7 @@ class PlayerManager {
     }
 
     newPlayer(playerData) {
-        let player = new Player(this.game, this);
+        let player = new Player(this.game, this.chipConfig);
         player.initialize(playerData);
         player.initializeDisplay();
 

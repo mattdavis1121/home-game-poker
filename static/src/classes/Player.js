@@ -1,10 +1,11 @@
 import Util from "../Util";
 import CardManager from "../managers/CardManager";
+import ChipManager from "../managers/ChipManager";
 
 class Player {
-    constructor(game, manager) {
+    constructor(game, chipConfig) {
         this.game = game;
-        this.manager = manager;
+        this.chipConfig = chipConfig;
 
         this.id = null;
         this.userId = null;
@@ -22,6 +23,7 @@ class Player {
         this.displayGroup = this.game.add.group();
 
         this.cards = new CardManager(this.game);
+        this.chips = new ChipManager(this.game, "chips", this.game.config.denoms);
     }
 
     initialize(data) {
@@ -62,6 +64,11 @@ class Player {
         this.display.nextIndicator.right = this.display.background.right - 5;
         this.display.nextIndicator.bottom = this.display.background.bottom - 5;
         this.displayGroup.add(this.display.nextIndicator);
+
+        this.display.chips = this.chips.displayGroup;
+        this.display.chips.x = this.chipConfig[this.seat].x;
+        this.display.chips.y = this.chipConfig[this.seat].y;
+        this.displayGroup.addChild(this.chips.displayGroup);
 
         this.updateDisplay();
     }
