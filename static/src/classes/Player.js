@@ -86,6 +86,7 @@ class Player {
         this.isDealer = data.isDealer === undefined ? this.isDealer : data.isDealer;
         this.isNext = data.isNext === undefined ? this.isNext : data.isNext;
         this.roundBet = data.roundBet === undefined ? this.roundBet : data.roundBet;
+        this.chips.setValue(this.roundBet);
         this.updateDisplay();
     }
 }

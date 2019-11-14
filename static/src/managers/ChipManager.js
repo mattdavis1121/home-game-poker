@@ -1,6 +1,3 @@
-import Button from "../classes/Button";
-import Chip from "../classes/Chip";
-
 class ChipManager {
     constructor(game, key, values) {
         this.game = game;
@@ -17,51 +14,46 @@ class ChipManager {
 
     }
 
-    getChip(value) {
+    getChip() {
         let chip = this.pool.pop();
         if (!chip) {
-            chip = new Chip(this.game, this.key);
+            chip = this.game.add.sprite(0, 0, this.key);
+            chip.angle = this.game.rnd.integerInRange(-180, 180);   // Random rotation
+            chip.anchor.setTo(0.5);
         }
+        chip.revive();
         this.chips.push(chip);
-
-        // chip.events.onKilled.add(this.recycleChip, this);
-
-        chip.value = value;
-        chip.frameName = value.toString();
         return chip;
     }
 
     setValue(value) {
+        this.clear();
         this.value = value;
-        let i = 0;
-        let j = this.values.length - 1;
+        let yPos = 0;
+        let valuesPtr = this.values.length - 1;
         while (value >= 25) {
-            while (value < this.values[j]) {
-                j--;
-                if (j === 0) {
+            while (value < this.values[valuesPtr]) {
+                valuesPtr--;
+                if (valuesPtr === 0) {
                     break;
                 }
             }
-            let chip = this.game.add.sprite(0, i, this.key);
-            chip.frameName = this.values[j].toString();
-            chip.anchor.setTo(0.5);
-            chip.angle = this.game.rnd.integerInRange(-180, 180);
-            i -= 5;
-            value -= this.values[j];
+            let chip = this.getChip();
+            chip.y = yPos;
+            chip.frameName = this.values[valuesPtr].toString();
+            yPos -= 5;
+            value -= this.values[valuesPtr];
             this.displayGroup.addChild(chip);
         }
     }
 
-    // clear() {
-    //     let chip;
-    //     while (chip = this.chips.pop()) {
-    //         chip.kill();
-    //     }
-    // }
-    //
-    // recycleChip(chip) {
-    //
-    // }
+    clear() {
+        let chip;
+        while (chip = this.chips.pop()) {
+            this.pool.push(chip);
+            chip.kill();
+        }
+    }
 }
 
 export default ChipManager;
