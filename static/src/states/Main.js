@@ -35,9 +35,8 @@ class Main extends Phaser.State {
         this.game.board.displayGroup.centerY = this.game.world.centerY;
 
         this.game.pot = new Pot(this.game);
-        this.game.pot.initializeDisplay();
-        this.game.pot.sprite.centerX = this.game.world.centerX;
-        this.game.pot.sprite.centerY = this.game.world.centerY - 140;
+        this.game.pot.chips.displayGroup.centerX = this.game.world.centerX;     // TODO - Positions in config
+        this.game.pot.chips.displayGroup.centerY = this.game.world.centerY - 140;
 
         // TODO - These should go somewhere else. Maybe in Pot?
         this.game.roundBet = 0;
@@ -130,6 +129,10 @@ class Main extends Phaser.State {
             for (let i = 0; i < data.winners.length; i++) {
                 let winner = data.winners[i];
                 this.game.players.getById(winner.id).update({balance: winner.balance});
+            }
+            this.game.pot.chips.clear();
+            for (let i = 0; i < this.game.players.players.length; i++) {
+                this.game.players.players[i].chips.clear();
             }
         });
         this.table_sse.addListener("newPlayer", (event) => {
