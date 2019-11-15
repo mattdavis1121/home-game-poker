@@ -4,6 +4,8 @@ class ChipManager {
         this.key = key;
         this.values = values;
 
+        this.stackChips = true;
+        this.colorUp = true;
         this.chips = [];
         this.pool = [];
         this.value = 0;
@@ -27,8 +29,18 @@ class ChipManager {
     }
 
     setValue(value) {
-        this.clear();
-        this.value = value;
+        if (value === this.value) {
+            return;
+        }
+
+        if (this.colorUp) {
+            this.clear();
+            this.value = value;
+        } else {
+            value -= this.value;
+            this.value += value;
+        }
+
         let yPos = 0;
         let valuesPtr = this.values.length - 1;
         while (value >= 25) {
@@ -39,9 +51,21 @@ class ChipManager {
                 }
             }
             let chip = this.getChip();
-            chip.y = yPos;
             chip.frameName = this.values[valuesPtr].toString();
-            yPos -= 5;
+
+            if (this.stackChips) {
+                chip.y = yPos;
+                yPos -= 5;
+            } else {
+                if (this.chips.length === 1) {
+                    chip.x = 0;
+                    chip.y = 0;
+                } else {
+                    let variation = this.displayGroup.width / 2;
+                    chip.x = this.game.rnd.integerInRange(-variation, variation);
+                    chip.y = this.game.rnd.integerInRange(-variation, variation);
+                }
+            }
             value -= this.values[valuesPtr];
             this.displayGroup.addChild(chip);
         }

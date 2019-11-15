@@ -6,6 +6,8 @@ class Pot {
         this.amount = 0;
         this.sprite = null;
         this.chips = new ChipManager(this.game, "chips", this.game.config.denoms);
+        this.chips.stackChips = false;
+        this.chips.colorUp = false;
     }
 
     updateDisplay() {
