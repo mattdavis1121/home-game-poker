@@ -90,6 +90,16 @@ class Player {
         this.chips.setValue(this.roundBet);
         this.updateDisplay();
     }
+
+    action(data) {
+        this.update({
+            balance: data.playerBalance,
+            roundBet: data.playerRoundBet
+        });
+
+        let actionText = ActionText[data.actionType];
+
+    }
 }
 
 export default Player;

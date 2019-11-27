@@ -114,6 +114,7 @@ class Main extends Phaser.State {
                 isNext: false,
                 roundBet: data.playerRoundBet
             });
+            this.game.players.getById(data.playerId).nameplate.flash(this.parseActionText(data));
             this.game.players.getById(data.next).update({isNext: true});
             this.game.pot.setAmount(data.pot);
             this.game.roundBet = data.roundBet;
@@ -183,6 +184,36 @@ class Main extends Phaser.State {
             default:
                 console.warn("Invalid Action Type: " + action);
         }
+    }
+
+    /**
+     * @summary Transform action data into more descriptive bet string
+     *
+     * All bets are bets, but some require more description to follow poker
+     * convention. Specifically, a bet which just equals an existing bet is a
+     * call, and one which increases an existing bet is a raise.
+     *
+     * NOTE: This function must be called BEFORE the state's `roundBet` and
+     * `roundRaise` variables are updated, as this function must compare
+     * new bet data against the previous state.
+     *
+     * @param actionData
+     * @returns {string} - The text to be flashed
+     */
+    parseActionText(actionData) {
+        let actionText = ActionText[actionData.actionType];
+        if (actionData.actionType === Action.BET) {
+            if (actionData.playerRoundBet === this.game.roundBet) {
+                actionText = "CALL";
+            } else if (actionData.playerRoundBet > this.game.roundBet && this.game.roundBet > 0) {
+                actionText = "RAISE";
+            }
+
+            if (actionData.playerBalance === 0) {
+                actionText = "ALL IN";
+            }
+        }
+        return actionText;
     }
 
     update() {
