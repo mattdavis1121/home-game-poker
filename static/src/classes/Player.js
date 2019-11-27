@@ -1,6 +1,7 @@
 import Util from "../Util";
 import CardManager from "../managers/CardManager";
 import ChipManager from "../managers/ChipManager";
+import Nameplate from "../classes/Nameplate";
 
 class Player {
     constructor(game, chipConfig) {
@@ -19,11 +20,18 @@ class Player {
         this.isNext = false;
         this.isUser = false;
 
-        this.display = {};
         this.displayGroup = this.game.add.group();
+        this.display = {
+            nameplate: null,
+            cards: null,
+            dealerButton: null,
+            nextIndicator: null,
+            chips: null
+        };
 
         this.cards = new CardManager(this.game);
         this.chips = new ChipManager(this.game, "chips", this.game.config.denoms);
+        this.nameplate = new Nameplate(this.game, 0, 0, "nameplate");
     }
 
     initialize(data) {
@@ -39,16 +47,9 @@ class Player {
     }
 
     initializeDisplay() {
-        this.display.background = this.displayGroup.create(0, 0, this.game.textures.whiteRect);
-        this.display.background.anchor.setTo(0.5);
-
-        this.display.name = this.game.add.text(0, -20, "");
-        this.display.name.anchor.setTo(0.5);
-        this.displayGroup.add(this.display.name);
-
-        this.display.balance = this.game.add.text(0, 20, "");
-        this.display.balance.anchor.setTo(0.5);
-        this.displayGroup.add(this.display.balance);
+        this.display.nameplate = this.nameplate;
+        this.display.nameplate.initializeDisplay();
+        this.displayGroup.add(this.display.nameplate);
 
         this.display.cards = this.cards.displayGroup;
         this.display.cards.centerX = 0;
@@ -56,13 +57,13 @@ class Player {
         this.displayGroup.add(this.display.cards);
 
         this.display.dealerButton = this.game.add.sprite(0, 0, "dealerButton");
-        this.display.dealerButton.left = this.display.background.left + 5;
-        this.display.dealerButton.bottom = this.display.background.bottom - 5;
+        this.display.dealerButton.left = this.display.nameplate.left + 5;
+        this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
         this.displayGroup.add(this.display.dealerButton);
 
         this.display.nextIndicator = this.game.add.sprite(0, 0, "redCircle");
-        this.display.nextIndicator.right = this.display.background.right - 5;
-        this.display.nextIndicator.bottom = this.display.background.bottom - 5;
+        this.display.nextIndicator.right = this.display.nameplate.right - 5;
+        this.display.nextIndicator.bottom = this.display.nameplate.bottom - 5;
         this.displayGroup.add(this.display.nextIndicator);
 
         this.display.chips = this.chips.displayGroup;
@@ -74,8 +75,8 @@ class Player {
     }
 
     updateDisplay() {
-        this.display.name.text = this.name;
-        this.display.balance.text = Util.parseCurrency(this.balance);
+        this.display.nameplate.name = this.name;
+        this.display.nameplate.balance = this.balance;
         this.display.dealerButton.visible = this.isDealer === true;
         this.display.nextIndicator.visible = this.isNext === true;
     }

@@ -63,5 +63,22 @@
       {"x": 174, "y": 74},
       {"x": 14, "y": 98}
     ]
+  },
+  "nameplate": {
+    "name": {
+      "x": 10,
+      "y": 30,
+      "style": {
+        "font": "bold 22pt Arial"
+      }
+    },
+    "balance": {
+      "x": 10,
+      "y": 60,
+      "style": {
+        "font": "16pt Arial",
+        "boundsAlignH": "right"
+      }
+    }
   }
 }

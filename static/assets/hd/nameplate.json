@@ -1,0 +1,36 @@
+{"frames": {
+
+"nameplate_primary":
+{
+	"frame": {"x":0,"y":0,"w":200,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
+	"sourceSize": {"w":200,"h":75}
+},
+"nameplate_red":
+{
+	"frame": {"x":0,"y":75,"w":200,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
+	"sourceSize": {"w":200,"h":75}
+},
+"nameplate_yellow":
+{
+	"frame": {"x":0,"y":150,"w":200,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
+	"sourceSize": {"w":200,"h":75}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "nameplate.png",
+	"format": "RGBA8888",
+	"size": {"w":200,"h":225},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:797db6221fd02b1173a6b5f0a2ce2f7e:3dfeda24eff0e3c8f43d875c3006251a:ba677772e24b440a62c991319a8c7efa$"
+}
+}
