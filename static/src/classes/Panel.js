@@ -1,7 +1,7 @@
 import Util from "../Util";
 import Button from "./Button";
 import Slider from "./Slider";
-import Action from "./Action";
+import {Action} from "./Action";
 
 class Panel {
     constructor(game, key) {

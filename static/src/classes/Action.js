@@ -5,4 +5,11 @@ const Action = {
     BET: 3
 };
 
-export default Action;
+const ActionText = {
+    0: "BLIND",
+    1: "FOLD",
+    2: "CHECK",
+    3: "BET"
+};
+
+export {Action, ActionText};

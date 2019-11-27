@@ -1,4 +1,4 @@
-import Action from "../classes/Action.js";
+import {Action, ActionText} from "../classes/Action.js";
 import BuyInManager from "../managers/BuyInManager";
 import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
