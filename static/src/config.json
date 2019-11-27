@@ -79,6 +79,11 @@
         "font": "16pt Arial",
         "boundsAlignH": "right"
       }
+    },
+    "flash": {
+      "style": {
+        "font": "bold 30pt Arial"
+      }
     }
   }
 }
