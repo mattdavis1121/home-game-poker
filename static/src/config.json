@@ -69,7 +69,8 @@
       "x": 10,
       "y": 30,
       "style": {
-        "font": "bold 22pt Arial"
+        "font": "bold 22pt Arial",
+        "fill": "#333333"
       }
     },
     "balance": {
@@ -77,12 +78,14 @@
       "y": 60,
       "style": {
         "font": "16pt Arial",
-        "boundsAlignH": "right"
+        "boundsAlignH": "right",
+        "fill": "#555555"
       }
     },
     "flash": {
       "style": {
-        "font": "bold 30pt Arial"
+        "font": "bold 30pt Arial",
+        "fill": "#333333"
       }
     }
   }
