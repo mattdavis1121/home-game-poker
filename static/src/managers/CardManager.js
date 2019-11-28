@@ -33,6 +33,10 @@ class CardManager {
             this.cards[i].updateDisplay();
         }
     }
+
+    get length() {
+        return this.cards.length;
+    }
 }
 
 export default CardManager;

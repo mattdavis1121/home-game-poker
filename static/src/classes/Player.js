@@ -49,27 +49,29 @@ class Player {
     initializeDisplay() {
         this.display.nameplate = this.nameplate;
         this.display.nameplate.initializeDisplay();
-        this.displayGroup.add(this.display.nameplate);
 
         this.display.cards = this.cards.displayGroup;
-        this.display.cards.centerX = 0;
-        this.display.cards.centerY = -120;
-        this.displayGroup.add(this.display.cards);
+        this.cards.displayGroup.align(-1, 1, this.nameplate.width / this.cards.length, 0);
+        this.display.cards.centerX = this.display.nameplate.centerX;
+        this.display.cards.bottom = this.display.nameplate.bottom - this.display.nameplate.height * 0.2;
 
         this.display.dealerButton = this.game.add.sprite(0, 0, "dealerButton");
         this.display.dealerButton.left = this.display.nameplate.left + 5;
         this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
-        this.displayGroup.add(this.display.dealerButton);
 
         this.display.nextIndicator = this.game.add.sprite(0, 0, "redCircle");
         this.display.nextIndicator.right = this.display.nameplate.right - 5;
         this.display.nextIndicator.bottom = this.display.nameplate.bottom - 5;
-        this.displayGroup.add(this.display.nextIndicator);
 
         this.display.chips = this.chips.displayGroup;
         this.display.chips.x = this.chipConfig[this.seat].x;
         this.display.chips.y = this.chipConfig[this.seat].y;
-        this.displayGroup.addChild(this.chips.displayGroup);
+
+        this.displayGroup.add(this.chips.displayGroup);
+        this.displayGroup.add(this.display.cards);
+        this.displayGroup.add(this.display.nameplate);
+        this.displayGroup.add(this.display.dealerButton);
+        this.displayGroup.add(this.display.nextIndicator);
 
         this.updateDisplay();
     }
