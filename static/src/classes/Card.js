@@ -13,7 +13,6 @@ class Card {
     initializeDisplay() {
         this.sprite = this.game.add.sprite(0, 0, "cards");
         this.sprite.anchor.setTo(0.5);
-        this.sprite.scale.setTo(1.5);
 
         this.updateDisplay();
     }
