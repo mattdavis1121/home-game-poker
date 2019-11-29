@@ -51,7 +51,7 @@ class Player {
         this.display.nameplate.initializeDisplay();
 
         this.display.cards = this.cards.displayGroup;
-        this.cards.displayGroup.align(-1, 1, this.nameplate.width / this.cards.length, 0);
+        this.cards.displayGroup.align(-1, 1, (this.nameplate.width / this.cards.length) * 0.5, 0);
         this.display.cards.centerX = this.display.nameplate.centerX;
         this.display.cards.bottom = this.display.nameplate.bottom - this.display.nameplate.height * 0.2;
 
