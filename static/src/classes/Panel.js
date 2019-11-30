@@ -34,6 +34,9 @@ class Panel {
         this.display.slider = this.slider.bar;
         this.display.slider.y = 60;
 
+        this.display.primary.events.onInputOver.add(() => this.slider.enableSliderWheel(true));
+        this.display.primary.events.onInputOut.add(() => this.slider.enableSliderWheel(false));
+
         this.displayGroup.add(this.display.primary);
         this.displayGroup.add(this.display.secondary);
         this.displayGroup.add(this.display.tertiary);
