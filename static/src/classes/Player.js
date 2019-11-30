@@ -25,7 +25,6 @@ class Player {
             nameplate: null,
             cards: null,
             dealerButton: null,
-            nextIndicator: null,
             chips: null
         };
 
@@ -59,10 +58,6 @@ class Player {
         this.display.dealerButton.left = this.display.nameplate.left + 5;
         this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
 
-        this.display.nextIndicator = this.game.add.sprite(0, 0, "redCircle");
-        this.display.nextIndicator.right = this.display.nameplate.right - 5;
-        this.display.nextIndicator.bottom = this.display.nameplate.bottom - 5;
-
         this.display.chips = this.chips.displayGroup;
         this.display.chips.x = this.chipConfig[this.seat].x;
         this.display.chips.y = this.chipConfig[this.seat].y;
@@ -71,7 +66,6 @@ class Player {
         this.displayGroup.add(this.display.cards);
         this.displayGroup.add(this.display.nameplate);
         this.displayGroup.add(this.display.dealerButton);
-        this.displayGroup.add(this.display.nextIndicator);
 
         this.updateDisplay();
     }
@@ -79,8 +73,8 @@ class Player {
     updateDisplay() {
         this.display.nameplate.name = this.name;
         this.display.nameplate.balance = this.balance;
+        this.display.nameplate.frame = this.isNext ? 1 : 0; // TODO - No magic numberes
         this.display.dealerButton.visible = this.isDealer === true;
-        this.display.nextIndicator.visible = this.isNext === true;
     }
 
     update(data) {
