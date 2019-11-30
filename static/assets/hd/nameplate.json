@@ -1,6 +1,6 @@
 {"frames": {
 
-"nameplate_primary":
+"base":
 {
 	"frame": {"x":0,"y":0,"w":200,"h":75},
 	"rotated": false,
@@ -8,17 +8,33 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
 	"sourceSize": {"w":200,"h":75}
 },
-"nameplate_red":
+"blue":
 {
-	"frame": {"x":0,"y":75,"w":200,"h":75},
+	"frame": {"x":200,"y":0,"w":200,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
 	"sourceSize": {"w":200,"h":75}
 },
-"nameplate_yellow":
+"green":
 {
-	"frame": {"x":0,"y":150,"w":200,"h":75},
+	"frame": {"x":400,"y":0,"w":200,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
+	"sourceSize": {"w":200,"h":75}
+},
+"red":
+{
+	"frame": {"x":600,"y":0,"w":200,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
+	"sourceSize": {"w":200,"h":75}
+},
+"yellow":
+{
+	"frame": {"x":800,"y":0,"w":200,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":75},
@@ -29,8 +45,8 @@
 	"version": "1.0",
 	"image": "nameplate.png",
 	"format": "RGBA8888",
-	"size": {"w":200,"h":225},
+	"size": {"w":1000,"h":75},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:797db6221fd02b1173a6b5f0a2ce2f7e:3dfeda24eff0e3c8f43d875c3006251a:ba677772e24b440a62c991319a8c7efa$"
+	"smartupdate": "$TexturePacker:SmartUpdate:597d63acdd35ef857b74c364fb95ded3:180ccc66f7818a990f7c7cceffdeb736:ba677772e24b440a62c991319a8c7efa$"
 }
 }

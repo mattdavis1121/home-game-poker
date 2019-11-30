@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.6.3</string>
         <key>fileName</key>
-        <string>/Users/matthewdavis/dev/poker/static/assets_raw/namepalte.tps</string>
+        <string>/Users/matthewdavis/dev/poker/static/assets_raw/nameplate/texture.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -134,7 +134,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../assets/hd/nameplate.json</filename>
+                <filename>../../assets/hd/nameplate.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -183,25 +183,27 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">nameplate/nameplate_primary.png</key>
-            <key type="filename">nameplate/nameplate_red.png</key>
-            <key type="filename">nameplate/nameplate_yellow.png</key>
+            <key type="filename">output/base.png</key>
+            <key type="filename">output/blue.png</key>
+            <key type="filename">output/green.png</key>
+            <key type="filename">output/red.png</key>
+            <key type="filename">output/yellow.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>40,15,80,30</rect>
+                <rect>50,19,100,37</rect>
                 <key>scale9Paddings</key>
-                <rect>40,15,80,30</rect>
+                <rect>50,19,100,37</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>nameplate</filename>
+            <filename>output</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
