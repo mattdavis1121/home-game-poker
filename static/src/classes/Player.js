@@ -73,7 +73,7 @@ class Player {
     updateDisplay() {
         this.display.nameplate.name = this.name;
         this.display.nameplate.balance = this.balance;
-        this.display.nameplate.frame = this.isNext ? 1 : 0; // TODO - No magic numberes
+        this.display.nameplate.frameName = this.isNext ? "red" : "base";
         this.display.dealerButton.visible = this.isDealer === true;
     }
 
