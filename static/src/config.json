@@ -88,5 +88,21 @@
         "fill": "#333333"
       }
     }
+  },
+  "popup": {
+    "x": 0,
+    "y": 10,
+    "width": 60,
+    "height": 20,
+    "text": {
+      "x": 6,
+      "y": 18,
+      "style": {
+        "font": "12pt Arial",
+        "boundsAlignH": "center",
+        "boundsAlignV": "center",
+        "fill": "#FFFFFF"
+      }
+    }
   }
 }

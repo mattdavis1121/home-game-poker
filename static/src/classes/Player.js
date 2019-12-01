@@ -58,6 +58,7 @@ class Player {
         this.display.dealerButton.left = this.display.nameplate.left + 5;
         this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
 
+        this.chips.initializeDisplay();
         this.display.chips = this.chips.displayGroup;
         this.display.chips.x = this.chipConfig[this.seat].x;
         this.display.chips.y = this.chipConfig[this.seat].y;

@@ -10,6 +10,10 @@ class Pot {
         this.chips.colorUp = false;
     }
 
+    initializeDisplay() {
+        this.chips.initializeDisplay();
+    }
+
     updateDisplay() {
         this.chips.setValue(this.amount);
     }

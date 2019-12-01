@@ -1,3 +1,59 @@
+import Util from "../Util";
+
+class Tooltip {
+    constructor(game, key, padding = 10) {
+        this.game = game;
+        this.key = key;
+        this.padding = padding;
+
+        this._text = "";
+
+        this.displayGroup = this.game.add.group();
+        this.display = {
+            background: null,
+            text: null
+        }
+    }
+
+    initializeDisplay() {
+        this.display.background = this.game.add.sprite(0, 0, this.key);
+        this.display.background.anchor.setTo(0.5);
+
+        this.display.text = this.game.add.text(0, 2, "");   // TODO - No magic numbers (leaving for now because fuck trying to position text vertically)
+        this.display.text.setStyle({
+            "font": "16pt Arial",
+            "fill": "#FFFFFF"
+        });
+        this.display.text.anchor.setTo(0.5);
+
+        this.displayGroup.add(this.display.background);
+        this.displayGroup.add(this.display.text);
+        this.displayGroup.visible = false;
+    }
+
+    rePos() {
+        this.display.text.scale.setTo(1);
+        const textArea = this.display.background.width - (this.padding * 2);
+        if (this.display.text.width > textArea) {
+            this.display.text.scale.setTo(textArea / this.display.text.width);
+        }
+    }
+
+    set text(text) {
+        this._text = text;
+        this.display.text.text = text;
+        this.rePos();
+    }
+
+    get text() {
+        return this._text;
+    }
+
+    set visible(visible) {
+        this.displayGroup.visible = visible;
+    }
+}
+
 class ChipManager {
     constructor(game, key, values) {
         this.game = game;
@@ -8,12 +64,21 @@ class ChipManager {
         this.colorUp = true;
         this.chips = [];
         this.pool = [];
-        this.value = 0;
+        this.value = null;
+        this.tooltip = new Tooltip(this.game, this.game.textures.textUnderlay);
         this.displayGroup = this.game.add.group();
+        this.display = {
+            chips: this.game.add.group(),
+            tooltip: this.tooltip.displayGroup
+        };
     }
 
-    initialize() {
-
+    initializeDisplay() {
+        this.tooltip.initializeDisplay();
+        this.display.tooltip.y = this.display.tooltip.height;
+        this.displayGroup.add(this.display.tooltip);
+        this.displayGroup.add(this.display.chips);
+        this.setValue(0);
     }
 
     getChip() {
@@ -22,6 +87,10 @@ class ChipManager {
             chip = this.game.add.sprite(0, 0, this.key);
             chip.angle = this.game.rnd.integerInRange(-180, 180);   // Random rotation
             chip.anchor.setTo(0.5);
+
+            chip.inputEnabled = true;
+            chip.events.onInputOver.add(() => {this.tooltip.visible = true});
+            chip.events.onInputOut.add(() => {this.tooltip.visible = false});
         }
         chip.revive();
         this.chips.push(chip);
@@ -67,8 +136,10 @@ class ChipManager {
                 }
             }
             value -= this.values[valuesPtr];
-            this.displayGroup.addChild(chip);
+            this.display.chips.addChild(chip);
         }
+
+        this.tooltip.text = Util.parseCurrency(this.value);
     }
 
     clear() {
