@@ -15,16 +15,16 @@ class Chip extends Phaser.Sprite {
         this.rotateRandom();
     }
 
-    rotateRandom() {
-        this.angle = this.game.rnd.integerInRange(-180, 180);
-    }
-
     set value(value) {
         this._value = value;
     }
 
     get value() {
         return this._value;
+    }
+
+    rotateRandom() {
+        this.angle = this.game.rnd.integerInRange(-180, 180);
     }
 }
 

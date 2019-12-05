@@ -16,6 +16,20 @@ class Tooltip {
         }
     }
 
+    set text(text) {
+        this._text = text;
+        this.display.text.text = text;
+        this.rePos();
+    }
+
+    get text() {
+        return this._text;
+    }
+
+    set visible(visible) {
+        this.displayGroup.visible = visible;
+    }
+
     initializeDisplay() {
         this.display.background = this.game.add.sprite(0, 0, this.key);
         this.display.background.anchor.setTo(0.5);
@@ -39,20 +53,6 @@ class Tooltip {
             this.display.text.scale.setTo(textArea / this.display.text.width);
         }
     }
-
-    set text(text) {
-        this._text = text;
-        this.display.text.text = text;
-        this.rePos();
-    }
-
-    get text() {
-        return this._text;
-    }
-
-    set visible(visible) {
-        this.displayGroup.visible = visible;
-    }
 }
 
 class ChipManager {
@@ -72,6 +72,15 @@ class ChipManager {
             chips: this.game.add.group(),
             tooltip: this.tooltip.displayGroup
         };
+    }
+
+    set value(value) {
+        this._value = value;
+        this.tooltip.text = Util.parseCurrency(this._value);
+    }
+
+    get value() {
+        return this._value;
     }
 
     initializeDisplay() {
@@ -99,15 +108,6 @@ class ChipManager {
 
         chip.events.onInputOut.removeAll();
         chip.events.onInputOut.add(() => {this.tooltip.visible = false});
-    }
-
-    set value(value) {
-        this._value = value;
-        this.tooltip.text = Util.parseCurrency(this._value);
-    }
-
-    get value() {
-        return this._value;
     }
 
     setValue(value) {

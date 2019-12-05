@@ -18,6 +18,14 @@ class Nameplate extends Phaser.Image {
         };
     }
 
+    set name(name) {
+        this.display.name.setText(name);
+    }
+
+    set balance(balance) {
+        this.display.balance.setText(Util.parseCurrency(balance));
+    }
+
     initializeDisplay() {
         this.display.nameplate = this;
 
@@ -52,14 +60,6 @@ class Nameplate extends Phaser.Image {
             this.display.balance.visible = true;
             this.display.flash.visible = false;
         }, this);
-    }
-
-    set name(name) {
-        this.display.name.setText(name);
-    }
-
-    set balance(balance) {
-        this.display.balance.setText(Util.parseCurrency(balance));
     }
 }
 
