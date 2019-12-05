@@ -1,3 +1,4 @@
+import Chip from "../classes/Chip";
 import Util from "../Util";
 
 class Tooltip {
@@ -84,21 +85,33 @@ class ChipManager {
     getChip() {
         let chip = this.pool.pop();
         if (!chip) {
-            chip = this.game.add.sprite(0, 0, this.key);
-            chip.angle = this.game.rnd.integerInRange(-180, 180);   // Random rotation
-            chip.anchor.setTo(0.5);
-
-            chip.inputEnabled = true;
-            chip.events.onInputOver.add(() => {this.tooltip.visible = true});
-            chip.events.onInputOut.add(() => {this.tooltip.visible = false});
+            chip = new Chip(this.game, 0, 0, this.key, this);
+            this.setChipInputs(chip);
         }
         chip.revive();
         this.chips.push(chip);
         return chip;
     }
 
+    setChipInputs(chip) {
+        chip.events.onInputOver.removeAll();
+        chip.events.onInputOver.add(() => {this.tooltip.visible = true});
+
+        chip.events.onInputOut.removeAll();
+        chip.events.onInputOut.add(() => {this.tooltip.visible = false});
+    }
+
+    set value(value) {
+        this._value = value;
+        this.tooltip.text = Util.parseCurrency(this._value);
+    }
+
+    get value() {
+        return this._value;
+    }
+
     setValue(value) {
-        if (value === this.value) {
+        if (value === this._value) {
             return;
         }
 
@@ -120,6 +133,7 @@ class ChipManager {
                 }
             }
             let chip = this.getChip();
+            chip.value = this.values[valuesPtr];
             chip.frameName = this.values[valuesPtr].toString();
 
             if (this.stackChips) {
