@@ -100,7 +100,7 @@ class Main extends Phaser.State {
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             for (let i = 0; i < this.game.players.players.length; i++) {
-                this.game.players.players[i].update({roundBet: 0});
+                this.game.players.players[i].update({roundBet: 0}, false);
             }
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(0);

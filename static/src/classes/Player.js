@@ -78,13 +78,17 @@ class Player {
         this.display.dealerButton.visible = this.isDealer === true;
     }
 
-    update(data) {
+    update(data, updateChips = true) {
         // TODO - Flesh out the rest of the data -- do I like this method?
         this.balance = data.balance === undefined ? this.balance : data.balance;
         this.isDealer = data.isDealer === undefined ? this.isDealer : data.isDealer;
         this.isNext = data.isNext === undefined ? this.isNext : data.isNext;
         this.roundBet = data.roundBet === undefined ? this.roundBet : data.roundBet;
-        this.chips.setValue(this.roundBet);
+        if (updateChips) {
+            this.chips.setValue(this.roundBet);
+        } else {
+            this.chips.value = this.roundBet;
+        }
         this.updateDisplay();
     }
 

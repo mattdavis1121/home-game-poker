@@ -28,11 +28,9 @@ class Pot {
         for (let i = 0; i < players.length; i++) {
             let player = players[i];
             if (player.chips.chips.length) {
-                let chips = player.chips.chips.slice();
-                let value = player.chips.value;
                 this.game.time.events.add(delay, () => {
-                    this.amount += value;
-                    this.chips.takeChips(chips);
+                    this.amount += player.chips.value;
+                    this.chips.takeChips(player.chips.chips);
                 }, this);
                 delay += 100;
             }
