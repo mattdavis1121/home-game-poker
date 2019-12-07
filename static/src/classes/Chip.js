@@ -7,6 +7,7 @@ class Chip extends Phaser.Sprite {
         this.key = key;
         this.manager = manager;
 
+        this.id = ++Chip.counter;
         this._value = 0;
         this.angle = 0;
 
@@ -17,15 +18,26 @@ class Chip extends Phaser.Sprite {
 
     set value(value) {
         this._value = value;
+        this.frameName = value.toString();
     }
 
     get value() {
         return this._value;
     }
 
+    clone(chip) {
+        this.x = chip.worldPosition.x - this.parent.worldPosition.x;
+        this.y = chip.worldPosition.y - this.parent.worldPosition.y;
+        this.key = chip.key;
+        this.angle = chip.angle;
+        this.value = chip.value;
+    }
+
     rotateRandom() {
         this.angle = this.game.rnd.integerInRange(-180, 180);
     }
 }
+
+Chip.counter = 0;
 
 export default Chip;

@@ -22,6 +22,22 @@ class Pot {
         this.amount = amount;
         this.updateDisplay();
     }
+
+    gatherChips(players) {
+        let delay = 0;
+        for (let i = 0; i < players.length; i++) {
+            let player = players[i];
+            if (player.chips.chips.length) {
+                let chips = player.chips.chips.slice();
+                let value = player.chips.value;
+                this.game.time.events.add(delay, () => {
+                    this.amount += value;
+                    this.chips.takeChips(chips);
+                }, this);
+                delay += 100;
+            }
+        }
+    }
 }
 
 export default Pot;

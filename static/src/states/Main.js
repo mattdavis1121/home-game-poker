@@ -61,7 +61,6 @@ class Main extends Phaser.State {
             this.game.board.reset();
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
-            this.game.pot.setAmount(0);
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
@@ -97,6 +96,7 @@ class Main extends Phaser.State {
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
             console.log("newRound: ", data);
+            this.game.pot.gatherChips(this.game.players.players);
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             for (let i = 0; i < this.game.players.players.length; i++) {
@@ -117,7 +117,6 @@ class Main extends Phaser.State {
             });
             this.game.players.getById(data.playerId).nameplate.flash(this.parseActionText(data));
             this.game.players.getById(data.next).update({isNext: true});
-            this.game.pot.setAmount(data.pot);
             this.game.roundBet = data.roundBet;
             this.game.roundRaise = data.roundRaise;
 

@@ -65,13 +65,16 @@ class ChipManager {
         this.colorUp = true;
         this.chips = [];
         this.pool = [];
-        this.value = null;
+        this._value = null;
         this.tooltip = new Tooltip(this.game, this.game.textures.textUnderlay);
         this.displayGroup = this.game.add.group();
         this.display = {
             chips: this.game.add.group(),
             tooltip: this.tooltip.displayGroup
         };
+        this.transferAnimation = this.animateChipCascade;
+        this.transferComplete = new Phaser.Signal();
+        this.pileRadius = 30;
     }
 
     set value(value) {
@@ -86,8 +89,8 @@ class ChipManager {
     initializeDisplay() {
         this.tooltip.initializeDisplay();
         this.display.tooltip.y = this.display.tooltip.height;
-        this.displayGroup.add(this.display.tooltip);
         this.displayGroup.add(this.display.chips);
+        this.displayGroup.add(this.display.tooltip);
         this.setValue(0);
     }
 
@@ -96,8 +99,10 @@ class ChipManager {
         if (!chip) {
             chip = new Chip(this.game, 0, 0, this.key, this);
             this.setChipInputs(chip);
+            this.display.chips.addChild(chip);
         }
         chip.revive();
+        chip.parent.bringToTop(chip);
         this.chips.push(chip);
         return chip;
     }
@@ -134,7 +139,6 @@ class ChipManager {
             }
             let chip = this.getChip();
             chip.value = this.values[valuesPtr];
-            chip.frameName = this.values[valuesPtr].toString();
 
             if (this.stackChips) {
                 chip.y = yPos;
@@ -144,16 +148,13 @@ class ChipManager {
                     chip.x = 0;
                     chip.y = 0;
                 } else {
-                    let variation = this.displayGroup.width / 2;
-                    chip.x = this.game.rnd.integerInRange(-variation, variation);
-                    chip.y = this.game.rnd.integerInRange(-variation, variation);
+                    let randPos = this.randChipPos();
+                    chip.x = randPos.x;
+                    chip.y = randPos.y;
                 }
             }
             value -= this.values[valuesPtr];
-            this.display.chips.addChild(chip);
         }
-
-        this.tooltip.text = Util.parseCurrency(this.value);
     }
 
     clear() {
@@ -162,6 +163,76 @@ class ChipManager {
             this.pool.push(chip);
             chip.kill();
         }
+    }
+
+    clearChip(chip) {
+        // Remove chip from this.chips if found
+        let found = false;
+        for (let i = 0; i < this.chips.length; i++) {
+            if (this.chips[i].id === chip.id) {
+                this.chips.splice(i, 1);
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            this.pool.push(chip);
+            chip.kill();
+            return chip;
+        }
+
+        return null;
+    }
+
+    takeChips(chips) {
+        chips = chips.slice();
+        let newChips = [];
+        for (let i = 0; i < chips.length; i++) {
+            let newChip = this.takeChip(chips[i]);
+            newChips.push(newChip);
+        }
+
+        this.transferAnimation(newChips);
+    }
+
+    takeChip(srcChip) {
+        let newChip = this.getChip();
+        newChip.clone(srcChip);
+        this.setChipInputs(newChip);
+
+        srcChip.manager.clearChip(srcChip);
+
+        this.value += srcChip.value;
+
+        return newChip;
+    }
+
+    animateStackTransfer() {
+
+    }
+
+    animateChipCascade(chips) {
+        let delay = 0;
+        for (let i = 0; i < chips.length; i++) {
+            let chip = chips[i];
+            this.game.time.events.add(delay, () => {
+                let randPos = this.randChipPos();
+                let tween = this.game.add.tween(chip).to({x: randPos.x, y: randPos.y}, 200, Phaser.Easing.Quadratic.InOut, true);
+                tween.onComplete.add(() => {this.value += chip.value});
+                if (i === chips.length - 1) {
+                    tween.onComplete.add(() => this.transferComplete.dispatch());
+                }
+            }, this);
+            delay += 100;
+        }
+    }
+
+    randChipPos() {
+        return {
+            x: this.game.rnd.integerInRange(-this.pileRadius, this.pileRadius),
+            y: this.game.rnd.integerInRange(-this.pileRadius, this.pileRadius)
+        };
     }
 }
 
