@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.6.3</string>
         <key>fileName</key>
-        <string>/Users/matthewdavis/dev/poker/static/assets_raw/chips.tps</string>
+        <string>/Users/matthewdavis/dev/poker/static/assets_raw/chips/texture.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -134,7 +134,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../assets/hd/chips.json</filename>
+                <filename>../../assets/hd/chips.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -183,27 +183,27 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">chips/100.png</key>
-            <key type="filename">chips/2000.png</key>
-            <key type="filename">chips/25.png</key>
-            <key type="filename">chips/5.png</key>
-            <key type="filename">chips/500.png</key>
+            <key type="filename">output/100.png</key>
+            <key type="filename">output/2000.png</key>
+            <key type="filename">output/25.png</key>
+            <key type="filename">output/5.png</key>
+            <key type="filename">output/500.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,5,10,10</rect>
+                <rect>5,5,11,11</rect>
                 <key>scale9Paddings</key>
-                <rect>5,5,10,10</rect>
+                <rect>5,5,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>chips</filename>
+            <filename>output</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
