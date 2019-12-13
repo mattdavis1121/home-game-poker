@@ -1,4 +1,4 @@
-import {Action, ActionText} from "../classes/Action.js";
+import {Action, ActionText} from "../classes/Action";
 import BuyInManager from "../managers/BuyInManager";
 import CardManager from "../managers/CardManager";
 import Panel from "../classes/Panel";
@@ -6,6 +6,7 @@ import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
 import Poker from "../Poker";
 import SSE from "../SSE";
+import TweenQueue from "../classes/TweenQueue";
 
 class Main extends Phaser.State {
     init() {
@@ -52,6 +53,8 @@ class Main extends Phaser.State {
         this.game.buyIn = new BuyInManager(this.game, "buyIn");
         this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
         this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
+
+        this.game.queue = new TweenQueue(this.game);
 
         this.registerListeners();
 
