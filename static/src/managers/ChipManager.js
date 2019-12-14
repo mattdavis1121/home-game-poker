@@ -219,7 +219,6 @@ class ChipManager {
             this.game.time.events.add(delay, () => {
                 let randPos = this.randChipPos();
                 let tween = this.game.add.tween(chip).to({x: randPos.x, y: randPos.y}, 200, Phaser.Easing.Quadratic.InOut, true);
-                tween.onComplete.add(() => {this.value += chip.value});
                 if (i === chips.length - 1) {
                     tween.onComplete.add(() => this.transferComplete.dispatch());
                 }
