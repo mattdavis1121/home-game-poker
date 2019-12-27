@@ -129,15 +129,33 @@ class Main extends Phaser.State {
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
-            console.log("handComplete: ", data);
-            for (let i = 0; i < data.winners.length; i++) {
-                let winner = data.winners[i];
-                this.game.players.getById(winner.id).update({balance: winner.balance});
+
+            // TODO - Handle split pots
+            // if (data.winners.length > 1) {
+            //
+            // }
+
+            // NOTE - This is a temporary stopgap
+            if (data.winners.length === 1) {
+                // This should be how the code functions -- all winners call
+                // chips.takeChips on a specific pot. If there are multiple
+                // winners, the pot must have already been split into the
+                // appropriate size piles
+                this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+            } else {
+                // This is just a temporary overflow measure. If the pot was
+                // split on the back end, don't animate anything, as we aren't
+                // splitting on the front end yet.
+                for (let i = 0; i < data.winners.length; i++) {
+                    let winner = data.winners[i];
+                    this.game.players.getById(winner.id).update({balance: winner.balance});
+                }
+                this.game.pot.chips.clear();
+                for (let i = 0; i < this.game.players.players.length; i++) {
+                    this.game.players.players[i].chips.clear();
+                }
             }
-            this.game.pot.chips.clear();
-            for (let i = 0; i < this.game.players.players.length; i++) {
-                this.game.players.players[i].chips.clear();
-            }
+
         });
         this.table_sse.addListener("newPlayer", (event) => {
             let data = JSON.parse(event.data);
