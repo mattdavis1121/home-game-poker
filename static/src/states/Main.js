@@ -129,6 +129,7 @@ class Main extends Phaser.State {
         });
         this.table_sse.addListener("handComplete", event => {
             let data = JSON.parse(event.data);
+            console.log("handComplete: ", data);
 
             // TODO - Handle split pots
             // if (data.winners.length > 1) {
