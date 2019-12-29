@@ -1,9 +1,16 @@
-class Card {
-    constructor(game, manager) {
+class Card extends Phaser.Sprite {
+    constructor(game, x, y, key, manager) {
+        super(game, x, y, key);
+        game.world.add(this);
+
         this.game = game;
+        this.key = key;
         this.manager = manager;
-        this.name = null;   // String ID of card, e.g. 'Kh' or '7s'
-        this.sprite = null;
+
+        this.name = null;  // String ID of card, e.g. 'Kh' or '7s'
+
+        this.anchor.setTo(0.5);
+        this.inputEnabled = true;
     }
 
     initialize(data) {
@@ -11,14 +18,11 @@ class Card {
     }
 
     initializeDisplay() {
-        this.sprite = this.game.add.sprite(0, 0, "cards");
-        this.sprite.anchor.setTo(0.5);
-
         this.updateDisplay();
     }
 
     updateDisplay() {
-        this.sprite.frameName = this.name ? this.name : "back";
+        this.frameName = this.name ? this.name : "back";
     }
 }
 
