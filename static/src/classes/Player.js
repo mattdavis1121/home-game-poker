@@ -24,6 +24,7 @@ class Player {
         this.display = {
             nameplate: null,
             cards: null,
+            cardsMask: null,
             dealerButton: null,
             chips: null
         };
@@ -54,6 +55,17 @@ class Player {
         this.display.cards.centerX = this.display.nameplate.centerX;
         this.display.cards.bottom = this.display.nameplate.bottom - this.display.nameplate.height * 0.2;
 
+        this.display.cardsMask = this.createCardsMask();
+        this.display.cardsMask.bottom = this.display.nameplate.top;
+        this.display.cards.mask = this.display.cardsMask;
+
+        // NOTE: This line is required for this mask to work under WebGL
+        // Some changes to masks in WebGL mode will render the mask
+        // completely ineffective. The bug is not well understood. It may
+        // have been fixed in later versions of Phaser.
+        // More detail here: https://github.com/photonstorm/phaser-ce/issues/334
+        this.display.cardsMask.dirty = true;
+
         this.display.dealerButton = this.game.add.sprite(0, 0, "dealerButton");
         this.display.dealerButton.left = this.display.nameplate.left + 5;
         this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
@@ -65,6 +77,7 @@ class Player {
 
         this.displayGroup.add(this.chips.displayGroup);
         this.displayGroup.add(this.display.cards);
+        this.displayGroup.add(this.display.cardsMask);
         this.displayGroup.add(this.display.nameplate);
         this.displayGroup.add(this.display.dealerButton);
 
@@ -100,6 +113,15 @@ class Player {
 
         let actionText = ActionText[data.actionType];
 
+    }
+
+    createCardsMask() {
+        let height = this.cards.cards[0].height;
+        let width = this.nameplate.width;
+        let mask = this.game.add.graphics(0, 0);
+        mask.beginFill(0xffffff);
+        mask.drawRect(0, 0, width, height);
+        return mask;
     }
 }
 
