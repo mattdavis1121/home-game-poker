@@ -6,6 +6,7 @@ class CardManager {
         this.key = key;
         this.cards = [];
         this.displayGroup = this.game.add.group();
+        this._mask = null;  // A mask applied to all cards in displayGroup
     }
 
     initialize(num_cards) {
@@ -37,6 +38,15 @@ class CardManager {
 
     get length() {
         return this.cards.length;
+    }
+
+    set mask(mask) {
+        this._mask = mask;
+        this.displayGroup.mask = mask;
+    }
+
+    get mask() {
+        return this._mask;
     }
 }
 

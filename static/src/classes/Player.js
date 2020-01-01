@@ -57,7 +57,7 @@ class Player {
 
         this.display.cardsMask = this.createCardsMask();
         this.display.cardsMask.bottom = this.display.nameplate.top;
-        this.display.cards.mask = this.display.cardsMask;
+        this.cards.mask = this.display.cardsMask;
 
         // NOTE: This line is required for this mask to work under WebGL
         // Some changes to masks in WebGL mode will render the mask
