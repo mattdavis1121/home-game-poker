@@ -15,6 +15,10 @@ class PlayerManager {
         this.displayGroup = this.game.add.group();
     }
 
+    get length() {
+        return this.players.length;
+    }
+
     initialize(playerData) {
         for (let i = 0; i < playerData.length; i++) {
             this.newPlayer(playerData[i]);

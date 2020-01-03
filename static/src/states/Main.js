@@ -81,6 +81,11 @@ class Main extends Phaser.State {
         this.table_sse.addListener("deal", event => {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
+
+            for (let i = 0; i < this.game.players.length; i++) {
+                this.game.players.players[i].animateDeal();
+            }
+
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
@@ -111,6 +116,11 @@ class Main extends Phaser.State {
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
+
+            if (data.actionType === Action.FOLD) {
+                this.game.players.getById(data.playerId).animateFold();
+            }
+
             this.game.board.setCardNames(data.board);
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             this.game.players.getById(data.playerId).update({
