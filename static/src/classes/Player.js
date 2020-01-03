@@ -51,9 +51,8 @@ class Player {
         this.display.nameplate.initializeDisplay();
 
         this.display.cards = this.cards.displayGroup;
-        this.cards.displayGroup.align(-1, 1, (this.nameplate.width / this.cards.length) * 0.5, 0);
-        this.display.cards.centerX = this.display.nameplate.centerX;
-        this.display.cards.bottom = this.display.nameplate.bottom - this.display.nameplate.height * 0.2;
+        this.display.cards.x = this.display.nameplate.centerX;
+        this.hideCards();
 
         this.display.cardsMask = this.createCardsMask();
         this.display.cardsMask.bottom = this.display.nameplate.top;
@@ -122,6 +121,82 @@ class Player {
         mask.beginFill(0xffffff);
         mask.drawRect(0, 0, width, height);
         return mask;
+    }
+
+    animateDeal() {
+        this.hideCards();
+
+        const showTween = this.game.add.tween(this.display.cards).to({y: -this.nameplate.height / 2}, 500, Phaser.Easing.Quartic.Out, true);
+
+        showTween.onComplete.add(() => {
+            const cardPositions = this.calcCardPositions();
+            for (let i = 0; i < this.cards.length; i++) {
+                this.game.add.tween(this.cards.cards[i]).to({x: cardPositions[i]}, 500, Phaser.Easing.Quartic.Out, true);
+            }
+        }, this);
+    }
+
+    animateFold() {
+        this.showCards();
+
+        for (let i = 0; i < this.cards.length; i++) {
+            this.game.add.tween(this.cards.cards[i]).to({x: 0}, 500, Phaser.Easing.Quartic.Out, true);
+        }
+
+        this.game.time.events.add(500, () => {
+            this.game.add.tween(this.display.cards).to({top: this.display.nameplate.top}, 500, Phaser.Easing.Quartic.Out, true);
+        }, this);
+    }
+
+    hideCards() {
+        for (let i = 0; i < this.cards.length; i++) {
+            this.cards.cards[i].x = 0;
+        }
+        this.display.cards.top = this.display.nameplate.top;
+    }
+
+    showCards() {
+        const cardPositions = this.calcCardPositions();
+        for (let i = 0; i < this.cards.length; i++) {
+            this.cards.cards[i].x = cardPositions[i];
+        }
+        this.display.cards.y = -this.nameplate.height / 2;
+    }
+
+    /**
+     * @summary Calculate the final positions of all cards in hand
+     *
+     * NOTE TO ME: Don't fuck with this. It took a long time to get right.
+     *
+     * The cards need to be positioned correctly both in relation to
+     * themselves (staggered evenly) and also in relation to the nameplate.
+     * Doing the latter by centering the cards' display group on the nameplate
+     * would have been much easier, but that way made animating the card
+     * spread nearly impossible.
+     *
+     * @returns {number[]}
+     */
+    calcCardPositions() {
+        if (!this.cards.length) {
+            return [];
+        }
+
+        let positions = [];
+        const cardWidth = this.cards.cards[0].width;
+        const cardArea = this.display.nameplate.width * 0.9;
+        const totalWidth = cardWidth * this.cards.length;
+        const totalOverflow = totalWidth - cardArea;
+        const cardOffset = totalOverflow / (this.cards.length - 1);
+        for (let i = 0; i < this.cards.length; i++) {
+            // Space cards evenly
+            let pos = cardWidth * i - cardOffset * i;
+
+            // Center cards on nameplate
+            pos -= cardArea / 2 - cardWidth / 2;
+
+            positions.push(pos);
+        }
+        return positions;
     }
 }
 

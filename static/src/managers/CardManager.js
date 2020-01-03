@@ -18,8 +18,6 @@ class CardManager {
             this.cards.push(card);
             this.displayGroup.add(card);
         }
-
-        this.displayGroup.align(-1, 1, this.cards[0].width * 1.2, 0);
     }
 
     setCardNames(names) {
