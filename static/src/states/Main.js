@@ -64,6 +64,7 @@ class Main extends Phaser.State {
             this.game.board.reset();
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
+            this.game.players.dealerPlayer = this.game.players.getById(data.dealer);
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
@@ -82,8 +83,16 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
 
-            for (let i = 0; i < this.game.players.length; i++) {
-                this.game.players.players[i].animateDeal();
+            let delay = 0;
+            let seats = this.game.players.getOccupiedSeats();
+            let seatIndex = seats.indexOf(this.game.players.dealerPlayer.seat);
+            seatIndex = (seatIndex + 1) % seats.length;  // Start with player to left of dealer
+            for (let i = 0; i < seats.length; i++) {
+                this.game.time.events.add(delay, () => {
+                    this.game.players.getBySeat(seats[seatIndex]).animateDeal();
+                    seatIndex = (seatIndex + 1) % seats.length;
+                }, this);
+                delay += 200;
             }
 
             this.game.players.nextPlayer = this.game.players.getById(data.next);

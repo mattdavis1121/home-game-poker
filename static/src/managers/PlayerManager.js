@@ -10,6 +10,7 @@ class PlayerManager {
         this.players = [];  // Direct access to the Player objects
         this.userPlayer = null;  // The user's player object, if available
         this.nextPlayer = null;  // The player that the game expects to act next
+        this.dealerPlayer = null;   // Current hand's dealer
 
         // Contains all display elements for all players in the game
         this.displayGroup = this.game.add.group();
@@ -71,6 +72,15 @@ class PlayerManager {
         // TODO - Should this ever return null?
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i].id === id) {
+                return this.players[i];
+            }
+        }
+        return null;
+    }
+
+    getBySeat(seat) {
+        for (let i = 0; i < this.length; i++) {
+            if (this.players[i].seat === seat) {
                 return this.players[i];
             }
         }
