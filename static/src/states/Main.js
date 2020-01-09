@@ -30,10 +30,13 @@ class Main extends Phaser.State {
         this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats], this.game.config.chips[numSeats]);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
 
-        this.game.board = new CardManager(this.game);
+        this.game.board = new CardManager(this.game, true);
         this.game.board.initialize(5);
+        this.game.board.displayGroup.setAll("visible", true);
+        this.game.board.displayGroup.align(-1, 1, this.game.board.cardWidth * 1.2, 1);
         this.game.board.displayGroup.centerX = this.game.world.centerX;
         this.game.board.displayGroup.centerY = this.game.world.centerY;
+        this.game.board.displayGroup.setAll("visible", false);
 
         this.game.pot = new Pot(this.game);
         this.game.pot.initializeDisplay();

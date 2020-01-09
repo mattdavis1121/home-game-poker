@@ -1,8 +1,9 @@
 import Card from "../classes/Card";
 
 class CardManager {
-    constructor(game, key = "cards") {
+    constructor(game, autoHide = false, key = "cards") {
         this.game = game;
+        this.autoHide = autoHide; // Auto-hide all face down cards?
         this.key = key;
         this.cards = [];
         this.displayGroup = this.game.add.group();
@@ -11,7 +12,7 @@ class CardManager {
 
     initialize(num_cards) {
         for (let i = 0; i < num_cards; i++) {
-            let card = new Card(this.game, 0, 0, this.key, this);
+            let card = new Card(this.game, 0, 0, this.key, this, this.autoHide);
             card.initialize({});
             card.initializeDisplay();
 
@@ -45,6 +46,13 @@ class CardManager {
 
     get mask() {
         return this._mask;
+    }
+
+    get cardWidth() {
+        if (!this.cards.length) {
+            return 0;
+        }
+        return this.cards[0].width;
     }
 }
 
