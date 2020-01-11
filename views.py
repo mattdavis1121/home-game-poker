@@ -221,6 +221,8 @@ def deal(table_name):
         return jsonify({"success": False, "msg": "No active hand to deal"})
     elif table.active_hand.antes_owed or table.active_hand.blinds_owed:
         return jsonify({"success": False, "msg": "Can't deal before pre-hand bets complete"})
+    elif table.active_hand.dealt:
+        return jsonify({"success": False, "msg": "Hand already dealt"})
 
     hand = table.active_hand
     hand.deal(TexasHoldemHand, table.ready_players)  # TODO - get hand type from json

@@ -615,6 +615,10 @@ class Hand(BaseModel):
             self.player_holdings[i].add_cards(poker_holding)
         self.save()
 
+    @property
+    def dealt(self):
+        return len(self.player_holdings[0].cards) > 0
+
 
 class PotState(IntEnum):
     VOID = -1
