@@ -131,9 +131,18 @@ def show_table(table_name):
         player["name"] = User.query.get(player["userId"]).name
         player["isUser"] = player["userId"] == current_user.id
     token = create_access_token(identity=current_user.id)
-    return render_template("game.html", table=table,
-                           players=json.dumps(players), token=token,
-                           emulate=EMULATOR_ENABLED)
+    initial_data = {
+        "tableName": table.name,
+        "userId": current_user.id if current_user else -1,
+        "playerId": current_user.active_player.id if current_user.active_player else -1,
+        "tableSSEUrl": url_for("sse.stream", channel=table.name),
+        "userSSEUrl": url_for("sse.stream", channel=current_user.id),
+        "tableUrl": url_for("show_table", table_name=table.name),
+        "players": players,
+        "token": token,
+        "emulatorEnabled": EMULATOR_ENABLED
+    }
+    return render_template("game.html", initial_data=initial_data)
 
 
 @app.route("/tables/<table_name>/join/", methods=["POST"])

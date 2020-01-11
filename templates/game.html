@@ -9,17 +9,7 @@
 
     <script>
         // TODO: Get this data from initialize API call
-        var initialData = {
-            tableName: "{{ table.name }}",
-            userId: {{ current_user.id if current_user else -1 }},
-            playerId: {{ current_user.active_player.id if current_user.active_player else -1 }},
-            tableSSEUrl: "{{ url_for('sse.stream', channel=table.name) }}",
-            userSSEUrl: "{{ url_for('sse.stream', channel=current_user.id) }}",
-            tableUrl: "{{ url_for('show_table', table_name=table.name) }}",
-            players: {{ players|safe }},
-            token: "{{ token }}",
-            emulatorEnabled: "{{ emulate }}"
-        };
+        var initialData = {{ initial_data | tojson | safe }};
     </script>
 
     <style>html, body {
