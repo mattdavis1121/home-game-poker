@@ -1,6 +1,7 @@
 import {Action, ActionText} from "../classes/Action";
 import BuyInManager from "../managers/BuyInManager";
 import CardManager from "../managers/CardManager";
+import DealerButton from "../classes/DealerButton";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
@@ -29,6 +30,13 @@ class Main extends Phaser.State {
         const numSeats = 10;    // TODO - Make dynamic
         this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats], this.game.config.chips[numSeats]);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
+
+        this.game.dealerButton = new DealerButton(this.game);
+        window.button = this.game.dealerButton;
+        console.log(this.game.initialData);
+        this.game.dealerButton.inputEnabled = true;
+        this.game.dealerButton.input.enableDrag(true);
+        this.game.dealerButton.events.onDragStop.add(sprite => console.log({x: sprite.x, y: sprite.y}));
 
         this.game.board = new CardManager(this.game, true);
         this.game.board.initialize(5);
