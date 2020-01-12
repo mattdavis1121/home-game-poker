@@ -88,6 +88,7 @@ class Main extends Phaser.State {
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(0);
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
+            this.game.dealerButton.moveToSeat(this.game.players.dealerPlayer.seat);
         });
         this.table_sse.addListener("deal", event => {
             let data = JSON.parse(event.data);
