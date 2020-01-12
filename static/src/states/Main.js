@@ -27,9 +27,8 @@ class Main extends Phaser.State {
         this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
         this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
-        const numSeats = 10;    // TODO - Make dynamic
-        this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats[numSeats], this.game.config.chips[numSeats]);
-        this.game.players.initialize(this.game.initialData.players, this.game.config.seats[numSeats]);
+        this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats, this.game.config.chips);
+        this.game.players.initialize(this.game.initialData.players, this.game.config.seats);
 
         this.game.dealerButton = new DealerButton(this.game);
         window.button = this.game.dealerButton;
@@ -62,7 +61,7 @@ class Main extends Phaser.State {
         this.game.panel.alwaysVisible = this.game.initialData.emulatorEnabled;
 
         this.game.buyIn = new BuyInManager(this.game, "buyIn");
-        this.game.buyIn.initialize(this.game.config.seats[numSeats], this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
+        this.game.buyIn.initialize(this.game.config.seats, this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
         this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
 
         this.game.queue = new TweenQueue(this.game);
