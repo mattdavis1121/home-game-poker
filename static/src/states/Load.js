@@ -1,10 +1,10 @@
 class Load extends Phaser.State {
     preload() {
         this.game.load.image("background", "/static/assets/hd/background.png");
-        this.game.load.image("dealerButton", "/static/assets/hd/dealerbutton.png");
         this.game.load.image("redCircle", "/static/assets/hd/redcircle.png");
         this.game.load.atlasJSONHash("cards", "/static/assets/hd/cards.png", "/static/assets/hd/cards.json");
         this.game.load.atlasJSONHash("panel", "/static/assets/hd/panel.png", "/static/assets/hd/panel.json");
+        this.game.load.atlasJSONHash("dealerButton", "/static/assets/hd/button.png", "/static/assets/hd/button.json");
         this.game.load.atlasJSONHash("buyIn", "/static/assets/hd/buyin.png", "/static/assets/hd/buyin.json");
         this.game.load.atlasJSONHash("chips", "/static/assets/hd/chips.png", "/static/assets/hd/chips.json");
         this.game.load.atlasJSONHash("nameplate", "/static/assets/hd/nameplate.png", "/static/assets/hd/nameplate.json");
