@@ -25,7 +25,6 @@ class Player {
             nameplate: null,
             cards: null,
             cardsMask: null,
-            dealerButton: null,
             chips: null
         };
 
@@ -65,10 +64,6 @@ class Player {
         // More detail here: https://github.com/photonstorm/phaser-ce/issues/334
         this.display.cardsMask.dirty = true;
 
-        this.display.dealerButton = this.game.add.sprite(0, 0, "dealerButton");
-        this.display.dealerButton.left = this.display.nameplate.left + 5;
-        this.display.dealerButton.bottom = this.display.nameplate.bottom - 5;
-
         this.chips.initializeDisplay();
         this.display.chips = this.chips.displayGroup;
         this.display.chips.x = this.chipConfig[this.seat].x;
@@ -78,7 +73,6 @@ class Player {
         this.displayGroup.add(this.display.cards);
         this.displayGroup.add(this.display.cardsMask);
         this.displayGroup.add(this.display.nameplate);
-        this.displayGroup.add(this.display.dealerButton);
 
         this.updateDisplay();
     }
@@ -87,7 +81,6 @@ class Player {
         this.display.nameplate.name = this.name;
         this.display.nameplate.balance = this.balance;
         this.display.nameplate.frameName = this.isNext ? "red" : "base";
-        this.display.dealerButton.visible = this.isDealer === true;
     }
 
     update(data, updateChips = true) {
