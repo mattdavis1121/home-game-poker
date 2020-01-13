@@ -117,8 +117,6 @@ class Player {
     }
 
     animateDeal() {
-        this.hideCards();
-
         const showTween = this.game.add.tween(this.display.cards).to({y: -this.nameplate.height / 2}, 500, Phaser.Easing.Quartic.Out, true);
 
         showTween.onComplete.add(() => {
@@ -130,8 +128,6 @@ class Player {
     }
 
     animateFold() {
-        this.showCards();
-
         for (let i = 0; i < this.cards.length; i++) {
             this.game.add.tween(this.cards.cards[i]).to({x: 0}, 500, Phaser.Easing.Quartic.Out, true);
         }

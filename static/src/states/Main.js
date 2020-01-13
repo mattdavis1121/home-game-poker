@@ -66,6 +66,10 @@ class Main extends Phaser.State {
         this.table_sse.addListener("newHand", event => {
             let data = JSON.parse(event.data);
             console.log("newHand: ", data);
+            for (let i = 0; i < this.game.players.length; i++) {
+                this.game.players.players[i].animateFold();
+                this.game.players.players[i].chips.clear();
+            }
             this.game.board.reset();
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
