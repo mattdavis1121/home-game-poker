@@ -119,7 +119,7 @@ class Panel {
      */
     singleStepBet(modifier) {
         let index = this.slider.index + modifier;
-        if (index >= 0 && index <= this.slider.length) {
+        if (index >= 0 && index < this.slider.length) {
             this.slider.setIndex(index);
         }
     }
