@@ -479,6 +479,7 @@ class Hand(BaseModel):
         return Holding.create(hand_id=self.id, cards=cards, **kwargs)
 
     def resolve_action(self, action, current_bet, total_bet):
+        ret = {}
         if action.type == ActionType.FOLD:
             action.holding.fold()
             self.remove_player_from_pots(action.player)
@@ -505,6 +506,7 @@ class Hand(BaseModel):
         if self.next_to_act == self.active_betting_round.bettor:
             self.determine_side_pots()   # TODO - Rename method?
             self.active_betting_round.close()
+            ret["round_complete"] = True
 
             if not hand_complete:
                 next_seat = determine_next_seat(self.dealer.seat, [player.seat for player in self.live_players])
@@ -512,11 +514,14 @@ class Hand(BaseModel):
 
                 try:
                     self.new_betting_round()
+                    ret["new_round"] = True
                 except InvalidRoundNumberError:
                     # Final round of hand complete
                     hand_complete = True
 
         if hand_complete:
+            ret["round_complete"] = True
+            ret["hand_complete"] = True
             # Copy list so changes to list in loop don't cause problems
             for pot in list(self.pots):
                 winners = self.determine_winners(players=pot.eligible_players)
@@ -529,6 +534,7 @@ class Hand(BaseModel):
             self.close()
 
         self.save()
+        return ret
 
     def determine_winners(self, players=None):
         """

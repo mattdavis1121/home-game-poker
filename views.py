@@ -219,6 +219,12 @@ def new_hand(table_name):
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
 
+    sse.publish({
+        "id": hand.active_betting_round.id,
+        "handId": hand.id,
+        "roundNum": hand.active_betting_round.round_num,
+    }, type="newRound", channel=table.name)
+
     return jsonify({"success": True, "hand": hand.id})
 
 
@@ -334,7 +340,7 @@ def action(table_name):
     try:
         act = Action.create(holding_id=player.active_holding.id,
                             type=data.get("actionType"))
-        hand.resolve_action(act, current_bet, total_bet)
+        resolution = hand.resolve_action(act, current_bet, total_bet)
     except IntegrityError:
         return jsonify({"success": False, "msg": "Database error"})
     except Exception as e:
@@ -365,14 +371,22 @@ def action(table_name):
         "playerRoundBet": total_bet  # Sum of player's bets for this betting round (THIS WILL FAIL ON ALL-IN SIDE POTS)
     }, type="action", channel=table.name)
 
-    if prev_num_rounds < len(hand.betting_rounds):
+    if resolution.get("round_complete"):
+        prev_round = hand.betting_rounds[prev_num_rounds - 1]
+        sse.publish({
+            "id": prev_round.id,
+            "handId": hand.id,
+            "roundNum": prev_round.round_num
+        }, type="roundComplete", channel=table.name)
+
+    if resolution.get("new_round"):
         sse.publish({
             "id": hand.active_betting_round.id,
             "handId": hand.id,
             "roundNum": hand.active_betting_round.round_num,
         }, type="newRound", channel=table.name)
 
-    if hand.complete:
+    if resolution.get("hand_complete"):
         sse.publish({
             "id": hand.id,
             "winners": [{
