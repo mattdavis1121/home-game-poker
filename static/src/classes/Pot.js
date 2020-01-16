@@ -24,17 +24,24 @@ class Pot {
     }
 
     gatherChips(players) {
+        const finished = new Phaser.Signal();
+        const playersWithChips = players.filter(player => player.chips.chips.length);
+
         let delay = 0;
-        for (let i = 0; i < players.length; i++) {
-            let player = players[i];
-            if (player.chips.chips.length) {
-                this.game.time.events.add(delay, () => {
-                    this.amount += player.chips.value;
-                    this.chips.takeChips(player.chips.chips);
-                }, this);
-                delay += 100;
-            }
+        for (let i = 0; i < playersWithChips.length; i++) {
+            const player = playersWithChips[i];
+            this.game.time.events.add(delay, () => {
+                this.amount += player.chips.value;
+                const takeChipsFinished = this.chips.takeChips(player.chips.chips);
+
+                if (i === playersWithChips.length - 1) {
+                    takeChipsFinished.add(() => finished.dispatch());
+                }
+            }, this);
+            delay += 100;
         }
+
+        return finished;
     }
 }
 

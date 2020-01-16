@@ -376,14 +376,15 @@ def action(table_name):
         sse.publish({
             "id": prev_round.id,
             "handId": hand.id,
-            "roundNum": prev_round.round_num
+            "roundNum": prev_round.round_num,
+            "handComplete": resolution.get("hand_complete", False)
         }, type="roundComplete", channel=table.name)
 
     if resolution.get("new_round"):
         sse.publish({
             "id": hand.active_betting_round.id,
             "handId": hand.id,
-            "roundNum": hand.active_betting_round.round_num,
+            "roundNum": hand.active_betting_round.round_num
         }, type="newRound", channel=table.name)
 
     if resolution.get("hand_complete"):

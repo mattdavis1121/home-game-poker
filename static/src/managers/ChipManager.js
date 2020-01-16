@@ -73,7 +73,6 @@ class ChipManager {
             tooltip: this.tooltip.displayGroup
         };
         this.transferAnimation = this.animateChipCascade;
-        this.transferComplete = new Phaser.Signal();
         this.pileRadius = 30;
     }
 
@@ -193,7 +192,7 @@ class ChipManager {
             newChips.push(newChip);
         }
 
-        this.transferAnimation(newChips);
+        return this.transferAnimation(newChips);
     }
 
     takeChip(srcChip) {
@@ -213,18 +212,23 @@ class ChipManager {
     }
 
     animateChipCascade(chips) {
+        const finished = new Phaser.Signal();
+
         let delay = 0;
         for (let i = 0; i < chips.length; i++) {
             let chip = chips[i];
             this.game.time.events.add(delay, () => {
                 let randPos = this.randChipPos();
                 let tween = this.game.add.tween(chip).to({x: randPos.x, y: randPos.y}, 200, Phaser.Easing.Quadratic.InOut, true);
+
                 if (i === chips.length - 1) {
-                    tween.onComplete.add(() => this.transferComplete.dispatch());
+                    tween.onComplete.add(finished.dispatch, finished);
                 }
             }, this);
             delay += 100;
         }
+
+        return finished;
     }
 
     randChipPos() {

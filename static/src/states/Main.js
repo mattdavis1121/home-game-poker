@@ -2,6 +2,7 @@ import {Action, ActionText} from "../classes/Action";
 import BuyInManager from "../managers/BuyInManager";
 import CardManager from "../managers/CardManager";
 import DealerButton from "../classes/DealerButton";
+import EventRegister from "../managers/EventRegister";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
@@ -60,6 +61,7 @@ class Main extends Phaser.State {
         this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
 
         this.game.queue = new TweenQueue(this.game);
+        this.game.register = new EventRegister(this.game);
 
         this.registerListeners();
 
@@ -123,7 +125,6 @@ class Main extends Phaser.State {
         this.table_sse.addListener("newRound", event => {
             let data = JSON.parse(event.data);
             console.log("newRound: ", data);
-            this.game.pot.gatherChips(this.game.players.players);
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             for (let i = 0; i < this.game.players.players.length; i++) {
@@ -131,6 +132,13 @@ class Main extends Phaser.State {
             }
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(0);
+        });
+        this.table_sse.addListener("roundComplete", event => {
+            const data = JSON.parse(event.data);
+            console.log("roundComplete: ", data);
+            if (!data.handComplete) {
+                this.game.pot.gatherChips(this.game.players.players);
+            }
         });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
@@ -171,7 +179,11 @@ class Main extends Phaser.State {
                 // chips.takeChips on a specific pot. If there are multiple
                 // winners, the pot must have already been split into the
                 // appropriate size piles
-                this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+                this.game.pot.gatherChips(this.game.players.players).add(() => {
+                    this.game.time.events.add(1000, () => {
+                      this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+                    });
+                });
             } else {
                 // This is just a temporary overflow measure. If the pot was
                 // split on the back end, don't animate anything, as we aren't
