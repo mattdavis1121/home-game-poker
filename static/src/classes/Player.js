@@ -132,9 +132,12 @@ class Player {
             this.game.add.tween(this.cards.cards[i]).to({x: 0}, 500, Phaser.Easing.Quartic.Out, true);
         }
 
+        const hideTween = this.game.add.tween(this.display.cards).to({top: this.display.nameplate.top}, 500, Phaser.Easing.Quartic.Out);
         this.game.time.events.add(500, () => {
-            this.game.add.tween(this.display.cards).to({top: this.display.nameplate.top}, 500, Phaser.Easing.Quartic.Out, true);
+            hideTween.start();
         }, this);
+
+        return hideTween.onComplete;
     }
 
     hideCards() {

@@ -388,13 +388,22 @@ def action(table_name):
         }, type="newRound", channel=table.name)
 
     if resolution.get("hand_complete"):
-        sse.publish({
+        hand_complete_data = {
             "id": hand.id,
             "winners": [{
                 "id": pot.winner.id,
                 "amount": pot.amount,
                 "balance": pot.winner.balance
             } for pot in hand.pots_paid]
-        }, type="handComplete", channel=table.name)
+        }
+
+        # Include holding data for showdown if necessary
+        if len(hand.live_holdings) > 1:
+            hand_complete_data["showdown"] = [{
+                "playerId": holding.player_id,
+                "holdings": [card.name for card in holding.cards],
+            } for holding in hand.live_holdings]
+
+        sse.publish(hand_complete_data, type="handComplete", channel=table.name)
 
     return jsonify({"success": True})

@@ -69,8 +69,10 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("newHand: ", data);
             for (let i = 0; i < this.game.players.length; i++) {
-                this.game.players.players[i].animateFold();
-                this.game.players.players[i].chips.clear();
+                const player = this.game.players.players[i];
+                const complete = player.animateFold();
+                complete.add(player.cards.reset, player.cards);
+                player.chips.clear();
             }
             this.game.board.reset();
             this.game.roundBet = 0;
@@ -79,7 +81,6 @@ class Main extends Phaser.State {
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             for (let i = 0; i < this.game.players.players.length; i++) {
                 let player = this.game.players.players[i];
-                player.cards.reset();
                 player.update({
                     isDealer: player.id === data.dealer,
                     isNext: player.id === data.next,
@@ -118,7 +119,7 @@ class Main extends Phaser.State {
                 console.log("emulateDeal: ", data);
                 for (let i = 0; i < data.length; i++) {
                     let playerData = data[i];
-                    this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                    // this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
                 }
             });
         }
@@ -173,31 +174,25 @@ class Main extends Phaser.State {
             //
             // }
 
-            // NOTE - This is a temporary stopgap
-            if (data.winners.length === 1) {
-                // This should be how the code functions -- all winners call
-                // chips.takeChips on a specific pot. If there are multiple
-                // winners, the pot must have already been split into the
-                // appropriate size piles
-                this.game.pot.gatherChips(this.game.players.players).add(() => {
-                    this.game.time.events.add(1000, () => {
-                      this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+            // TODO - Split pots before getting here, otherwise pays
+            //   will be correct, but it will look like all money goes
+            //   to one player
+            this.game.pot.gatherChips(this.game.players.players).add(() => {
+                this.game.time.events.add(1000, () => {
+                    if (data.showdown) {
+                        for (let i = 0; i < data.showdown.length; i++) {
+                            const playerData = data.showdown[i];
+                            this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                        }
+                    }
+
+                    // Delay one second for each player going to showdown
+                    const delay = data.showdown ? 1000 * data.showdown.length : 0;
+                    this.game.time.events.add(delay, () => {
+                        this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
                     });
                 });
-            } else {
-                // This is just a temporary overflow measure. If the pot was
-                // split on the back end, don't animate anything, as we aren't
-                // splitting on the front end yet.
-                for (let i = 0; i < data.winners.length; i++) {
-                    let winner = data.winners[i];
-                    this.game.players.getById(winner.id).update({balance: winner.balance});
-                }
-                this.game.pot.chips.clear();
-                for (let i = 0; i < this.game.players.players.length; i++) {
-                    this.game.players.players[i].chips.clear();
-                }
-            }
-
+            });
         });
         this.table_sse.addListener("newPlayer", (event) => {
             let data = JSON.parse(event.data);
