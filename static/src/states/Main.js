@@ -60,6 +60,7 @@ class Main extends Phaser.State {
         this.game.buyIn.initialize(this.game.config.seats, this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
         this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
 
+        // TODO - These are not currently used. Scrap?
         this.game.queue = new TweenQueue(this.game);
         this.game.register = new EventRegister(this.game);
 
@@ -119,6 +120,7 @@ class Main extends Phaser.State {
                 console.log("emulateDeal: ", data);
                 for (let i = 0; i < data.length; i++) {
                     let playerData = data[i];
+                    // UNCOMMENT TO REINSTATE GOD MODE
                     // this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
                 }
             });
