@@ -1,20 +1,18 @@
 import Card from "../classes/Card";
 
 class CardManager {
-    constructor(game, autoHide = false, key = "cards") {
+    constructor(game, key = "cards") {
         this.game = game;
-        this.autoHide = autoHide; // Auto-hide all face down cards?
         this.key = key;
         this.cards = [];
         this.displayGroup = this.game.add.group();
         this._mask = null;  // A mask applied to all cards in displayGroup
     }
 
-    initialize(num_cards) {
-        for (let i = 0; i < num_cards; i++) {
-            let card = new Card(this.game, 0, 0, this.key, this, this.autoHide);
+    initialize(numCards) {
+        for (let i = 0; i < numCards; i++) {
+            let card = new Card(this.game, 0, 0, this.key, this);
             card.initialize({});
-            card.initializeDisplay();
 
             this.cards.push(card);
             this.displayGroup.add(card);
@@ -24,7 +22,12 @@ class CardManager {
     setCardNames(names) {
         for (let i = 0; i < names.length; i++) {
             this.cards[i].name = names[i];
-            this.cards[i].updateDisplay();
+        }
+    }
+
+    setCardsFaceUp(faceUp) {
+        for (let i = 0; i < this.cards.length; i++) {
+            this.cards[i].faceUp = faceUp;
         }
     }
 
@@ -32,6 +35,22 @@ class CardManager {
         for (let i = 0; i < this.cards.length; i++) {
             this.cards[i].name = null;
             this.cards[i].updateDisplay();
+        }
+    }
+
+    flip() {
+        for (let i = 0; i < this.cards.length; i++) {
+            this.cards[i].flip();
+        }
+    }
+
+    animateFlip() {
+        for (let i = 0; i < this.cards.length; i++) {
+            let complete = this.cards[i].animateFlip();
+
+            if (i === this.cards.length - 1) {
+                return complete;
+            }
         }
     }
 

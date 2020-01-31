@@ -6,7 +6,8 @@ class Game extends Phaser.Game {
     constructor() {
         super({
             width: 1920,
-            height: 1080
+            height: 1080,
+            renderer: Phaser.CANVAS
         });
 
         this.state.add("boot", Boot, false);

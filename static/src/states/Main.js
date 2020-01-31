@@ -1,6 +1,6 @@
 import {Action, ActionText} from "../classes/Action";
+import BoardManager from "../managers/BoardManager";
 import BuyInManager from "../managers/BuyInManager";
-import CardManager from "../managers/CardManager";
 import DealerButton from "../classes/DealerButton";
 import EventRegister from "../managers/EventRegister";
 import Panel from "../classes/Panel";
@@ -33,13 +33,11 @@ class Main extends Phaser.State {
 
         this.game.dealerButton = new DealerButton(this.game);
 
-        this.game.board = new CardManager(this.game, true);
-        this.game.board.initialize(5);
-        this.game.board.displayGroup.setAll("visible", true);
-        this.game.board.displayGroup.align(-1, 1, this.game.board.cardWidth * 1.2, 1);
+        this.game.board = new BoardManager(this.game);
+        this.game.board.initialize();
+        this.game.board.initializeDisplay();
         this.game.board.displayGroup.centerX = this.game.world.centerX;
-        this.game.board.displayGroup.centerY = this.game.world.centerY;
-        this.game.board.displayGroup.setAll("visible", false);
+        this.game.board.displayGroup.centerY = this.game.world.centerY + 80;
 
         this.game.pot = new Pot(this.game);
         this.game.pot.initializeDisplay();
@@ -74,7 +72,8 @@ class Main extends Phaser.State {
                 complete.add(player.cards.reset, player.cards);
                 player.chips.clear();
             }
-            this.game.board.reset();
+            // const complete = this.game.board.animateHide();
+            // complete.add(this.game.board.cards.reset, this.game.board);
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             this.game.players.dealerPlayer = this.game.players.getById(data.dealer);
@@ -119,6 +118,7 @@ class Main extends Phaser.State {
                 console.log("emulateDeal: ", data);
                 for (let i = 0; i < data.length; i++) {
                     let playerData = data[i];
+                    // TODO - Uncomment to re-enable all cards visible
                     // this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
                 }
             });
@@ -131,6 +131,7 @@ class Main extends Phaser.State {
             for (let i = 0; i < this.game.players.players.length; i++) {
                 this.game.players.players[i].update({roundBet: 0}, false);
             }
+            this.game.board.animateReveal(data.board);
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(0);
         });
@@ -149,7 +150,6 @@ class Main extends Phaser.State {
                 this.game.players.getById(data.playerId).animateFold();
             }
 
-            this.game.board.setCardNames(data.board);
             this.game.players.nextPlayer = this.game.players.getById(data.next);
             this.game.players.getById(data.playerId).update({
                 balance: data.playerBalance,
@@ -180,8 +180,10 @@ class Main extends Phaser.State {
             this.game.pot.gatherChips(this.game.players.players).add(() => {
                 this.game.time.events.add(1000, () => {
                     if (data.showdown) {
+                        console.log("showdown");
                         for (let i = 0; i < data.showdown.length; i++) {
                             const playerData = data.showdown[i];
+                            console.log(i, playerData);
                             this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
                         }
                     }
@@ -212,6 +214,7 @@ class Main extends Phaser.State {
             let data = JSON.parse(event.data);
             console.log("deal: ", data);
             this.game.players.userPlayer.cards.setCardNames(data.holdings);
+            this.game.players.userPlayer.cards.setCardsFaceUp(true);
         }, this);
     }
 

@@ -57,13 +57,6 @@ class Player {
         this.display.cardsMask.bottom = this.display.nameplate.top;
         this.cards.mask = this.display.cardsMask;
 
-        // NOTE: This line is required for this mask to work under WebGL
-        // Some changes to masks in WebGL mode will render the mask
-        // completely ineffective. The bug is not well understood. It may
-        // have been fixed in later versions of Phaser.
-        // More detail here: https://github.com/photonstorm/phaser-ce/issues/334
-        this.display.cardsMask.dirty = true;
-
         this.chips.initializeDisplay();
         this.display.chips = this.chips.displayGroup;
         this.display.chips.x = this.chipConfig[this.seat].x;

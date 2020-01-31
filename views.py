@@ -364,7 +364,6 @@ def action(table_name):
         "actionType": act.type,
         "pot": hand.active_pot.amount,
         "next": hand.next_to_act.id,
-        "board": up_cards,
         "bet": current_bet,
         "roundBet": hand.active_betting_round.bet if hand.active_betting_round else 0,
         "roundRaise": hand.active_betting_round.raise_amt if hand.active_betting_round else 0,
@@ -384,7 +383,8 @@ def action(table_name):
         sse.publish({
             "id": hand.active_betting_round.id,
             "handId": hand.id,
-            "roundNum": hand.active_betting_round.round_num
+            "roundNum": hand.active_betting_round.round_num,
+            "board": up_cards
         }, type="newRound", channel=table.name)
 
     if resolution.get("hand_complete"):
