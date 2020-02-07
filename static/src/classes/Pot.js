@@ -1,4 +1,5 @@
 import ChipManager from "../managers/ChipManager";
+import OneTimeSignal from "../classes/OneTimeSignal";
 
 class Pot {
     constructor(game) {
@@ -24,7 +25,7 @@ class Pot {
     }
 
     gatherChips(players) {
-        const finished = new Phaser.Signal();
+        const finished = new OneTimeSignal();
         const playersWithChips = players.filter(player => player.chips.chips.length);
 
         let delay = 0;
@@ -34,11 +35,17 @@ class Pot {
                 this.amount += player.chips.value;
                 const takeChipsFinished = this.chips.takeChips(player.chips.chips);
 
+                takeChipsFinished.add(() => console.log("takeChipsFinished " + i));
+
                 if (i === playersWithChips.length - 1) {
                     takeChipsFinished.add(() => finished.dispatch());
                 }
             }, this);
             delay += 100;
+        }
+
+        if (!playersWithChips.length) {
+            finished.dispatch()
         }
 
         return finished;

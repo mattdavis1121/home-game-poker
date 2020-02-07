@@ -179,7 +179,9 @@ class Main extends Phaser.State {
             // TODO - Split pots before getting here, otherwise pays
             //   will be correct, but it will look like all money goes
             //   to one player
+            console.log(1);
             this.game.pot.gatherChips(this.game.players.players).add(() => {
+                console.log(2);
                 this.game.time.events.add(1000, () => {
                     if (data.showdown) {
                         for (let i = 0; i < data.showdown.length; i++) {
