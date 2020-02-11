@@ -219,12 +219,6 @@ def new_hand(table_name):
         "start_utc": hand.created_utc
     }, type="newHand", channel=table.name)
 
-    sse.publish({
-        "id": hand.active_betting_round.id,
-        "handId": hand.id,
-        "roundNum": hand.active_betting_round.round_num,
-    }, type="newRound", channel=table.name)
-
     return jsonify({"success": True, "hand": hand.id})
 
 
@@ -356,7 +350,7 @@ def action(table_name):
         # Hand has ended, so hand.active_betting_round is None
         up_cards = []
 
-    sse.publish({
+    sse_data = {
         "id": act.id,
         "handId": hand.id,
         "playerId": act.player.id,
@@ -368,42 +362,26 @@ def action(table_name):
         "bet": current_bet,
         "roundBet": hand.active_betting_round.bet if hand.active_betting_round else 0,
         "roundRaise": hand.active_betting_round.raise_amt if hand.active_betting_round else 0,
-        "playerRoundBet": total_bet  # Sum of player's bets for this betting round (THIS WILL FAIL ON ALL-IN SIDE POTS)
-    }, type="action", channel=table.name)
-
-    if resolution.get("round_complete"):
-        prev_round = hand.betting_rounds[prev_num_rounds - 1]
-        sse.publish({
-            "id": prev_round.id,
-            "handId": hand.id,
-            "roundNum": prev_round.round_num,
-            "handComplete": resolution.get("hand_complete", False)
-        }, type="roundComplete", channel=table.name)
-
-    if resolution.get("new_round"):
-        sse.publish({
-            "id": hand.active_betting_round.id,
-            "handId": hand.id,
-            "roundNum": hand.active_betting_round.round_num
-        }, type="newRound", channel=table.name)
+        "playerRoundBet": total_bet, # Sum of player's bets for this betting round (THIS WILL FAIL ON ALL-IN SIDE POTS)
+        "roundComplete": resolution.get("round_complete", False),
+        "newRound": resolution.get("new_round", False)
+    }
 
     if resolution.get("hand_complete"):
-        hand_complete_data = {
-            "id": hand.id,
-            "winners": [{
-                "id": pot.winner.id,
-                "amount": pot.amount,
-                "balance": pot.winner.balance
-            } for pot in hand.pots_paid]
-        }
+        sse_data["handComplete"] = True
+        sse_data["winners"] = [{
+            "id": pot.winner.id,
+            "amount": pot.amount,
+            "balance": pot.winner.balance
+        } for pot in hand.pots_paid]
 
         # Include holding data for showdown if necessary
         if len(hand.live_holdings) > 1:
-            hand_complete_data["showdown"] = [{
+            sse_data["showdown"] = [{
                 "playerId": holding.player_id,
                 "holdings": [card.name for card in holding.cards],
             } for holding in hand.live_holdings]
 
-        sse.publish(hand_complete_data, type="handComplete", channel=table.name)
+    sse.publish(sse_data, type="action", channel=table.name)
 
     return jsonify({"success": True})
