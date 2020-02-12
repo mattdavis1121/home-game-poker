@@ -47,7 +47,11 @@ class Card extends Phaser.Sprite {
     }
 
     updateDisplay() {
-        this.frameName = this._faceUp ? this._name : "back";
+        if (!this._faceUp || this._name === null) {
+            this.frameName = "back";
+        } else {
+            this.frameName = this._name;
+        }
     }
 
     flip() {
