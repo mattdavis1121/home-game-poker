@@ -116,9 +116,10 @@ class Main extends Phaser.State {
                 let data = JSON.parse(event.data);
                 console.log("emulateDeal: ", data);
                 for (let i = 0; i < data.length; i++) {
-                    let playerData = data[i];
-                    // UNCOMMENT TO REINSTATE GOD MODE
-                    // this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                    const playerData = data[i];
+                    const player = this.game.players.getById(playerData.playerId);
+                    player.cards.setCardNames(playerData.holdings);
+                    player.cards.setCardsFaceUp(true);
                 }
             });
         }
