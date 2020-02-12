@@ -58,6 +58,7 @@ class Main extends Phaser.State {
         this.game.buyIn.initialize(this.game.config.seats, this.game.players.getOccupiedSeats(), this.game.config.buyInModal);
         this.game.buyIn.setButtonsVisible(this.game.players.userPlayer === null);
 
+        // TODO - These are not currently used. Scrap?
         this.game.queue = new TweenQueue(this.game);
         this.game.register = new EventRegister(this.game);
 
@@ -118,30 +119,11 @@ class Main extends Phaser.State {
                 console.log("emulateDeal: ", data);
                 for (let i = 0; i < data.length; i++) {
                     let playerData = data[i];
-                    // TODO - Uncomment to re-enable all cards visible
+                    // UNCOMMENT TO REINSTATE GOD MODE
                     // this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
                 }
             });
         }
-        this.table_sse.addListener("newRound", event => {
-            let data = JSON.parse(event.data);
-            console.log("newRound: ", data);
-            this.game.roundBet = 0;
-            this.game.roundRaise = 0;
-            for (let i = 0; i < this.game.players.players.length; i++) {
-                this.game.players.players[i].update({roundBet: 0}, false);
-            }
-            this.game.board.animateReveal(data.board);
-            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
-            this.game.panel.setSecondaryBet(0);
-        });
-        this.table_sse.addListener("roundComplete", event => {
-            const data = JSON.parse(event.data);
-            console.log("roundComplete: ", data);
-            if (!data.handComplete) {
-                this.game.pot.gatherChips(this.game.players.players);
-            }
-        });
         this.table_sse.addListener("action", event => {
             let data = JSON.parse(event.data);
             console.log("action: ", data);
@@ -164,37 +146,41 @@ class Main extends Phaser.State {
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
-        });
-        this.table_sse.addListener("handComplete", event => {
-            let data = JSON.parse(event.data);
-            console.log("handComplete: ", data);
 
-            // TODO - Handle split pots
-            // if (data.winners.length > 1) {
-            //
-            // }
+            if (data.newRound) {
+                this.game.board.animateReveal(data.board);
+            }
 
-            // TODO - Split pots before getting here, otherwise pays
-            //   will be correct, but it will look like all money goes
-            //   to one player
-            this.game.pot.gatherChips(this.game.players.players).add(() => {
-                this.game.time.events.add(1000, () => {
-                    if (data.showdown) {
-                        console.log("showdown");
-                        for (let i = 0; i < data.showdown.length; i++) {
-                            const playerData = data.showdown[i];
-                            console.log(i, playerData);
-                            this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+            if (data.handComplete) {
+                this.game.pot.gatherChips(this.game.players.players).add(() => {
+                    this.game.time.events.add(1000, () => {
+                        if (data.showdown) {
+                            for (let i = 0; i < data.showdown.length; i++) {
+                                const playerData = data.showdown[i];
+                                this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                            }
                         }
-                    }
 
-                    // Delay one second for each player going to showdown
-                    const delay = data.showdown ? 1000 * data.showdown.length : 0;
-                    this.game.time.events.add(delay, () => {
-                        this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+                        // Delay one second for each player going to showdown
+                        const delay = data.showdown ? 1000 * data.showdown.length : 0;
+                        this.game.time.events.add(delay, () => {
+                            this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
+                        });
                     });
                 });
-            });
+            } else if (data.roundComplete) {
+                this.game.pot.gatherChips(this.game.players.players);
+
+                if (data.newRound) {
+                    this.game.roundBet = 0;
+                    this.game.roundRaise = 0;
+                    for (let i = 0; i < this.game.players.players.length; i++) {
+                        this.game.players.players[i].update({roundBet: 0}, false);
+                    }
+                    this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
+                    this.game.panel.setSecondaryBet(0);
+                }
+            }
         });
         this.table_sse.addListener("newPlayer", (event) => {
             let data = JSON.parse(event.data);
