@@ -87,6 +87,7 @@ class BoardManager {
                     tween.onComplete.add(complete.dispatch, complete);
                 }
             });
+            delay += 200;
         }
 
         complete.add(() => {
