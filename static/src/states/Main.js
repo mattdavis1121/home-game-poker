@@ -69,12 +69,10 @@ class Main extends Phaser.State {
             console.log("newHand: ", data);
             for (let i = 0; i < this.game.players.length; i++) {
                 const player = this.game.players.players[i];
-                const complete = player.animateFold();
-                complete.add(player.cards.reset, player.cards);
+                player.animateFold().add(player.cards.reset, player.cards);
                 player.chips.clear();
             }
-            // const complete = this.game.board.animateHide();
-            // complete.add(this.game.board.cards.reset, this.game.board);
+            this.game.board.animateHide().add(this.game.board.cards.reset, this.game.board.cards);
             this.game.roundBet = 0;
             this.game.roundRaise = 0;
             this.game.players.dealerPlayer = this.game.players.getById(data.dealer);
@@ -157,7 +155,9 @@ class Main extends Phaser.State {
                         if (data.showdown) {
                             for (let i = 0; i < data.showdown.length; i++) {
                                 const playerData = data.showdown[i];
-                                this.game.players.getById(playerData.playerId).cards.setCardNames(playerData.holdings);
+                                const player = this.game.players.getById(playerData.playerId);
+                                player.cards.setCardNames(playerData.holdings);
+                                player.cards.setCardsFaceUp(true);
                             }
                         }
 

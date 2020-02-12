@@ -1,4 +1,5 @@
 import CardManager from "./CardManager";
+import OneTimeSignal from "../classes/OneTimeSignal";
 
 const CARD_SEPARATOR = 1.2;
 
@@ -53,7 +54,7 @@ class BoardManager {
         }
 
         let delay = 0;
-        let complete = new Phaser.Signal();
+        let complete = new OneTimeSignal();
         for (let i = this.numCardsRevealed; i < cards.length; i++) {
             this.game.time.events.add(delay, () => {
                 this.cards.cards[i].name = cards[i];
@@ -74,10 +75,10 @@ class BoardManager {
 
     animateHide() {
         let delay = 0;
-        let complete = new Phaser.Signal();
+        let complete = new OneTimeSignal();
         for (let i = 0; i < this.numCardsRevealed; i++) {
             this.game.time.events.add(delay, () => {
-                const tween = this.game.add.tween(this.cards.cards[i].to({top: 0}), 1000, Phaser.Easing.Back.InOut, true);
+                const tween = this.game.add.tween(this.cards.cards[i]).to({top: 0}, 1000, Phaser.Easing.Back.InOut, true);
                 tween.onComplete.add(() => {
                     this.cards.cards[i].faceUp = false;
                 });
@@ -91,7 +92,9 @@ class BoardManager {
         complete.add(() => {
             this.numCardsRevealed = 0;
 
-        })
+        });
+
+        return complete;
     }
 
     hideCards() {
