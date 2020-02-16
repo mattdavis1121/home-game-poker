@@ -35,8 +35,6 @@ class Pot {
                 this.amount += player.chips.value;
                 const takeChipsFinished = this.chips.takeChips(player.chips.chips);
 
-                takeChipsFinished.add(() => console.log("takeChipsFinished " + i));
-
                 if (i === playersWithChips.length - 1) {
                     takeChipsFinished.add(() => finished.dispatch());
                 }
