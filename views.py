@@ -384,6 +384,15 @@ def action(table_name):
                 "holdings": [card.name for card in holding.cards],
             } for holding in hand.live_holdings]
 
+        # Kick off next hand
+        next_hand = table.new_hand(TexasHoldemHand)
+        sse_data["nextHand"] = {
+            "id": next_hand.id,
+            "next": next_hand.next_to_act.id,
+            "dealer": next_hand.dealer.id,
+            "start_utc": next_hand.created_utc
+        }
+
     sse.publish(sse_data, type="action", channel=table.name)
 
     return jsonify({"success": True})

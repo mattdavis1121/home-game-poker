@@ -1,3 +1,5 @@
+import OneTimeSignal from "./OneTimeSignal";
+
 const BUTTON_STYLES = {
     PLAIN: 0,
     LETTER: 1,
@@ -28,10 +30,13 @@ class DealerButton extends Phaser.Sprite {
     }
 
     moveToSeat(seatNum) {
+        const finished = new OneTimeSignal();
         const x = this.config[seatNum].x;
         const y = this.config[seatNum].y;
 
-        this.game.add.tween(this).to({x: x, y: y}, 500, Phaser.Easing.Quadratic.InOut, true);
+        this.game.add.tween(this).to({x: x, y: y}, 500, Phaser.Easing.Quadratic.InOut, true).onComplete.add(finished.dispatch, finished);
+
+        return finished;
     }
 }
 

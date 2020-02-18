@@ -3,6 +3,7 @@ import BoardManager from "../managers/BoardManager";
 import BuyInManager from "../managers/BuyInManager";
 import DealerButton from "../classes/DealerButton";
 import EventRegister from "../managers/EventRegister";
+import OneTimeSignal from "../classes/OneTimeSignal";
 import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
@@ -22,7 +23,7 @@ class Main extends Phaser.State {
 
     create() {
         this.background = this.game.add.image(0, 0, "background");
-        this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHand);
+        this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHandCallback);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
         this.leaveBtn = this.makeBtn(100, 340, "leave", this.game.textures.whiteSquare, this.leaveTable);
         this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
@@ -119,7 +120,7 @@ class Main extends Phaser.State {
                     const playerData = data[i];
                     const player = this.game.players.getById(playerData.playerId);
                     player.cards.setCardNames(playerData.holdings);
-                    player.cards.setCardsFaceUp(true);
+                    // player.cards.setCardsFaceUp(true);
                 }
             });
         }
@@ -151,24 +152,7 @@ class Main extends Phaser.State {
             }
 
             if (data.handComplete) {
-                this.game.pot.gatherChips(this.game.players.players).add(() => {
-                    this.game.time.events.add(1000, () => {
-                        if (data.showdown) {
-                            for (let i = 0; i < data.showdown.length; i++) {
-                                const playerData = data.showdown[i];
-                                const player = this.game.players.getById(playerData.playerId);
-                                player.cards.setCardNames(playerData.holdings);
-                                player.cards.setCardsFaceUp(true);
-                            }
-                        }
-
-                        // Delay one second for each player going to showdown
-                        const delay = data.showdown ? 1000 * data.showdown.length : 0;
-                        this.game.time.events.add(delay, () => {
-                            this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips);
-                        });
-                    });
-                });
+                this.handComplete(data);
             } else if (data.roundComplete) {
                 this.game.pot.gatherChips(this.game.players.players);
 
@@ -203,6 +187,95 @@ class Main extends Phaser.State {
             this.game.players.userPlayer.cards.setCardNames(data.holdings);
             this.game.players.userPlayer.cards.setCardsFaceUp(true);
         }, this);
+    }
+
+    handComplete(data) {
+        this.game.pot.gatherChips(this.game.players.players).add(() => {
+            this.game.time.events.add(1000, () => {
+                this.showdown(data).add(() => {
+                    // Delay one second for each player going to showdown
+                    const delay = data.showdown ? 1000 * data.showdown.length : 0;
+                    this.game.time.events.add(delay, () => {
+                        this.game.players.getById(data.winners[0].id).chips.takeChips(this.game.pot.chips.chips).add(() => {
+                            this.goToNextHand(data);
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    goToNextHand(data) {
+        this.clearTable().add(() => {
+            this.game.dealerButton.moveToSeat(this.game.players.getById(data.nextHand.dealer).seat).add(() => {
+                this.newHand(data.nextHand);
+            });
+        });
+    }
+
+    newHand(data) {
+        this.game.roundBet = 0;
+        this.game.roundRaise = 0;
+        this.game.players.dealerPlayer = this.game.players.getById(data.dealer);
+        this.game.players.nextPlayer = this.game.players.getById(data.next);
+        for (let i = 0; i < this.game.players.players.length; i++) {
+            let player = this.game.players.players[i];
+            player.update({
+                isDealer: player.id === data.dealer,
+                isNext: player.id === data.next,
+                roundBet: 0
+            });
+        }
+        this.resetPanel();
+    }
+
+    resetPanel() {
+        this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
+        this.game.panel.setSecondaryBet(0);
+        this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
+    }
+
+    clearTable() {
+        const finished = new OneTimeSignal();
+
+        this.game.board.animateHide().add(() => {
+            this.game.board.cards.reset();
+
+            for (let i = 0; i < this.game.players.length; i++) {
+                const player = this.game.players.players[i];
+                player.chips.clear();
+                player.animateFold().add(() => {
+                    player.cards.reset();
+                    player.cards.setCardsFaceUp(false);
+
+                    if (i === this.game.players.length - 1) {
+                        finished.dispatch();
+                    }
+                });
+            }
+        });
+
+        return finished;
+    }
+
+    showdown(data) {
+        const complete = new OneTimeSignal();
+
+        if (data.showdown) {
+            for (let i = 0; i < data.showdown.length; i++) {
+                const playerData = data.showdown[i];
+                const player = this.game.players.getById(playerData.playerId);
+                player.cards.setCardNames(playerData.holdings);
+                player.cards.setCardsFaceUp(true);
+            }
+
+            // Can insert longer-running animation here if needed
+            complete.dispatch();
+        } else {
+            complete.dispatch();
+        }
+
+        return complete;
     }
 
     registerListeners() {
@@ -289,7 +362,7 @@ class Main extends Phaser.State {
         }));
     }
 
-    newHand() {
+    newHandCallback() {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/new-hand/');
         xhr.setRequestHeader('Content-Type', 'application/json');

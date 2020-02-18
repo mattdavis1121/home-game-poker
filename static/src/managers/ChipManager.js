@@ -1,5 +1,6 @@
 import Chip from "../classes/Chip";
 import Util from "../Util";
+import OneTimeSignal from "../classes/OneTimeSignal";
 
 class Tooltip {
     constructor(game, key, padding = 10) {
@@ -212,7 +213,7 @@ class ChipManager {
     }
 
     animateChipCascade(chips) {
-        const finished = new Phaser.Signal();
+        const finished = new OneTimeSignal();
 
         let delay = 0;
         for (let i = 0; i < chips.length; i++) {
