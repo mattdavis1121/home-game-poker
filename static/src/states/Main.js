@@ -227,6 +227,19 @@ class Main extends Phaser.State {
             });
         }
         this.resetPanel();
+
+        // After hand is prepared, check if SB has checked auto-blind
+        // TODO - All players forced to use auto-blind right now
+        //   but I'd like to implement click-to-post
+        this.checkForStoredActions();
+    }
+
+    checkForStoredActions() {
+        if (this.game.players.userPlayer === this.game.players.nextPlayer) {
+            if (this.game.players.userPlayer.prefs.autoBlind) {
+                this.postBlind();
+            }
+        }
     }
 
     resetPanel() {
@@ -373,6 +386,10 @@ class Main extends Phaser.State {
 
     leaveTable() {
         this.game.controller.leave();
+    }
+
+    postBlind() {
+
     }
 
     bb() {

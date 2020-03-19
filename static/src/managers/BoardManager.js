@@ -76,24 +76,28 @@ class BoardManager {
     animateHide() {
         let delay = 0;
         let complete = new OneTimeSignal();
-        for (let i = 0; i < this.numCardsRevealed; i++) {
-            this.game.time.events.add(delay, () => {
-                const tween = this.game.add.tween(this.cards.cards[i]).to({top: 0}, 1000, Phaser.Easing.Back.InOut, true);
-                tween.onComplete.add(() => {
-                    this.cards.cards[i].faceUp = false;
+
+        if (this.numCardsRevealed === 0) {
+            complete.dispatch();
+        } else {
+            for (let i = 0; i < this.numCardsRevealed; i++) {
+                this.game.time.events.add(delay, () => {
+                    const tween = this.game.add.tween(this.cards.cards[i]).to({top: 0}, 1000, Phaser.Easing.Back.InOut, true);
+                    tween.onComplete.add(() => {
+                        this.cards.cards[i].faceUp = false;
+                    });
+
+                    if (i === this.numCardsRevealed - 1) {
+                        tween.onComplete.add(complete.dispatch, complete);
+                    }
                 });
+                delay += 200;
+            }
 
-                if (i === this.numCardsRevealed - 1) {
-                    tween.onComplete.add(complete.dispatch, complete);
-                }
+            complete.add(() => {
+                this.numCardsRevealed = 0;
             });
-            delay += 200;
         }
-
-        complete.add(() => {
-            this.numCardsRevealed = 0;
-
-        });
 
         return complete;
     }

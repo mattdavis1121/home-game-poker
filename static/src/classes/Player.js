@@ -20,6 +20,10 @@ class Player {
         this.isNext = false;
         this.isUser = false;
 
+        this.prefs = {
+            autoBlind: true
+        };
+
         this.displayGroup = this.game.add.group();
         this.display = {
             nameplate: null,
