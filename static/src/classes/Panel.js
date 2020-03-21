@@ -8,25 +8,38 @@ class Panel {
         this.game = game;
         this.key = key;
         this.bets = [0];
-        this.primaryClicked = new Phaser.Signal();
+
+        // Always dispatched with two args: actionType and betAmt
+        this.buttonClicked = new Phaser.Signal();
+
         this.primaryAction = Action.BET;
         this.primaryBet = 0;
-        this.secondaryClicked = new Phaser.Signal();
         this.secondaryAction = Action.CHECK;
         this.secondaryBet = 0;
-        this.tertiaryClicked = new Phaser.Signal();
         this.tertiaryAction = Action.FOLD;
+        this.blindAction = Action.BLIND;
+        this.blindBet = 0;
+
         this.slider = new Slider(this.game, "panel");
-        this.display = {};
+        this.display = {
+            primaryGroup: this.game.add.group(),
+            primary: null,
+            secondary: null,
+            tertiary: null,
+            slider: null,
+            binaryGroup: this.game.add.group(),
+            yes: null,
+            no: null,
+        };
         this.displayGroup = this.game.add.group();
         this.visible = false;
         this.alwaysVisible = false;
     }
 
     initialize() {
-        this.display.primary = this.makeButton(0, 0, "med", () => this.primaryClicked.dispatch(this.primaryAction, this.primaryBet));
-        this.display.secondary = this.makeButton(135, 0, "med", () => this.secondaryClicked.dispatch(this.secondaryAction, this.secondaryBet));
-        this.display.tertiary = this.makeButton(270, 0, "med", () => this.tertiaryClicked.dispatch(this.tertiaryAction, 0));
+        this.display.primary = this.makeButton(0, 0, "med", () => this.buttonClicked.dispatch(this.primaryAction, this.primaryBet));
+        this.display.secondary = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.secondaryAction, this.secondaryBet));
+        this.display.tertiary = this.makeButton(270, 0, "med", () => this.buttonClicked.dispatch(this.tertiaryAction, 0));
 
         this.slider.initializeDisplay();
         this.slider.indexChanged.add((index) => this.setPrimaryBet(this.bets[index]), this);
@@ -37,10 +50,19 @@ class Panel {
         this.display.primary.events.onInputOver.add(() => this.slider.enableSliderWheel(true));
         this.display.primary.events.onInputOut.add(() => this.slider.enableSliderWheel(false));
 
-        this.displayGroup.add(this.display.primary);
-        this.displayGroup.add(this.display.secondary);
-        this.displayGroup.add(this.display.tertiary);
-        this.displayGroup.add(this.display.slider);
+        this.display.primaryGroup.add(this.display.primary);
+        this.display.primaryGroup.add(this.display.secondary);
+        this.display.primaryGroup.add(this.display.tertiary);
+        this.display.primaryGroup.add(this.display.slider);
+
+        this.display.yes = this.makeButton(0, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+        this.display.no = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+
+        this.display.binaryGroup.add(this.display.yes);
+        this.display.binaryGroup.add(this.display.no);
+
+        this.displayGroup.add(this.display.primaryGroup);
+        this.displayGroup.add(this.display.binaryGroup);
 
         this.updateDisplay();
     }

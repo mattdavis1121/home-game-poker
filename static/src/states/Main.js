@@ -292,9 +292,7 @@ class Main extends Phaser.State {
     }
 
     registerListeners() {
-        this.game.panel.primaryClicked.add(this.handleAction, this);
-        this.game.panel.secondaryClicked.add(this.handleAction, this);
-        this.game.panel.tertiaryClicked.add(this.handleAction, this);
+        this.game.panel.buttonClicked.add(this.handleAction, this);
         this.game.buyIn.buyInRequested.add(this.game.controller.join, this.game.controller);
     }
 
