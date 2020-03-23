@@ -55,14 +55,16 @@ class Panel {
         this.display.primaryGroup.add(this.display.tertiary);
         this.display.primaryGroup.add(this.display.slider);
 
-        this.display.yes = this.makeButton(0, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
-        this.display.no = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+        this.display.yes = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+        this.display.no = this.makeButton(270, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
 
         this.display.binaryGroup.add(this.display.yes);
         this.display.binaryGroup.add(this.display.no);
 
         this.displayGroup.add(this.display.primaryGroup);
         this.displayGroup.add(this.display.binaryGroup);
+
+        this.setActivePanelGroup("primary");
 
         this.updateDisplay();
     }
@@ -144,6 +146,14 @@ class Panel {
         if (index >= 0 && index < this.slider.length) {
             this.slider.setIndex(index);
         }
+    }
+
+    setActivePanelGroup(groupName) {
+        const activeGroup = groupName === "primary" ? this.display.primaryGroup : this.display.binaryGroup;
+        const inactiveGroup = activeGroup === this.display.primaryGroup ? this.display.binaryGroup : this.display.primaryGroup;
+
+        activeGroup.visible = true;
+        inactiveGroup.visible = false;
     }
 }
 
