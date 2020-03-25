@@ -86,8 +86,7 @@ class Main extends Phaser.State {
                     roundBet: 0
                 });
             }
-            this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
-            this.game.panel.setSecondaryBet(0);
+            this.game.panel.setActivePanelGroup("blind");
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
             this.game.dealerButton.moveToSeat(this.game.players.dealerPlayer.seat);
         });
@@ -108,6 +107,7 @@ class Main extends Phaser.State {
             }
 
             this.game.players.nextPlayer = this.game.players.getById(data.next);
+            this.game.panel.setActivePanelGroup("primary");
             this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
             this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
@@ -312,6 +312,9 @@ class Main extends Phaser.State {
                 break;
             case Action.BET:
                 this.game.controller.bet(bet);
+                break;
+            case Action.BLIND:
+                this.game.controller.blind();
                 break;
             default:
                 console.warn("Invalid Action Type: " + action);

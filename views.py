@@ -306,12 +306,15 @@ def action(table_name):
             return jsonify({"success": False, "msg": "Expected blind"})
 
         expected_blind = hand.stakes.small if hand.active_betting_round.sum == 0 else hand.stakes.big
-        if current_bet != expected_blind and current_bet != player.balance:
-            # TODO - Solve for all-in on big blind
-            #  This should allow players to bet amounts other than SB or BB
-            #  but it will fail to set the expected bet to the BB if the player
-            #  who should have paid the full BB went all-in for less.
-            return jsonify({"success": False, "msg": "Incorrect blind amount"})
+
+        if expected_blind > player.balance:
+            return jsonify({"success": False, "msg": "Bet > balance"})
+
+        # Blind amounts no longer sent by clients, default to expected amount
+        current_bet = expected_blind
+        total_bet = prev_bet + current_bet
+
+        # TODO - Solve for all-in on big blind
     else:
         if not hand.dealt:
             return jsonify({"success": False, "msg": "Can't take action before hand dealt"})

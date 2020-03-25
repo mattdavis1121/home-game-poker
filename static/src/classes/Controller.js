@@ -66,6 +66,11 @@ class Controller {
         this.action(data);
     }
 
+    blind() {
+        const data = this.buildPayload("BLIND");
+        this.action(data);
+    }
+
     fold() {
         const data = this.buildPayload("FOLD");
         this.action(data);

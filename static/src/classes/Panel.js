@@ -27,7 +27,7 @@ class Panel {
             secondary: null,
             tertiary: null,
             slider: null,
-            binaryGroup: this.game.add.group(),
+            blindGroup: this.game.add.group(),
             yes: null,
             no: null,
         };
@@ -55,14 +55,16 @@ class Panel {
         this.display.primaryGroup.add(this.display.tertiary);
         this.display.primaryGroup.add(this.display.slider);
 
-        this.display.yes = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
-        this.display.no = this.makeButton(270, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+        this.display.blind = this.makeButton(135, 0, "med", () => this.buttonClicked.dispatch(this.blindAction, this.blindBet));
+        this.display.blind.setText("BLIND");
+        this.display.sitOut = this.makeButton(270, 0, "med", () => console.log("PLAYER REQUESTED SIT OUT"));    // TODO - Real sit out action
+        this.display.sitOut.setText("SIT OUT");
 
-        this.display.binaryGroup.add(this.display.yes);
-        this.display.binaryGroup.add(this.display.no);
+        this.display.blindGroup.add(this.display.blind);
+        this.display.blindGroup.add(this.display.sitOut);
 
         this.displayGroup.add(this.display.primaryGroup);
-        this.displayGroup.add(this.display.binaryGroup);
+        this.displayGroup.add(this.display.blindGroup);
 
         this.setActivePanelGroup("primary");
 
@@ -149,11 +151,16 @@ class Panel {
     }
 
     setActivePanelGroup(groupName) {
-        const activeGroup = groupName === "primary" ? this.display.primaryGroup : this.display.binaryGroup;
-        const inactiveGroup = activeGroup === this.display.primaryGroup ? this.display.binaryGroup : this.display.primaryGroup;
-
-        activeGroup.visible = true;
-        inactiveGroup.visible = false;
+        switch (groupName) {
+            case "blind":
+                this.display.blindGroup.visible = true;
+                this.display.primaryGroup.visible = false;
+                break;
+            case "primary":
+                this.display.blindGroup.visible = false;
+                this.display.primaryGroup.visible = true;
+                break;
+        }
     }
 }
 
