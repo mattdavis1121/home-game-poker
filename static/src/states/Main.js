@@ -26,8 +26,6 @@ class Main extends Phaser.State {
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHandCallback);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
         this.leaveBtn = this.makeBtn(100, 340, "leave", this.game.textures.whiteSquare, this.leaveTable);
-        this.bbBtn = this.makeBtn(100, 460, "BB", this.game.textures.whiteSquare, this.bb);
-        this.sbBtn = this.makeBtn(100, 580, "SB", this.game.textures.whiteSquare, this.sb);
 
         this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats, this.game.config.chips);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats);
@@ -392,14 +390,6 @@ class Main extends Phaser.State {
     postBlind() {
 
     }
-
-    bb() {
-        this.game.controller.bb();
-    };
-
-    sb() {
-        this.game.controller.sb();
-    };
 
     generateBets(playerRoundBet, playerBalance) {
         return Poker.generateBets(25, 50, this.game.roundBet, playerRoundBet, this.game.roundRaise, playerBalance);
