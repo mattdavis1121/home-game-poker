@@ -8,6 +8,7 @@ import Panel from "../classes/Panel";
 import PlayerManager from "../managers/PlayerManager";
 import Pot from "../classes/Pot";
 import Poker from "../Poker";
+import Settings from "../classes/Settings";
 import SSE from "../SSE";
 import TweenQueue from "../classes/TweenQueue";
 
@@ -26,6 +27,10 @@ class Main extends Phaser.State {
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHandCallback);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
         this.leaveBtn = this.makeBtn(100, 340, "leave", this.game.textures.whiteSquare, this.leaveTable);
+
+        this.game.settings = new Settings(this.game, "settings");
+        this.game.settings.initializeDisplay();
+        this.game.settings.displayGroup.right = this.game.world.width - 40;
 
         this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats, this.game.config.chips);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats);
