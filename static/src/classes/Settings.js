@@ -37,6 +37,7 @@ class Settings {
                 "dropdown-over");
             button.onInputUp.add(() => {
                 this.itemClicked.dispatch(itemName);
+                this.display.dropdownGroup.visible = false;
             }, this);
 
             this.display.dropdownButtons.push(button);

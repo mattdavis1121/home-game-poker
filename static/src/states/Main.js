@@ -297,6 +297,7 @@ class Main extends Phaser.State {
     registerListeners() {
         this.game.panel.buttonClicked.add(this.handleAction, this);
         this.game.buyIn.buyInRequested.add(this.game.controller.join, this.game.controller);
+        this.game.settings.itemClicked.add(this.handleSettingsClicked, this);
     }
 
 
@@ -321,6 +322,16 @@ class Main extends Phaser.State {
                 break;
             default:
                 console.warn("Invalid Action Type: " + action);
+        }
+    }
+
+    handleSettingsClicked(settingName) {
+        switch (settingName) {
+            case "leave":
+                this.leaveTable();
+                break;
+            default:
+                console.warn("Invalid setting: " + settingName);
         }
     }
 
