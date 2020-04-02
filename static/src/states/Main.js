@@ -26,7 +26,6 @@ class Main extends Phaser.State {
         this.background = this.game.add.image(0, 0, "background");
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHandCallback);
         this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
-        this.leaveBtn = this.makeBtn(100, 340, "leave", this.game.textures.whiteSquare, this.leaveTable);
 
         this.game.settings = new Settings(this.game, "settings");
         this.game.settings.initializeDisplay();
