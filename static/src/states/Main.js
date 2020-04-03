@@ -30,6 +30,7 @@ class Main extends Phaser.State {
         this.game.settings = new Settings(this.game, "settings");
         this.game.settings.initializeDisplay();
         this.game.settings.displayGroup.right = this.game.world.width - 40;
+        this.game.settings.displayGroup.top = 40;
 
         this.game.players = new PlayerManager(this.game, this.game.initialData.userId, this.game.config.seats, this.game.config.chips);
         this.game.players.initialize(this.game.initialData.players, this.game.config.seats);
