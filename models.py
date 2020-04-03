@@ -491,6 +491,10 @@ class Hand(BaseModel):
                 self.active_betting_round.bet = total_bet
                 self.active_betting_round.raise_amt = total_bet
                 self.active_betting_round.blind_leading = True
+
+                # If this was final oustanding blind, record blinds complete
+                ret["blinds_complete"] = not self.blinds_owed
+
             elif self.active_betting_round.bettor is None or (total_bet > self.active_betting_round.bet):
                 self.active_betting_round.raise_amt = total_bet
                 if self.active_betting_round.bet is not None and not self.active_betting_round.blind_leading:
@@ -615,6 +619,7 @@ class Hand(BaseModel):
                 self.new_pot([d["player"] for d in live_bets])
 
     def deal(self, hand_type, players):
+        print("DEAL")
         poker_hand = hand_type(num_players=len(players))
         self.new_holding(cards=poker_hand.board)
         for i, poker_holding in enumerate(poker_hand.holdings):

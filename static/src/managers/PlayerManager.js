@@ -92,6 +92,7 @@ class PlayerManager {
      * @returns {number[]} - The IDs of occupied seats
      */
     getOccupiedSeats() {
+        console.log("HERE");
         let occupiedSeats = [];
         for (let i = 0; i < this.players.length; i++) {
             occupiedSeats.push(this.players[i].seat);

@@ -25,7 +25,6 @@ class Main extends Phaser.State {
     create() {
         this.background = this.game.add.image(0, 0, "background");
         this.newHandBtn = this.makeBtn(100, 100, "new\nhand", this.game.textures.whiteSquare, this.newHandCallback);
-        this.dealBtn = this.makeBtn(100, 220, "deal", this.game.textures.whiteSquare, this.deal);
 
         this.game.settings = new Settings(this.game, "settings");
         this.game.settings.initializeDisplay();
@@ -150,6 +149,22 @@ class Main extends Phaser.State {
             this.game.panel.setSecondaryBet(Poker.getMinBet(this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.players.nextPlayer.balance));
             this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
 
+            if (data.deal) {
+                let delay = 0;
+                let seats = this.game.players.getOccupiedSeats();
+                let seatIndex = seats.indexOf(this.game.players.dealerPlayer.seat);
+                seatIndex = (seatIndex + 1) % seats.length;  // Start with player to left of dealer
+                for (let i = 0; i < seats.length; i++) {
+                    this.game.time.events.add(delay, () => {
+                        this.game.players.getBySeat(seats[seatIndex]).animateDeal();
+                        seatIndex = (seatIndex + 1) % seats.length;
+                    }, this);
+                    delay += 200;
+                }
+
+                this.game.panel.setActivePanelGroup("primary");
+            }
+
             if (data.newRound) {
                 this.game.board.animateReveal(data.board);
             }
@@ -246,6 +261,7 @@ class Main extends Phaser.State {
     }
 
     resetPanel() {
+        this.game.panel.setActivePanelGroup("blind");
         this.game.panel.setBets(Poker.generateRaises(this.game.rules.blinds.small, this.game.rules.blinds.big, this.game.roundBet, this.game.players.nextPlayer.roundBet, this.game.roundRaise, this.game.players.nextPlayer.balance));
         this.game.panel.setSecondaryBet(0);
         this.game.panel.setVisible(this.game.players.nextPlayer === this.game.players.userPlayer);
@@ -379,15 +395,6 @@ class Main extends Phaser.State {
         btn.text = btnText;
 
         return btn;
-    }
-
-    deal() {
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/tables/' + this.game.initialData.tableName + '/deal/');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify({
-            tableName: initialData.tableName,
-        }));
     }
 
     newHandCallback() {

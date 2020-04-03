@@ -368,6 +368,29 @@ def action(table_name):
         "roundComplete": resolution.get("round_complete", False)
     }
 
+    if resolution.get("blinds_complete"):
+        hand.deal(TexasHoldemHand, table.ready_players)  # TODO - get hand type from json
+
+        sse_data["deal"] = True
+        sse_data["dealer"] = hand.dealer.id
+        sse_data["numPlayers"] = len(hand.players)
+
+        # Publish holding data to each player individually
+        for holding in hand.player_holdings:
+            sse.publish({
+                "id": hand.id,
+                "playerId": holding.player_id,
+                "holdings": [card.name for card in holding.cards]
+            }, type="deal", channel=holding.player.user_id)
+
+        # Publish holding data for all players publicly
+        if EMULATOR_ENABLED:
+            sse.publish([{
+                "playerId": holding.player_id,
+                "holdings": [card.name for card in holding.cards]
+            } for holding in hand.player_holdings], type="emulateDeal",
+                channel=table.name)
+
     if resolution.get("new_round"):
         sse_data["newRound"] = True
         sse_data["board"] = up_cards
